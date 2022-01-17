@@ -22,5 +22,4 @@ module.exports = {
     'class-methods-use-this': ['off'],
     'no-underscore-dangle': ['error', { allowAfterThis: true }],
   },
-
 };
