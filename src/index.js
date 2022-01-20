@@ -17,4 +17,19 @@ export default class ToggleBlock {
     this.wrapper = undefined;
   }
 
+  render() {
+    this.wrapper = document.createElement('div');
+    this.wrapper.classList.add('toggle-block');
+    this.wrapper.innerHTML = toggleIconPrimary;
+
+    const input = document.createElement('div');
+
+    input.classList.add('toggle-input');
+    input.contentEditable = true;
+    input.innerHTML = this.data.text || '';
+
+    this.wrapper.appendChild(input);
+
+    return this.wrapper;
+  }
 }
