@@ -39,4 +39,11 @@ export default class ToggleBlock {
       text: caption.innerHTML,
     });
   }
+
+  validate(savedData) {
+    if (!savedData.text.trim()) {
+      return false;
+    }
+    return true;
+  }
 }
