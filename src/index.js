@@ -32,4 +32,11 @@ export default class ToggleBlock {
 
     return this.wrapper;
   }
+
+  save(blockContent) {
+    const caption = blockContent.querySelector('div');
+    return Object.assign(this.data, {
+      text: caption.innerHTML,
+    });
+  }
 }
