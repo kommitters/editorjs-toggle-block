@@ -8,4 +8,13 @@ export default class ToggleBlock {
       icon: toggleIconPrimary,
     };
   }
+
+  constructor({ data }) {
+    this.data = {
+      text: data.text || '',
+    };
+
+    this.wrapper = undefined;
+  }
+
 }
