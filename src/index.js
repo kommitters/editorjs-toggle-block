@@ -1,3 +1,11 @@
-const toggle = 'editorjs-toggle-block';
+import './index.css';
+import toggleIconPrimary from '../assets/toggleIcon.svg';
 
-console.log(toggle);
+export default class ToggleBlock {
+  static get toolbox() {
+    return {
+      title: 'Toggle',
+      icon: toggleIconPrimary,
+    };
+  }
+}
