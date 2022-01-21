@@ -20,11 +20,9 @@ describe('ToggleBlock', () => {
 
   describe('validates toggle components', () => {
     let toggle;
-    let input;
 
     beforeEach(() => {
       toggle = toggleBock.render();
-      input = toggle.querySelector('div');
     });
 
     it('validates toggle class', () => {
@@ -32,14 +30,13 @@ describe('ToggleBlock', () => {
     });
 
     it('validates toggle input', () => {
+      const input = toggle.querySelector('div');
       expect(input).toHaveClass('toggle-input');
     });
 
-    it('validates toggle icon as first element within the toggle-block', () => {
-      const { firstChild, lastChild } = toggle;
-      const icon = firstChild !== lastChild && input === lastChild;
-
-      expect(icon).toBe(true);
+    it('validates toggle icon', () => {
+      const icon = toggle.querySelector('span');
+      expect(icon).toHaveProperty('id', 'toggle-icon');
     });
   });
 });
