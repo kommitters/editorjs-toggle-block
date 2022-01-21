@@ -21,10 +21,10 @@ export default class ToggleBlock {
 
   render() {
     this.wrapper = document.createElement('div');
-    this.wrapper.classList.add('toggle-block');
+    this.wrapper.classList.add('toggle-block__selector');
 
     const icon = document.createElement('span');
-    icon.id = 'toggle-icon';
+    icon.classList.add('toggle-block__icon');
     icon.innerHTML = toggleIconPrimary;
 
     icon.addEventListener('click', () => {
@@ -39,7 +39,7 @@ export default class ToggleBlock {
 
     const input = document.createElement('div');
 
-    input.classList.add('toggle-input');
+    input.classList.add('toggle-block__input');
     input.contentEditable = true;
     input.innerHTML = this.data.text || '';
 

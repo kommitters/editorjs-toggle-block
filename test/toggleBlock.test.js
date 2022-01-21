@@ -26,17 +26,17 @@ describe('ToggleBlock', () => {
     });
 
     it('validates toggle class', () => {
-      expect(toggle).toHaveClass('toggle-block');
+      expect(toggle).toHaveClass('toggle-block__selector');
     });
 
     it('validates toggle input', () => {
       const input = toggle.querySelector('div');
-      expect(input).toHaveClass('toggle-input');
+      expect(input).toHaveClass('toggle-block__input');
     });
 
     it('validates toggle icon', () => {
       const icon = toggle.querySelector('span');
-      expect(icon).toHaveProperty('id', 'toggle-icon');
+      expect(icon).toHaveClass('toggle-block__icon');
     });
   });
 });
