@@ -1,5 +1,6 @@
 import './index.css';
 import toggleIconPrimary from '../assets/toggleIcon.svg';
+import toggleIconSecundary from '../assets/toggleIconSecundary.svg';
 
 export default class ToggleBlock {
   static get toolbox() {
@@ -12,6 +13,7 @@ export default class ToggleBlock {
   constructor({ data }) {
     this.data = {
       text: data.text || '',
+      status: data.status || 'closed',
     };
 
     this.wrapper = undefined;
@@ -20,7 +22,20 @@ export default class ToggleBlock {
   render() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block');
-    this.wrapper.innerHTML = toggleIconPrimary;
+
+    const icon = document.createElement('span');
+    icon.id = 'toggle-icon';
+    icon.innerHTML = toggleIconPrimary;
+
+    icon.addEventListener('click', () => {
+      if (this.data.status === 'closed') {
+        icon.innerHTML = toggleIconSecundary;
+        this.data.status = 'opened';
+      } else {
+        icon.innerHTML = toggleIconPrimary;
+        this.data.status = 'closed';
+      }
+    });
 
     const input = document.createElement('div');
 
@@ -28,6 +43,7 @@ export default class ToggleBlock {
     input.contentEditable = true;
     input.innerHTML = this.data.text || '';
 
+    this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
 
     return this.wrapper;
