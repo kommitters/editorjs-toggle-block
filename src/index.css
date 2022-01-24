@@ -4,11 +4,11 @@
   padding: 1% 0 1% 0;
   outline: none;
   border: none;
-  min-width: 94%;
+  width: 90%;
 }
 
 .toggle-block__icon svg {
-  vertical-align: middle;
+  vertical-align: top;
   width: 34px;
   height: 34px;
 }
