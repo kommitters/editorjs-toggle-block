@@ -14,6 +14,7 @@ export default class ToggleBlock {
     this.data = {
       text: data.text || '',
       status: data.status || 'closed',
+      items: data.items || [],
     };
 
     this.wrapper = undefined;
