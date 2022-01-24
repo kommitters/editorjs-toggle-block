@@ -4,9 +4,13 @@
 name: ci.js CI
 
 on:
-  push:
-    branches: [ main, v*.[0-9] ]
-  pull_request
+  [
+    push: 
+      [
+        branches: [ main, v*.[0-9] ]
+      ]
+    pull_request
+  ]
 
 jobs:
   build:
