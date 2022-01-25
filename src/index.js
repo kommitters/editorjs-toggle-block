@@ -141,4 +141,17 @@ export default class ToggleBlock {
 
     return icon;
   }
+
+  _toggleAction() {
+    if (this.data.status === 'closed') {
+      for (let i = 2; i < this.wrapper.children.length; i += 1) {
+        this.wrapper.children[i].setAttribute('hidden', true);
+      }
+    } else {
+      for (let i = 2; i < this.wrapper.children.length; i += 1) {
+        this.wrapper.children[i].removeAttribute('hidden');
+      }
+    }
+    return this.wrapper;
+  }
 }
