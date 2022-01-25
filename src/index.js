@@ -97,4 +97,13 @@ export default class ToggleBlock {
 
     return wrapper;
   }
+
+  _insertParagraph() {
+    const paragraph = document.createElement('div');
+
+    paragraph.classList.add('toggle-block__paragraph');
+    paragraph.contentEditable = true;
+    paragraph.innerHTML = '';
+    this.wrapper.appendChild(paragraph);
+  }
 }
