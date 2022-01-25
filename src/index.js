@@ -28,7 +28,7 @@ export default class ToggleBlock {
 
     const icon = document.createElement('span');
     icon.classList.add('toggle-block__icon');
-    icon.innerHTML = toggleIconPrimary;
+    icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecundary;
 
     icon.addEventListener('click', () => {
       icon.innerHTML = this._resolveToggleAction();
@@ -43,6 +43,20 @@ export default class ToggleBlock {
 
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
+
+    this.data.items.forEach((item) => {
+      const paragraph = document.createElement('div');
+
+      paragraph.classList.add('toggle-block__paragraph');
+      paragraph.contentEditable = true;
+      paragraph.innerHTML = item || '';
+
+      if (this.data.status === 'closed') {
+        paragraph.setAttribute('hidden', true);
+      }
+
+      this.wrapper.appendChild(paragraph);
+    });
 
     return this.wrapper;
   }
