@@ -31,13 +31,8 @@ export default class ToggleBlock {
     icon.innerHTML = toggleIconPrimary;
 
     icon.addEventListener('click', () => {
-      if (this.data.status === 'closed') {
-        icon.innerHTML = toggleIconSecundary;
-        this.data.status = 'opened';
-      } else {
-        icon.innerHTML = toggleIconPrimary;
-        this.data.status = 'closed';
-      }
+      icon.innerHTML = this._resolveToggleAction();
+      this._toggleAction();
     });
 
     const input = document.createElement('div');
