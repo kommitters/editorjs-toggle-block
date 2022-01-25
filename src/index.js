@@ -128,4 +128,17 @@ export default class ToggleBlock {
       paragraph.remove();
     }
   }
+
+  _resolveToggleAction() {
+    let icon = toggleIconPrimary;
+
+    if (this.data.status === 'closed') {
+      icon = toggleIconSecundary;
+      this.data.status = 'opened';
+    } else {
+      this.data.status = 'closed';
+    }
+
+    return icon;
+  }
 }
