@@ -111,6 +111,9 @@ export default class ToggleBlock {
   }
 
   _insertParagraph() {
+    this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
+    this._toggleAction();
+
     const paragraph = document.createElement('div');
 
     paragraph.classList.add('toggle-block__paragraph');
