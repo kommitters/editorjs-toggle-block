@@ -68,10 +68,19 @@ export default class ToggleBlock {
   }
 
   validate(savedData) {
-    if (!savedData.text.trim()) {
-      return false;
+    let validItems = false;
+
+    for (let i = 0; i < savedData.items.length; i += 1) {
+      if (savedData.items[i].trim()) {
+        validItems = true;
+        break;
+      }
     }
-    return true;
+
+    if (validItems || savedData.text.trim()) {
+      return true;
+    }
+    return false;
   }
 
   renderSettings() {
