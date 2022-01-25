@@ -54,8 +54,16 @@ export default class ToggleBlock {
 
   save(blockContent) {
     const caption = blockContent.querySelector('div');
+    const paragraphs = blockContent.querySelectorAll(
+      '.toggle-block__paragraph',
+    );
+    const items = [];
+
+    paragraphs.forEach((item) => items.push(item.innerHTML));
+
     return Object.assign(this.data, {
       text: caption.innerHTML,
+      items: [...items],
     });
   }
 
