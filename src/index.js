@@ -125,8 +125,10 @@ export default class ToggleBlock {
   }
 
   _insertParagraph() {
-    this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
-    this._toggleAction();
+    if (this.data.status === 'closed') {
+      this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
+      this._toggleAction();
+    }
 
     const paragraph = document.createElement('div');
 
