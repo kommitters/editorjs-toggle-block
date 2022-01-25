@@ -1,6 +1,8 @@
 import './index.css';
 import toggleIconPrimary from '../assets/toggleIcon.svg';
 import toggleIconSecundary from '../assets/toggleIconSecundary.svg';
+import insertParagraphIcon from '../assets/insertParagraphIcon.svg';
+import removeParagraphIcon from '../assets/removeParagraphIcon.svg';
 
 export default class ToggleBlock {
   static get toolbox() {
@@ -62,5 +64,37 @@ export default class ToggleBlock {
       return false;
     }
     return true;
+  }
+
+  renderSettings() {
+    const settings = [
+      {
+        name: 'insertParagraph',
+        icon: insertParagraphIcon,
+      },
+      {
+        name: 'removeParagraph',
+        icon: removeParagraphIcon,
+      },
+    ];
+    const wrapper = document.createElement('div');
+
+    settings.forEach((tune) => {
+      const button = document.createElement('div');
+
+      button.classList.add('cdx-settings-button');
+      button.innerHTML = tune.icon;
+      wrapper.appendChild(button);
+
+      button.addEventListener('click', () => {
+        if (tune.name === 'insertParagraph') {
+          this._insertParagraph();
+        } else {
+          this._removeParagraph();
+        }
+      });
+    });
+
+    return wrapper;
   }
 }
