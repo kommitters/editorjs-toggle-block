@@ -106,4 +106,11 @@ export default class ToggleBlock {
     paragraph.innerHTML = '';
     this.wrapper.appendChild(paragraph);
   }
+
+  _removeParagraph() {
+    const paragraph = this.wrapper.lastChild;
+    if (paragraph.classList.value === 'toggle-block__paragraph') {
+      paragraph.remove();
+    }
+  }
 }
