@@ -53,9 +53,7 @@ export default class ToggleBlock {
 
   save(blockContent) {
     const caption = blockContent.querySelector('div');
-    const paragraphs = blockContent.querySelectorAll(
-      '.toggle-block__paragraph',
-    );
+    const paragraphs = blockContent.querySelectorAll('.toggle-block__paragraph');
     const items = [];
 
     paragraphs.forEach((item) => items.push(item.innerHTML));
@@ -100,7 +98,6 @@ export default class ToggleBlock {
 
       button.classList.add('cdx-settings-button');
       button.innerHTML = tune.icon;
-      wrapper.appendChild(button);
 
       button.addEventListener('click', () => {
         if (tune.name === 'insertParagraph') {
@@ -109,13 +106,16 @@ export default class ToggleBlock {
           this._removeParagraph();
         }
       });
+
+      wrapper.appendChild(button);
     });
 
     return wrapper;
   }
 
   _insertParagraph(text = '') {
-    if (this.data.status === 'closed') {
+    const currentStatus = this.data.status;
+    if (currentStatus === 'closed') {
       this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
       this._hideAndShowParagraphs();
     }
@@ -126,8 +126,10 @@ export default class ToggleBlock {
     paragraph.contentEditable = true;
     paragraph.innerHTML = text || '';
 
-    if (this.data.status === 'closed') {
+    if (currentStatus === 'closed') {
       paragraph.setAttribute('hidden', true);
+      this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
+      this._hideAndShowParagraphs();
     }
 
     this.wrapper.appendChild(paragraph);
