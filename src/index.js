@@ -101,9 +101,9 @@ export default class ToggleBlock {
 
       button.addEventListener('click', () => {
         if (tune.name === 'insertParagraph') {
-          this._insertParagraph();
+          this.insertParagraph();
         } else {
-          this._removeParagraph();
+          this.removeParagraph();
         }
       });
 
@@ -116,7 +116,7 @@ export default class ToggleBlock {
   _renderParagraph(paragraph = '') {
     const currenStatus = this.data.status;
 
-    this._insertParagraph(paragraph);
+    this.insertParagraph(paragraph);
 
     if (currenStatus !== this.data.status) {
       this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
@@ -124,7 +124,7 @@ export default class ToggleBlock {
     }
   }
 
-  _insertParagraph(text = '') {
+  insertParagraph(text = '') {
     if (this.data.status === 'closed') {
       this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
       this._hideAndShowParagraphs();
@@ -139,7 +139,7 @@ export default class ToggleBlock {
     this.wrapper.appendChild(paragraph);
   }
 
-  _removeParagraph() {
+  removeParagraph() {
     const paragraph = this.wrapper.lastChild;
     if (paragraph.classList.value === 'toggle-block__paragraph') {
       paragraph.remove();
@@ -151,7 +151,7 @@ export default class ToggleBlock {
 
     if (this.data.status === 'closed') {
       icon = toggleIconSecundary;
-      this.data.status = 'opened';
+      this.data.status = 'open';
     } else {
       this.data.status = 'closed';
     }
