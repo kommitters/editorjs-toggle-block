@@ -32,7 +32,7 @@ export default class ToggleBlock {
 
     icon.addEventListener('click', () => {
       icon.innerHTML = this._resolveToggleAction();
-      this._toggleAction();
+      this._hideAndShowParagraphs();
     });
 
     const input = document.createElement('div');
@@ -45,17 +45,7 @@ export default class ToggleBlock {
     this.wrapper.appendChild(input);
 
     this.data.items.forEach((item) => {
-      const paragraph = document.createElement('div');
-
-      paragraph.classList.add('toggle-block__paragraph');
-      paragraph.contentEditable = true;
-      paragraph.innerHTML = item || '';
-
-      if (this.data.status === 'closed') {
-        paragraph.setAttribute('hidden', true);
-      }
-
-      this.wrapper.appendChild(paragraph);
+      this._insertParagraph(item);
     });
 
     return this.wrapper;
@@ -124,17 +114,22 @@ export default class ToggleBlock {
     return wrapper;
   }
 
-  _insertParagraph() {
+  _insertParagraph(text = '') {
     if (this.data.status === 'closed') {
       this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
-      this._toggleAction();
+      this._hideAndShowParagraphs();
     }
 
     const paragraph = document.createElement('div');
 
     paragraph.classList.add('toggle-block__paragraph');
     paragraph.contentEditable = true;
-    paragraph.innerHTML = '';
+    paragraph.innerHTML = text || '';
+
+    if (this.data.status === 'closed') {
+      paragraph.setAttribute('hidden', true);
+    }
+
     this.wrapper.appendChild(paragraph);
   }
 
@@ -158,7 +153,7 @@ export default class ToggleBlock {
     return icon;
   }
 
-  _toggleAction() {
+  _hideAndShowParagraphs() {
     if (this.data.status === 'closed') {
       for (let i = 2; i < this.wrapper.children.length; i += 1) {
         this.wrapper.children[i].setAttribute('hidden', true);
@@ -168,6 +163,5 @@ export default class ToggleBlock {
         this.wrapper.children[i].removeAttribute('hidden');
       }
     }
-    return this.wrapper;
   }
 }
