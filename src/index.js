@@ -28,7 +28,8 @@ export default class ToggleBlock {
 
     const icon = document.createElement('span');
     icon.classList.add('toggle-block__icon');
-    icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecundary;
+    icon.innerHTML =
+      this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecundary;
 
     icon.addEventListener('click', () => {
       icon.innerHTML = this._resolveToggleAction();
@@ -45,7 +46,7 @@ export default class ToggleBlock {
     this.wrapper.appendChild(input);
 
     this.data.items.forEach((item) => {
-      this._insertParagraph(item);
+      this._renderParagraph(item);
     });
 
     return this.wrapper;
@@ -53,7 +54,9 @@ export default class ToggleBlock {
 
   save(blockContent) {
     const caption = blockContent.querySelector('div');
-    const paragraphs = blockContent.querySelectorAll('.toggle-block__paragraph');
+    const paragraphs = blockContent.querySelectorAll(
+      '.toggle-block__paragraph'
+    );
     const items = [];
 
     paragraphs.forEach((item) => items.push(item.innerHTML));
@@ -113,9 +116,19 @@ export default class ToggleBlock {
     return wrapper;
   }
 
+  _renderParagraph(paragraph = '') {
+    const currenStatus = this.data.status;
+
+    this._insertParagraph(paragraph);
+
+    if (currenStatus !== this.data.status) {
+      this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
+      this._hideAndShowParagraphs();
+    }
+  }
+
   _insertParagraph(text = '') {
-    const currentStatus = this.data.status;
-    if (currentStatus === 'closed') {
+    if (this.data.status === 'closed') {
       this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
       this._hideAndShowParagraphs();
     }
@@ -125,12 +138,6 @@ export default class ToggleBlock {
     paragraph.classList.add('toggle-block__paragraph');
     paragraph.contentEditable = true;
     paragraph.innerHTML = text || '';
-
-    if (currentStatus === 'closed') {
-      paragraph.setAttribute('hidden', true);
-      this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
-      this._hideAndShowParagraphs();
-    }
 
     this.wrapper.appendChild(paragraph);
   }
