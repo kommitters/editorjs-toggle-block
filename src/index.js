@@ -28,8 +28,7 @@ export default class ToggleBlock {
 
     const icon = document.createElement('span');
     icon.classList.add('toggle-block__icon');
-    icon.innerHTML =
-      this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecundary;
+    icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecundary;
 
     icon.addEventListener('click', () => {
       icon.innerHTML = this._resolveToggleAction();
@@ -54,9 +53,7 @@ export default class ToggleBlock {
 
   save(blockContent) {
     const caption = blockContent.querySelector('div');
-    const paragraphs = blockContent.querySelectorAll(
-      '.toggle-block__paragraph'
-    );
+    const paragraphs = blockContent.querySelectorAll('.toggle-block__paragraph');
     const items = [];
 
     paragraphs.forEach((item) => items.push(item.innerHTML));
