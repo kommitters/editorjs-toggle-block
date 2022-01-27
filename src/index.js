@@ -22,11 +22,23 @@ export default class ToggleBlock {
     this.wrapper = undefined;
   }
 
-  onKeyDown(e) {
-    const paragraph = document.getElementById(this);
+  onKeyDown(paragraphId, e) {
+    const currentParagraph = document.getElementById(paragraphId);
 
-    if (e.code === 'Backspace' && paragraph.innerHTML.length === 0) {
-      paragraph.remove();
+    if (e.code === 'Backspace' && currentParagraph.innerHTML.length === 0) {
+      const previous = currentParagraph.previousSibling;
+
+      currentParagraph.remove();
+      previous.focus();
+    } else if (e.code === 'Enter') {
+      if (currentParagraph.nextSibling === null) {
+        this.insertParagraph();
+      } else {
+        const next = currentParagraph.nextSibling;
+        const paragraph = this._createParagraph();
+
+        this.wrapper.insertBefore(paragraph, next);
+      }
     }
   }
 
@@ -138,15 +150,21 @@ export default class ToggleBlock {
       this._hideAndShowParagraphs();
     }
 
-    const paragraph = document.createElement('div');
-
-    paragraph.classList.add('toggle-block__paragraph');
-    paragraph.setAttribute('id', crypto.randomUUID());
-    paragraph.addEventListener('keydown', this.onKeyDown.bind(paragraph.id));
-    paragraph.contentEditable = true;
-    paragraph.innerHTML = text || '';
+    const paragraph = this._createParagraph(text);
 
     this.wrapper.appendChild(paragraph);
+  }
+
+  _createParagraph(content = '') {
+    const newParagraph = document.createElement('div');
+
+    newParagraph.classList.add('toggle-block__paragraph');
+    newParagraph.setAttribute('id', crypto.randomUUID());
+    newParagraph.addEventListener('keydown', this.onKeyDown.bind(this, newParagraph.id));
+    newParagraph.contentEditable = true;
+    newParagraph.innerHTML = content || '';
+
+    return newParagraph;
   }
 
   removeParagraph() {
