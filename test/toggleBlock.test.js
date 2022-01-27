@@ -2,6 +2,8 @@ import createToggleBlock from './fixtures/toggle';
 import data from './fixtures/toolData';
 import getHiddenAttribute from './testHelpers';
 
+global.crypto = require('crypto');
+
 describe('ToggleBlock', () => {
   let toggleBlock;
 
