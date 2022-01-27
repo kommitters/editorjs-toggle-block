@@ -22,7 +22,7 @@ export default class ToggleBlock {
     this.wrapper = undefined;
   }
 
-  onKeyUp(e) {
+  onKeyDown(e) {
     const paragraph = document.getElementById(this);
 
     if (e.code === 'Backspace' && paragraph.innerHTML.length === 0) {
@@ -142,7 +142,7 @@ export default class ToggleBlock {
 
     paragraph.classList.add('toggle-block__paragraph');
     paragraph.setAttribute('id', crypto.randomUUID());
-    paragraph.addEventListener('keyup', this.onKeyUp.bind(paragraph.id));
+    paragraph.addEventListener('keydown', this.onKeyDown.bind(paragraph.id));
     paragraph.contentEditable = true;
     paragraph.innerHTML = text || '';
 
