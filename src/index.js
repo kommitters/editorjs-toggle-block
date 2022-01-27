@@ -22,6 +22,14 @@ export default class ToggleBlock {
     this.wrapper = undefined;
   }
 
+  onKeyUp(e) {
+    const paragraph = document.getElementById(this);
+
+    if (e.code === 'Backspace' && paragraph.innerHTML.length === 0) {
+      paragraph.remove();
+    }
+  }
+
   render() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
@@ -133,6 +141,8 @@ export default class ToggleBlock {
     const paragraph = document.createElement('div');
 
     paragraph.classList.add('toggle-block__paragraph');
+    paragraph.setAttribute('id', crypto.randomUUID());
+    paragraph.addEventListener('keyup', this.onKeyUp.bind(paragraph.id));
     paragraph.contentEditable = true;
     paragraph.innerHTML = text || '';
 
