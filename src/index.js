@@ -36,7 +36,7 @@ export default class ToggleBlock {
           this.insertParagraph();
         } else {
           const next = currentParagraph.nextSibling;
-          const paragraph = this._createParagraph();
+          const paragraph = this.createParagraph();
 
           this.wrapper.insertBefore(paragraph, next);
         }
@@ -48,7 +48,7 @@ export default class ToggleBlock {
           this.insertParagraph();
         } else {
           const firstChild = this.wrapper.children[2];
-          const paragraph = this._createParagraph();
+          const paragraph = this.createParagraph();
 
           this.wrapper.insertBefore(paragraph, firstChild);
         }
@@ -165,12 +165,12 @@ export default class ToggleBlock {
       this._hideAndShowParagraphs();
     }
 
-    const paragraph = this._createParagraph(text);
+    const paragraph = this.createParagraph(text);
 
     this.wrapper.appendChild(paragraph);
   }
 
-  _createParagraph(content = '') {
+  createParagraph(content = '') {
     const newParagraph = document.createElement('div');
 
     newParagraph.classList.add('toggle-block__paragraph');
