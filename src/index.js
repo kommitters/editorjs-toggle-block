@@ -23,21 +23,30 @@ export default class ToggleBlock {
   }
 
   onKeyDown(paragraphId, e) {
-    const currentParagraph = document.getElementById(paragraphId);
+    try {
+      const currentParagraph = document.getElementById(paragraphId);
 
-    if (e.code === 'Backspace' && currentParagraph.innerHTML.length === 0) {
-      const previous = currentParagraph.previousSibling;
+      if (e.code === 'Backspace' && currentParagraph.innerHTML.length === 0) {
+        const previous = currentParagraph.previousSibling;
 
-      currentParagraph.remove();
-      previous.focus();
-    } else if (e.code === 'Enter') {
-      if (currentParagraph.nextSibling === null) {
-        this.insertParagraph();
-      } else {
-        const next = currentParagraph.nextSibling;
-        const paragraph = this._createParagraph();
+        currentParagraph.remove();
+        previous.focus();
+      } else if (e.code === 'Enter') {
+        if (currentParagraph.nextSibling === null) {
+          this.insertParagraph();
+        } else {
+          const next = currentParagraph.nextSibling;
+          const paragraph = this._createParagraph();
 
-        this.wrapper.insertBefore(paragraph, next);
+          this.wrapper.insertBefore(paragraph, next);
+        }
+      }
+    } catch (error) {
+      if (e.code === 'Enter') {
+        const children = this.wrapper.children.length;
+        if (children === 2) {
+          this.insertParagraph();
+        }
       }
     }
   }
@@ -59,6 +68,7 @@ export default class ToggleBlock {
 
     input.classList.add('toggle-block__input');
     input.contentEditable = true;
+    input.addEventListener('keydown', this.onKeyDown.bind(this, null));
     input.innerHTML = this.data.text || '';
 
     this.wrapper.appendChild(icon);
