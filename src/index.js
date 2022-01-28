@@ -46,6 +46,11 @@ export default class ToggleBlock {
         const children = this.wrapper.children.length;
         if (children === 2) {
           this.insertParagraph();
+        } else {
+          const firstChild = this.wrapper.children[2];
+          const paragraph = this._createParagraph();
+
+          this.wrapper.insertBefore(paragraph, firstChild);
         }
       }
     }
