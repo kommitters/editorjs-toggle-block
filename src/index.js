@@ -47,6 +47,10 @@ export default class ToggleBlock {
         if (children === 2) {
           this.insertParagraph();
         } else {
+          if (this.data.status === 'closed') {
+            this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
+            this._hideAndShowParagraphs();
+          }
           const firstChild = this.wrapper.children[2];
           const paragraph = this.createParagraph();
 
@@ -56,7 +60,19 @@ export default class ToggleBlock {
     }
   }
 
-  render() {
+  static get pasteConfig() {
+    return {
+      patterns: {
+        key: />/i,
+      },
+    };
+  }
+
+  onPaste() {
+    this._createToggle.bind(this);
+  }
+
+  _createToggle() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
 
@@ -78,7 +94,10 @@ export default class ToggleBlock {
 
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
+  }
 
+  render() {
+    this._createToggle();
     this.data.items.forEach((item) => {
       this._renderParagraph(item);
     });
