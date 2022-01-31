@@ -22,40 +22,40 @@ export default class ToggleBlock {
     this.wrapper = undefined;
   }
 
-  onKeyDown(paragraphId, e) {
-    try {
-      const currentParagraph = document.getElementById(paragraphId);
-
-      if (e.code === 'Backspace' && currentParagraph.innerHTML.length === 0) {
-        const previous = currentParagraph.previousSibling;
-
-        currentParagraph.remove();
-        previous.focus();
-      } else if (e.code === 'Enter') {
-        if (currentParagraph.nextSibling === null) {
-          this.insertParagraph();
-        } else {
-          const next = currentParagraph.nextSibling;
-          const paragraph = this.createParagraph();
-
-          this.wrapper.insertBefore(paragraph, next);
+  _createParagraphFromToggleRoot(e) {
+    if (e.code === 'Enter') {
+      const children = this.wrapper.children.length;
+      if (children === 2) {
+        this.insertParagraph();
+      } else {
+        if (this.data.status === 'closed') {
+          this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
+          this._hideAndShowParagraphs();
         }
+        const firstChild = this.wrapper.children[2];
+        const paragraph = this.createParagraph();
+
+        this.wrapper.insertBefore(paragraph, firstChild);
       }
-    } catch (error) {
-      if (e.code === 'Enter') {
-        const children = this.wrapper.children.length;
-        if (children === 2) {
-          this.insertParagraph();
-        } else {
-          if (this.data.status === 'closed') {
-            this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
-            this._hideAndShowParagraphs();
-          }
-          const firstChild = this.wrapper.children[2];
-          const paragraph = this.createParagraph();
+    }
+  }
 
-          this.wrapper.insertBefore(paragraph, firstChild);
-        }
+  _createAndRemoveParagraphFromIt(paragraphId, e) {
+    const currentParagraph = document.getElementById(paragraphId);
+
+    if (e.code === 'Backspace' && currentParagraph.innerHTML.length === 0) {
+      const previous = currentParagraph.previousSibling;
+
+      currentParagraph.remove();
+      previous.focus();
+    } else if (e.code === 'Enter') {
+      if (currentParagraph.nextSibling === null) {
+        this.insertParagraph();
+      } else {
+        const next = currentParagraph.nextSibling;
+        const paragraph = this.createParagraph();
+
+        this.wrapper.insertBefore(paragraph, next);
       }
     }
   }
@@ -77,7 +77,7 @@ export default class ToggleBlock {
 
     input.classList.add('toggle-block__input');
     input.contentEditable = true;
-    input.addEventListener('keydown', this.onKeyDown.bind(this, null));
+    input.addEventListener('keydown', this._createParagraphFromToggleRoot.bind(this));
     input.innerHTML = this.data.text || '';
 
     this.wrapper.appendChild(icon);
@@ -182,7 +182,7 @@ export default class ToggleBlock {
 
     newParagraph.classList.add('toggle-block__paragraph');
     newParagraph.setAttribute('id', crypto.randomUUID());
-    newParagraph.addEventListener('keydown', this.onKeyDown.bind(this, newParagraph.id));
+    newParagraph.addEventListener('keydown', this._createAndRemoveParagraphFromIt.bind(this, newParagraph.id));
     newParagraph.contentEditable = true;
     newParagraph.innerHTML = content || '';
 
