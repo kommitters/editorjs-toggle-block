@@ -1,4 +1,5 @@
 import './index.css';
+import Shortcut from './customizedShortcuts';
 import toggleIconPrimary from '../assets/toggleIcon.svg';
 import toggleIconSecundary from '../assets/toggleIconSecundary.svg';
 import insertParagraphIcon from '../assets/insertParagraphIcon.svg';
@@ -58,6 +59,36 @@ export default class ToggleBlock {
         }
       }
     }
+  }
+
+  static alternativeShortcut() {
+    const data = { data: { text: '', status: 'closed', items: [] } };
+    const toggi = new Shortcut({
+      name: 'SHIFT+>',
+      on: document.body,
+      callback() {
+        console.log('>');
+        const toggle = new ToggleBlock(data);
+        const wrap = toggle.render();
+
+        const block = document.createElement('div');
+        block.classList.add('ce-block');
+
+        const blockContent = document.createElement('div');
+        blockContent.classList.add('ce-block__content');
+
+        blockContent.appendChild(wrap);
+        block.appendChild(blockContent);
+
+        const editor = document.body.querySelector('#editorjs').querySelector('.codex-editor').querySelector('.codex-editor__redactor');
+        return editor.appendChild(blockContent);
+      },
+    });
+    return toggi.name;
+  }
+
+  static get shortcut() {
+    return ToggleBlock.alternativeShortcut();
   }
 
   static get pasteConfig() {
