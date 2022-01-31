@@ -29,10 +29,10 @@ export default class ToggleBlock {
         this._hideAndShowParagraphs();
       }
 
-      const firstChild = this.wrapper.children[2];
+      const firstChild = this.wrapper.children[1];
       const paragraph = this.createParagraph();
 
-      this.wrapper.insertBefore(paragraph, firstChild);
+      firstChild.after(paragraph);
     }
   }
 
