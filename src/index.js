@@ -24,21 +24,15 @@ export default class ToggleBlock {
 
   createParagraphFromToggleRoot(e) {
     if (e.code === 'Enter') {
-      const children = this.wrapper.children.length;
-
       if (this.data.status === 'closed') {
         this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
         this._hideAndShowParagraphs();
       }
 
-      if (children === 2) {
-        this.insertParagraph();
-      } else {
-        const firstChild = this.wrapper.children[2];
-        const paragraph = this.createParagraph();
+      const firstChild = this.wrapper.children[2];
+      const paragraph = this.createParagraph();
 
-        this.wrapper.insertBefore(paragraph, firstChild);
-      }
+      this.wrapper.insertBefore(paragraph, firstChild);
     }
   }
 
