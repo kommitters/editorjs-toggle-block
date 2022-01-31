@@ -45,6 +45,15 @@ export default class ToggleBlock {
           const previous = currentParagraph.previousSibling;
 
           currentParagraph.remove();
+          previous.innerHTML += '.';
+
+          const selection = window.getSelection();
+          const range = document.createRange();
+
+          selection.removeAllRanges();
+          range.selectNodeContents(previous);
+          range.collapse(false);
+          selection.addRange(range);
           previous.focus();
         }
         break;
