@@ -4,7 +4,23 @@ import toggleIconSecundary from '../assets/toggleIconSecundary.svg';
 import insertParagraphIcon from '../assets/insertParagraphIcon.svg';
 import removeParagraphIcon from '../assets/removeParagraphIcon.svg';
 
+/**
+ * ToggleBlock for the Editor.js
+ * Creates a toggle and paragraphs can be saved in it.
+ * Requires no server-side uploader.
+ *
+ * @typedef {object} ToggleBlockData
+ * @description Tool's input and output data format
+ * @property {string} text - toggle text
+ * @property {string} status - toggle status
+ * @property {array} items - toggle paragraphs
+ */
+
 export default class ToggleBlock {
+  /**
+   * Icon and title for displaying at the Toolbox
+   * @returns {{tittle: string, icon: string}}
+   */
   static get toolbox() {
     return {
       title: 'Toggle',
@@ -12,6 +28,11 @@ export default class ToggleBlock {
     };
   }
 
+  /**
+   * Render tool`s main Element and fill it with saved data
+   * @param {{data: object}}
+   * data - Previously saved data
+   */
   constructor({ data }) {
     this.data = {
       text: data.text || '',
@@ -22,6 +43,14 @@ export default class ToggleBlock {
     this.wrapper = undefined;
   }
 
+  /**
+   * First checks the status of a toggle, if this is 'closed' then open it.
+   *
+   * After checks if a toggle has paragraphs, if so, insert a new one as the first
+   * child and move the others to the end, otherwise just insert a new paragraph.
+   *
+   * @param {KeyboardEvent} e - key down event
+   */
   createParagraphFromToggleRoot(e) {
     if (e.code === 'Enter') {
       if (this.data.status === 'closed') {
@@ -36,6 +65,19 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * First checks if the event code is 'Backspace' or 'Enter'.
+   *
+   * In the first case, if the paragraph text is totally deleted and
+   * 'Backspace' is pressed again, the paragraph too is deleted and
+   * the focus is sent to the previous element at the end of its content.
+   *
+   * In the second case, a paragraph is created and it's inserted
+   * after the paragraph that triggers the event.
+   *
+   * @param {string} paragraphId - paragraph identifier
+   * @param {KeyboardEvent} e - key down event
+   */
   createAndRemoveParagraphFromIt(paragraphId, e) {
     const currentParagraph = document.getElementById(paragraphId);
 
@@ -72,6 +114,9 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * Creates a toggle block view without paragraphs
+   */
   _createToggle() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
@@ -96,6 +141,10 @@ export default class ToggleBlock {
     this.wrapper.appendChild(input);
   }
 
+  /**
+   * Renders Tool's view
+   * @returns {HTMLDivElement}
+   */
   render() {
     this._createToggle();
     this.data.items.forEach((item) => {
@@ -105,6 +154,11 @@ export default class ToggleBlock {
     return this.wrapper;
   }
 
+  /**
+   * Extracts Tool's data from the view
+   * @param {HTMLDivElement} blockContent - Toggle tools rendered view
+   * @returns {ToggleBlockData} - saved data
+   */
   save(blockContent) {
     const caption = blockContent.querySelector('div');
     const paragraphs = blockContent.querySelectorAll('.toggle-block__paragraph');
@@ -118,6 +172,11 @@ export default class ToggleBlock {
     });
   }
 
+  /**
+   * Validates Toggle block data
+   * @param {object} savedData - Data received after saving
+   * @returns {boolean} false if saved data isn't correct, otherwise true
+   */
   validate(savedData) {
     let validItems = false;
 
@@ -134,6 +193,10 @@ export default class ToggleBlock {
     return false;
   }
 
+  /**
+   * Makes buttons with tunes
+   * @returns {HTMLDivElement}
+   */
   renderSettings() {
     const settings = [
       {
@@ -167,6 +230,15 @@ export default class ToggleBlock {
     return wrapper;
   }
 
+  /**
+   * First saves the current toggle status. After, calls the method to insert
+   * a paragraph, as this leaves the toggle open, asks if the toggle status
+   * before calling the method is different from the current status, if it's,
+   * it executes some instructions to collapse the toggle and return its
+   * original status.
+   *
+   * @param {string} paragraph - paragraph text
+   */
   _renderParagraph(paragraph = '') {
     const currenStatus = this.data.status;
 
@@ -178,6 +250,13 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * First checks the status of a toggle, if this is 'closed' then open it.
+   * After, calls the method to create a paragraph and the result is inserted
+   * as a toggle child.
+   *
+   * @param {string} text - paragraph text
+   */
   insertParagraph(text = '') {
     if (this.data.status === 'closed') {
       this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
@@ -189,6 +268,11 @@ export default class ToggleBlock {
     this.wrapper.appendChild(paragraph);
   }
 
+  /**
+   * * Creates a paragraph view
+   * @param {string} content - paragraph text
+   * @returns {HTMLDivElement}
+   */
   createParagraph(content = '') {
     const newParagraph = document.createElement('div');
 
@@ -201,6 +285,9 @@ export default class ToggleBlock {
     return newParagraph;
   }
 
+  /**
+   * Removes the last toggle paragraph
+   */
   removeParagraph() {
     const paragraph = this.wrapper.lastChild;
     if (paragraph.classList.value === 'toggle-block__paragraph') {
@@ -208,6 +295,14 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * Converts the toggle status to its opposite, including its icon.
+   * If the toggle status is open, then now will be closed and its icon
+   * will be the main. Otherwise, will be open and its icon will be the
+   * secundary.
+   *
+   * @returns {string} icon - toggle icon
+   */
   _resolveToggleAction() {
     let icon = toggleIconPrimary;
 
@@ -221,6 +316,12 @@ export default class ToggleBlock {
     return icon;
   }
 
+  /**
+   * Hides and shows the toggle paragraphs.
+   * If the toggle status is closed, the hidden attribute is added
+   * to the container paragraph. Otherwise, the hidden attribute is
+   * removed.
+   */
   _hideAndShowParagraphs() {
     if (this.data.status === 'closed') {
       for (let i = 2; i < this.wrapper.children.length; i += 1) {
