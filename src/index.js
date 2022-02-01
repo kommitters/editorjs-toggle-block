@@ -62,10 +62,9 @@ export default class ToggleBlock {
         if (currentParagraph.nextSibling === null) {
           this.insertParagraph();
         } else {
-          const next = currentParagraph.nextSibling;
           const paragraph = this.createParagraph();
 
-          this.wrapper.insertBefore(paragraph, next);
+          currentParagraph.after(paragraph);
         }
         break;
       default:
