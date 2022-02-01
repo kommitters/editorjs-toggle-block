@@ -29,6 +29,14 @@ export default class ToggleBlock {
   }
 
   /**
+   * Disables the creation of new editorjs blocks by pressing
+   * 'enter' when in a toggle block.
+   */
+  static get enableLineBreaks() {
+    return true;
+  }
+
+  /**
    * Render tool`s main Element and fill it with saved data
    * @param {{data: object}}
    * data - Previously saved data
@@ -57,11 +65,13 @@ export default class ToggleBlock {
         this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
         this._hideAndShowParagraphs();
       }
-
       const firstChild = this.wrapper.children[1];
       const paragraph = this.createParagraph();
 
       firstChild.after(paragraph);
+      firstChild.remove();
+
+      this.wrapper.insertBefore(firstChild, paragraph);
     }
   }
 
@@ -80,10 +90,11 @@ export default class ToggleBlock {
    */
   createAndRemoveParagraphFromIt(paragraphId, e) {
     const currentParagraph = document.getElementById(paragraphId);
+    const text = currentParagraph.innerHTML;
 
     switch (e.code) {
-      case 'Backspace':
-        if (currentParagraph.innerHTML.length === 0) {
+      case 'Backspace': {
+        if (text.length === 0) {
           const previous = currentParagraph.previousSibling;
 
           currentParagraph.remove();
@@ -99,16 +110,20 @@ export default class ToggleBlock {
           previous.focus();
         }
         break;
+      }
 
-      case 'Enter':
-        if (currentParagraph.nextSibling === null) {
-          this.insertParagraph();
-        } else {
-          const paragraph = this.createParagraph();
+      case 'Enter': {
+        const paragraph = this.createParagraph();
 
-          currentParagraph.after(paragraph);
-        }
+        currentParagraph.after(paragraph);
+        currentParagraph.remove();
+
+        const originalParagraph = this.createParagraph(text);
+
+        this.wrapper.insertBefore(originalParagraph, paragraph);
         break;
+      }
+
       default:
         break;
     }
