@@ -72,6 +72,7 @@ export default class ToggleBlock {
       firstChild.remove();
 
       this.wrapper.insertBefore(firstChild, paragraph);
+      paragraph.focus();
     }
   }
 
@@ -121,6 +122,7 @@ export default class ToggleBlock {
         const originalParagraph = this.createParagraph(text);
 
         this.wrapper.insertBefore(originalParagraph, paragraph);
+        paragraph.focus();
         break;
       }
 

@@ -21,3 +21,7 @@
 .toggle-block__paragraph {
   margin-left: 34px;
 }
+
+.toggle-block__paragraph br {
+  display: none;
+}
