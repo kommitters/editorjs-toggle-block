@@ -65,13 +65,11 @@ export default class ToggleBlock {
         this.wrapper.firstChild.innerHTML = this._resolveToggleAction();
         this._hideAndShowParagraphs();
       }
+
       const firstChild = this.wrapper.children[1];
       const paragraph = this.createParagraph();
 
       firstChild.after(paragraph);
-      firstChild.remove();
-
-      this.wrapper.insertBefore(firstChild, paragraph);
       paragraph.focus();
     }
   }
@@ -117,11 +115,6 @@ export default class ToggleBlock {
         const paragraph = this.createParagraph();
 
         currentParagraph.after(paragraph);
-        currentParagraph.remove();
-
-        const originalParagraph = this.createParagraph(text);
-
-        this.wrapper.insertBefore(originalParagraph, paragraph);
         paragraph.focus();
         break;
       }
