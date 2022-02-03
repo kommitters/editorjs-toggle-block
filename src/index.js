@@ -257,16 +257,6 @@ export default class ToggleBlock {
   }
 
   /**
-   * Removes the last toggle paragraph
-   */
-  removeParagraph() {
-    const paragraph = this.wrapper.lastChild;
-    if (paragraph.classList.value === 'toggle-block__paragraph') {
-      paragraph.remove();
-    }
-  }
-
-  /**
    * Converts the toggle status to its opposite, including its icon.
    * If the toggle status is open, then now will be closed and its icon
    * will be the main. Otherwise, will be open and its icon will be the
