@@ -36,8 +36,10 @@ export default class ToggleBlock {
 
   /**
    * Render tool`s main Element and fill it with saved data
-   * @param {{data: object}}
+   *
+   * @param {{data: object, api: object}}
    * data - Previously saved data
+   * api - Editor.js API
    */
   constructor({ data, api }) {
     this.data = {
