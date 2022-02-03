@@ -73,11 +73,10 @@ export default class ToggleBlock {
   }
 
   /**
-   * First checks if the event code is 'Backspace' or 'Enter'.
-   *
-   * In the first case, if the paragraph text is totally deleted and
-   * 'Backspace' is pressed again, the paragraph too is deleted and
-   * the focus is sent to the previous element at the end of its content.
+   * First checks if the event code is 'Backspace'. If it's, checks if
+   * the paragraph text is totally deleted and 'Backspace' is pressed
+   * again, the paragraph too is deleted and the focus is sent to the
+   * previous element at the end of its content.
    *
    * In the second case, a paragraph is created and it's inserted
    * after the paragraph that triggers the event.
@@ -85,40 +84,43 @@ export default class ToggleBlock {
    * @param {string} paragraphId - paragraph identifier
    * @param {KeyboardEvent} e - key down event
    */
-  createAndRemoveParagraphFromIt(paragraphId, e) {
-    const currentParagraph = document.getElementById(paragraphId);
-    const text = currentParagraph.innerHTML;
+  removeParagraphFromIt(paragraphId, e) {
+    if (e.code === 'Backspace') {
+      const currentParagraph = document.getElementById(paragraphId);
 
-    switch (e.code) {
-      case 'Backspace': {
-        if (text.length === 0) {
-          const previous = currentParagraph.previousSibling;
+      if (currentParagraph.innerHTML.length === 0 || currentParagraph.innerHTML.length === 8) {
+        const previous = currentParagraph.previousSibling;
 
-          currentParagraph.remove();
-          previous.innerHTML += '.';
+        currentParagraph.remove();
+        previous.innerHTML += ' ';
 
-          const selection = window.getSelection();
-          const range = document.createRange();
+        const selection = window.getSelection();
+        const range = document.createRange();
 
-          selection.removeAllRanges();
-          range.selectNodeContents(previous);
-          range.collapse(false);
-          selection.addRange(range);
-          previous.focus();
-        }
-        break;
+        selection.removeAllRanges();
+        range.selectNodeContents(previous);
+        range.collapse(false);
+        selection.addRange(range);
+        previous.focus();
       }
+    }
+  }
 
-      case 'Enter': {
-        const paragraph = this.createParagraph();
+  /**
+   * First checks if the event code is 'Enter'. If It's, a paragraph
+   * is created and it's inserted after the paragraph that triggers
+   * the event.
+   *
+   * @param {string} paragraphId - paragraph identifier
+   * @param {KeyboardEvent} e - key down event
+   */
+  createParagraphFromIt(paragraphId, e) {
+    if (e.code === 'Enter') {
+      const currentParagraph = document.getElementById(paragraphId);
+      const paragraph = this.createParagraph();
 
-        currentParagraph.after(paragraph);
-        paragraph.focus();
-        break;
-      }
-
-      default:
-        break;
+      currentParagraph.after(paragraph);
+      paragraph.focus();
     }
   }
 
@@ -249,7 +251,8 @@ export default class ToggleBlock {
 
     newParagraph.classList.add('toggle-block__paragraph');
     newParagraph.setAttribute('id', crypto.randomUUID());
-    newParagraph.addEventListener('keydown', this.createAndRemoveParagraphFromIt.bind(this, newParagraph.id));
+    newParagraph.addEventListener('keyup', this.removeParagraphFromIt.bind(this, newParagraph.id));
+    newParagraph.addEventListener('keydown', this.createParagraphFromIt.bind(this, newParagraph.id));
     newParagraph.contentEditable = true;
     newParagraph.innerHTML = content || '';
 
