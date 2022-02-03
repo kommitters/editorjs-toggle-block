@@ -1,8 +1,6 @@
 import './index.css';
 import toggleIconPrimary from '../assets/toggleIcon.svg';
 import toggleIconSecundary from '../assets/toggleIconSecundary.svg';
-import insertParagraphIcon from '../assets/insertParagraphIcon.svg';
-import removeParagraphIcon from '../assets/removeParagraphIcon.svg';
 
 /**
  * ToggleBlock for the Editor.js
