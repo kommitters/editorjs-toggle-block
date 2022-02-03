@@ -204,43 +204,6 @@ export default class ToggleBlock {
   }
 
   /**
-   * Makes buttons with tunes
-   * @returns {HTMLDivElement}
-   */
-  renderSettings() {
-    const settings = [
-      {
-        name: 'insertParagraph',
-        icon: insertParagraphIcon,
-      },
-      {
-        name: 'removeParagraph',
-        icon: removeParagraphIcon,
-      },
-    ];
-    const wrapper = document.createElement('div');
-
-    settings.forEach((tune) => {
-      const button = document.createElement('div');
-
-      button.classList.add('cdx-settings-button');
-      button.innerHTML = tune.icon;
-
-      button.addEventListener('click', () => {
-        if (tune.name === 'insertParagraph') {
-          this.insertParagraph();
-        } else {
-          this.removeParagraph();
-        }
-      });
-
-      wrapper.appendChild(button);
-    });
-
-    return wrapper;
-  }
-
-  /**
    * First saves the current toggle status. After, calls the method to insert
    * a paragraph, as this leaves the toggle open, asks if the toggle status
    * before calling the method is different from the current status, if it's,
