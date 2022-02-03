@@ -78,8 +78,10 @@ export default class ToggleBlock {
    * again, the paragraph too is deleted and the focus is sent to the
    * previous element at the end of its content.
    *
-   * In the second case, a paragraph is created and it's inserted
-   * after the paragraph that triggers the event.
+   * The second conditional asks if the element size is '0' or '8'
+   * because when a paragraph was inserted under the current, the
+   * element also contains '<br><br>' which it isn't visible, but
+   * is present to calculate the length
    *
    * @param {string} paragraphId - paragraph identifier
    * @param {KeyboardEvent} e - key down event
