@@ -39,13 +39,13 @@ export default class ToggleBlock {
    * @param {{data: object}}
    * data - Previously saved data
    */
-  constructor({ data }) {
+  constructor({ data, api }) {
     this.data = {
       text: data.text || '',
       status: data.status || 'closed',
       items: data.items || [],
     };
-
+    this.api = api;
     this.wrapper = undefined;
   }
 
