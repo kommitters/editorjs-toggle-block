@@ -82,12 +82,35 @@ export default class ToggleBlock {
   }
 
   renderItems() {
-    let index = this.api.blocks.getCurrentBlockIndex() + 1;
+    const originalIndex = this.api.blocks.getCurrentBlockIndex();
+    let index = originalIndex + 1;
+
     this.data.items.forEach((block) => {
       const { type, data } = block;
       this.api.blocks.insert(type, data, {}, index += 1, true);
       this.api.blocks.getBlockByIndex(index).holder.firstChild.firstChild.classList.add('toggle-block__item');
       this.api.blocks.getBlockByIndex(index).holder.firstChild.firstChild.setAttribute('id', crypto.randomUUID());
     });
+
+    this._hideAndShowBlocks(originalIndex);
+  }
+
+  /**
+   * Hides and shows the toggle blocks.
+   * If the toggle status is closed, the hidden attribute is added
+   * to the container block. Otherwise, the hidden attribute is
+   * removed.
+   */
+  _hideAndShowBlocks(toggleIndex) {
+    let index = toggleIndex + 1;
+    if (this.data.status === 'closed') {
+      for (let i = 0; i < this.data.items.length; i += 1) {
+        this.api.blocks.getBlockByIndex(index += 1).holder.setAttribute('hidden', true);
+      }
+    } else {
+      for (let i = 0; i < this.data.items.length; i += 1) {
+        this.api.blocks.getBlockByIndex(index += 1).holder.removeAttribute('hidden');
+      }
+    }
   }
 }
