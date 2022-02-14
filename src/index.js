@@ -77,12 +77,12 @@ export default class ToggleBlock {
 
   render() {
     this._createToggle();
-    setTimeout(this.renderItems());
+    setTimeout(this.renderItems.bind(this));
     return this.wrapper;
   }
 
   renderItems() {
-    let index = this.api.blocks.getCurrentBlockIndex();
+    let index = this.api.blocks.getCurrentBlockIndex() + 1;
     this.data.items.forEach((block) => {
       const { type, data } = block;
       this.api.blocks.insert(type, data, {}, index += 1, true);
