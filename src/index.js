@@ -59,11 +59,6 @@ export default class ToggleBlock {
     icon.classList.add('toggle-block__icon');
     icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecundary;
 
-    // icon.addEventListener('click', () => {
-    //   icon.innerHTML = this._resolveToggleAction();
-    //   this._hideAndShowParagraphs();
-    // });
-
     const input = document.createElement('div');
 
     input.classList.add('toggle-block__input');
@@ -83,6 +78,13 @@ export default class ToggleBlock {
 
   renderItems() {
     const originalIndex = this.api.blocks.getCurrentBlockIndex();
+    const icon = this.wrapper.firstChild;
+
+    icon.addEventListener('click', () => {
+      icon.innerHTML = this._resolveToggleAction();
+      this._hideAndShowBlocks(originalIndex);
+    });
+
     let index = originalIndex + 1;
 
     this.data.items.forEach((block) => {
@@ -93,6 +95,27 @@ export default class ToggleBlock {
     });
 
     this._hideAndShowBlocks(originalIndex);
+  }
+
+  /**
+   * Converts the toggle status to its opposite, including its icon.
+   * If the toggle status is open, then now will be closed and its icon
+   * will be the main. Otherwise, will be open and its icon will be the
+   * secundary.
+   *
+   * @returns {string} icon - toggle icon
+   */
+  _resolveToggleAction() {
+    let icon = toggleIconPrimary;
+
+    if (this.data.status === 'closed') {
+      icon = toggleIconSecundary;
+      this.data.status = 'open';
+    } else {
+      this.data.status = 'closed';
+    }
+
+    return icon;
   }
 
   /**
