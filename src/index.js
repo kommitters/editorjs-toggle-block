@@ -27,7 +27,7 @@ export default class ToggleBlock {
   }
 
   /**
-   * Disables the creation of new editorjs blocks by pressing
+   * Disables the creation of new EditorJS blocks by pressing
    * 'enter' when in a toggle block.
    */
   static get enableLineBreaks() {
@@ -51,9 +51,44 @@ export default class ToggleBlock {
     this.wrapper = undefined;
   }
 
+  /**
+   * First checks the status of a toggle, if this is 'closed' then open it.
+   *
+   * After checks if a toggle has paragraphs, if so, insert a new one as the first
+   * child and move the others to the end, otherwise just insert a new paragraph.
+   *
+   * @param {KeyboardEvent} e - key down event
+   */
+  createParagraphFromToggleRoot(e) {
+    if (e.code === 'Enter') {
+      const originalIndex = this.api.blocks.getCurrentBlockIndex();
+
+      if (this.data.status === 'closed') {
+        const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+
+        this.data.status = 'open';
+        this._hideAndShowBlocks(originalIndex - 1, children.length);
+      }
+
+      const foreignKey = this.wrapper.id;
+      const index = originalIndex + 1;
+      const id = crypto.randomUUID();
+
+      this.api.blocks.insert();
+
+      const newBlock = this.api.blocks.getBlockByIndex(index);
+
+      newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
+      newBlock.holder.setAttribute('foreignKey', foreignKey);
+      newBlock.holder.setAttribute('id', id);
+      document.getElementById(id).firstChild.firstChild.focus();
+    }
+  }
+
   _createToggle() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
+    this.wrapper.id = crypto.randomUUID();
 
     const icon = document.createElement('span');
     icon.classList.add('toggle-block__icon');
@@ -63,7 +98,7 @@ export default class ToggleBlock {
 
     input.classList.add('toggle-block__input');
     input.contentEditable = true;
-    // input.addEventListener('keydown', this.createParagraphFromToggleRoot.bind(this));
+    input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
     input.innerHTML = this.data.text || '';
 
     this.wrapper.appendChild(icon);
@@ -79,22 +114,30 @@ export default class ToggleBlock {
   renderItems() {
     const originalIndex = this.api.blocks.getCurrentBlockIndex();
     const icon = this.wrapper.firstChild;
+    const foreignKey = this.wrapper.id;
 
     icon.addEventListener('click', () => {
+      const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+
       icon.innerHTML = this._resolveToggleAction();
-      this._hideAndShowBlocks(originalIndex);
+      this._hideAndShowBlocksClicking(children.length);
     });
 
     let index = originalIndex + 1;
 
     this.data.items.forEach((block) => {
       const { type, data } = block;
+
       this.api.blocks.insert(type, data, {}, index += 1, true);
-      this.api.blocks.getBlockByIndex(index).holder.firstChild.firstChild.classList.add('toggle-block__item');
-      this.api.blocks.getBlockByIndex(index).holder.firstChild.firstChild.setAttribute('id', crypto.randomUUID());
+
+      const newBlock = this.api.blocks.getBlockByIndex(index);
+
+      newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
+      newBlock.holder.setAttribute('foreignKey', foreignKey);
+      newBlock.holder.setAttribute('id', crypto.randomUUID());
     });
 
-    this._hideAndShowBlocks(originalIndex);
+    this._hideAndShowBlocks(originalIndex, this.data.items.length);
   }
 
   /**
@@ -118,20 +161,26 @@ export default class ToggleBlock {
     return icon;
   }
 
-  /**
-   * Hides and shows the toggle blocks.
-   * If the toggle status is closed, the hidden attribute is added
-   * to the container block. Otherwise, the hidden attribute is
-   * removed.
-   */
-  _hideAndShowBlocks(toggleIndex) {
-    let index = toggleIndex + 1;
+  _hideAndShowBlocks(index, items) {
+    const toggleIndex = index + 1;
+
+    this._iterateOnItems(items, toggleIndex);
+  }
+
+  _hideAndShowBlocksClicking(items) {
+    const toggleIndex = this.api.blocks.getCurrentBlockIndex();
+
+    this._iterateOnItems(items, toggleIndex);
+  }
+
+  _iterateOnItems(items, toggleIndex) {
+    let index = toggleIndex;
     if (this.data.status === 'closed') {
-      for (let i = 0; i < this.data.items.length; i += 1) {
+      for (let i = 0; i < items; i += 1) {
         this.api.blocks.getBlockByIndex(index += 1).holder.setAttribute('hidden', true);
       }
     } else {
-      for (let i = 0; i < this.data.items.length; i += 1) {
+      for (let i = 0; i < items; i += 1) {
         this.api.blocks.getBlockByIndex(index += 1).holder.removeAttribute('hidden');
       }
     }
