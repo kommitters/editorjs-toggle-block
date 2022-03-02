@@ -1,6 +1,6 @@
 import './index.css';
 import toggleIconPrimary from '../assets/toggleIcon.svg';
-import toggleIconSecundary from '../assets/toggleIconSecundary.svg';
+import toggleIconSecondary from '../assets/toggleIconSecondary.svg';
 
 /**
  * ToggleBlock for the Editor.js
@@ -57,7 +57,7 @@ export default class ToggleBlock {
 
     const icon = document.createElement('span');
     icon.classList.add('toggle-block__icon');
-    icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecundary;
+    icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecondary;
 
     const input = document.createElement('div');
 
@@ -101,7 +101,7 @@ export default class ToggleBlock {
    * Converts the toggle status to its opposite, including its icon.
    * If the toggle status is open, then now will be closed and its icon
    * will be the main. Otherwise, will be open and its icon will be the
-   * secundary.
+   * Secondary.
    *
    * @returns {string} icon - toggle icon
    */
@@ -109,7 +109,7 @@ export default class ToggleBlock {
     let icon = toggleIconPrimary;
 
     if (this.data.status === 'closed') {
-      icon = toggleIconSecundary;
+      icon = toggleIconSecondary;
       this.data.status = 'open';
     } else {
       this.data.status = 'closed';
