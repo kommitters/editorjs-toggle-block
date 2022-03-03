@@ -191,4 +191,20 @@ export default class ToggleBlock {
       }
     }
   }
+
+  save(blockContent) {
+    const caption = blockContent.textContent;
+    const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+
+    const items = [];
+
+    blocks.forEach((block) => {
+      items.push({ type: 'paragraph', data: { text: block.textContent } });
+    });
+
+    return Object.assign(this.data, {
+      text: caption,
+      items: [...items],
+    });
+  }
 }
