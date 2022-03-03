@@ -66,7 +66,9 @@ export default class ToggleBlock {
       if (this.data.status === 'closed') {
         const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
 
-        this.data.status = 'open';
+        const icon = this.wrapper.firstChild;
+        icon.innerHTML = this._resolveToggleAction();
+
         this._hideAndShowBlocks(originalIndex - 1, children.length);
       }
 
@@ -115,6 +117,8 @@ export default class ToggleBlock {
     const originalIndex = this.api.blocks.getCurrentBlockIndex();
     const icon = this.wrapper.firstChild;
     const foreignKey = this.wrapper.id;
+    const editorBlocks = this.api.blocks.getBlocksCount();
+    let index = editorBlocks > 1 ? originalIndex + 1 : originalIndex;
 
     icon.addEventListener('click', () => {
       const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
@@ -122,8 +126,6 @@ export default class ToggleBlock {
       icon.innerHTML = this._resolveToggleAction();
       this._hideAndShowBlocksClicking(children.length);
     });
-
-    let index = originalIndex + 1;
 
     this.data.items.forEach((block) => {
       const { type, data } = block;
@@ -137,7 +139,11 @@ export default class ToggleBlock {
       newBlock.holder.setAttribute('id', crypto.randomUUID());
     });
 
-    this._hideAndShowBlocks(originalIndex, this.data.items.length);
+    if (editorBlocks > 1) {
+      this._hideAndShowBlocks(originalIndex, this.data.items.length);
+    } else {
+      this._hideAndShowBlocks(originalIndex - 1, this.data.items.length);
+    }
   }
 
   /**
