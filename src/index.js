@@ -87,6 +87,19 @@ export default class ToggleBlock {
     }
   }
 
+  createParagraphFromIt(e) {
+    if (e.code === 'Enter') {
+      const index = this.api.blocks.getCurrentBlockIndex();
+      const newBlock = this.api.blocks.getBlockByIndex(index);
+      const id = crypto.randomUUID();
+
+      newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
+      newBlock.holder.setAttribute('foreignKey', this.wrapper.id);
+      newBlock.holder.setAttribute('id', id);
+      document.getElementById(id).firstChild.firstChild.focus();
+    }
+  }
+
   _createToggle() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
@@ -133,7 +146,7 @@ export default class ToggleBlock {
       this.api.blocks.insert(type, data, {}, index += 1, true);
 
       const newBlock = this.api.blocks.getBlockByIndex(index);
-
+      newBlock.holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
       newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
       newBlock.holder.setAttribute('foreignKey', foreignKey);
       newBlock.holder.setAttribute('id', crypto.randomUUID());
