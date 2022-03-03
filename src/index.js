@@ -65,10 +65,9 @@ export default class ToggleBlock {
 
       if (this.data.status === 'closed') {
         const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-
         const icon = this.wrapper.firstChild;
-        icon.innerHTML = this._resolveToggleAction();
 
+        icon.innerHTML = this._resolveToggleAction();
         this._hideAndShowBlocks(originalIndex - 1, children.length);
       }
 
@@ -83,6 +82,7 @@ export default class ToggleBlock {
       newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
       newBlock.holder.setAttribute('foreignKey', foreignKey);
       newBlock.holder.setAttribute('id', id);
+
       document.getElementById(id).firstChild.firstChild.focus();
     }
   }
@@ -96,6 +96,7 @@ export default class ToggleBlock {
       newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
       newBlock.holder.setAttribute('foreignKey', this.wrapper.id);
       newBlock.holder.setAttribute('id', id);
+
       document.getElementById(id).firstChild.firstChild.focus();
     }
   }
@@ -106,6 +107,7 @@ export default class ToggleBlock {
     this.wrapper.id = crypto.randomUUID();
 
     const icon = document.createElement('span');
+
     icon.classList.add('toggle-block__icon');
     icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecondary;
 
@@ -123,6 +125,7 @@ export default class ToggleBlock {
   render() {
     this._createToggle();
     setTimeout(this.renderItems.bind(this));
+
     return this.wrapper;
   }
 
@@ -146,6 +149,7 @@ export default class ToggleBlock {
       this.api.blocks.insert(type, data, {}, index += 1, true);
 
       const newBlock = this.api.blocks.getBlockByIndex(index);
+
       newBlock.holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
       newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
       newBlock.holder.setAttribute('foreignKey', foreignKey);
@@ -182,13 +186,11 @@ export default class ToggleBlock {
 
   _hideAndShowBlocks(index, items) {
     const toggleIndex = index + 1;
-
     this._iterateOnItems(items, toggleIndex);
   }
 
   _hideAndShowBlocksClicking(items) {
     const toggleIndex = this.api.blocks.getCurrentBlockIndex();
-
     this._iterateOnItems(items, toggleIndex);
   }
 
@@ -208,7 +210,6 @@ export default class ToggleBlock {
   save(blockContent) {
     const caption = blockContent.textContent;
     const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-
     const items = [];
 
     blocks.forEach((block) => {
