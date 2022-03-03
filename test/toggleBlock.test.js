@@ -12,19 +12,19 @@ describe('ToggleBlock', () => {
   });
 
   describe('validates data', () => {
-    it('when the data is valid with toggle text and items', () => {
+    it('when the data is valid with items', () => {
       expect(toggleBlock.validate(data)).toBe(true);
     });
 
-    it('when the data is valid without toggle text and items', () => {
-      expect(toggleBlock.validate({ text: '', status: 'open', items: [] })).toBe(false);
+    it('when the toggle has no valid items', () => {
+      expect(toggleBlock.validate({ text: '', status: 'open', items: [{}] })).toBe(false);
     });
 
-    it('when the data is valid without toggle text but with toggle items', () => {
-      expect(toggleBlock.validate({ text: '', status: 'open', items: ['First line'] })).toBe(true);
+    it('when the data is valid with a empty item', () => {
+      expect(toggleBlock.validate({ text: '', status: 'open', items: [{ type: 'paragraph', data: {} }] })).toBe(true);
     });
 
-    it('when the data is valid with toggle text but without toggle items', () => {
+    it('when the data is valid without toggle items', () => {
       expect(toggleBlock.validate({ text: 'Text in the line', status: 'open', items: [] })).toBe(true);
     });
   });
