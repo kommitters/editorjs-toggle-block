@@ -221,4 +221,19 @@ export default class ToggleBlock {
       items: [...items],
     });
   }
+
+  /**
+   * Validates Toggle block data
+   * @param {object} savedData - Data received after saving
+   * @returns {boolean} false if saved data isn't correct, otherwise true
+   */
+  validate(savedData) {
+    for (let i = 0; i < savedData.items.length; i += 1) {
+      if (savedData.items[i].type === undefined || savedData.items[i].data === undefined) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
