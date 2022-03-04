@@ -26,3 +26,10 @@
 .toggle-block__selector br {
   display: none;
 }
+
+.toggle-block__input:empty:before {
+  content: attr(placeholder);
+  position: absolute;
+  color: gray;
+  background-color: transparent;
+}

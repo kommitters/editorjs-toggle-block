@@ -133,8 +133,20 @@ export default class ToggleBlock {
     input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
     input.innerHTML = this.data.text || '';
 
+    // Establishes the placeholder for the toggle root when it's empty
+    input.addEventListener('keyup', this.setPlaceHolder.bind(this));
+    input.setAttribute('placeholder', 'Toggle');
+
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
+  }
+
+  setPlaceHolder(e) {
+    if (this.wrapper.textContent.length === 0) {
+      if (e.code === 'Backspace' || e.code === 'Enter') {
+        this.wrapper.lastChild.textContent = '';
+      }
+    }
   }
 
   /**
