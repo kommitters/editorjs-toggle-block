@@ -137,6 +137,10 @@ export default class ToggleBlock {
     input.addEventListener('keyup', this.setPlaceHolder.bind(this));
     input.setAttribute('placeholder', 'Toggle');
 
+    // Calculates the number of toggle items
+    input.addEventListener('focus', this.calculateChildren.bind(this));
+    input.addEventListener('focusout', this.calculateChildren.bind(this));
+
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
   }
@@ -147,6 +151,11 @@ export default class ToggleBlock {
         this.wrapper.lastChild.textContent = '';
       }
     }
+  }
+
+  calculateChildren() {
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    this.wrapper.firstChild.style.color = children.length === 0 ? 'gray' : 'black';
   }
 
   /**
