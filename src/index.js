@@ -52,10 +52,12 @@ export default class ToggleBlock {
   }
 
   /**
-   * First checks the status of a toggle, if this is 'closed' then open it.
+   * First it gets the toggle index.
    *
-   * After checks if a toggle has paragraphs, if so, insert a new one as the first
-   * child and move the others to the end, otherwise just insert a new paragraph.
+   * After checks the toggle status, if this is 'closed' then open it.
+   *
+   * After inserts a new block after the toggle index and the new block
+   * gets the focus.
    *
    * @param {KeyboardEvent} e - key down event
    */
@@ -87,6 +89,16 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * First it gets the index of the inserted block.
+   *
+   * After get the full block to manipulate it.
+   *
+   * After sends the properties required to identify it as a toggle item,
+   * and finally sends the focus again to the new block.
+   *
+   * @param {KeyboardEvent} e - key down event
+   */
   createParagraphFromIt(e) {
     if (e.code === 'Enter') {
       const index = this.api.blocks.getCurrentBlockIndex();
@@ -101,6 +113,9 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * Creates a toggle block view without paragraphs
+   */
   _createToggle() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
@@ -122,6 +137,13 @@ export default class ToggleBlock {
     this.wrapper.appendChild(input);
   }
 
+  /**
+   * Renders Tool's view.
+   * First renders the toggle root, and immediately
+   * renders its items as new blocks under the root.
+   *
+   * @returns {HTMLDivElement}
+   */
   render() {
     this._createToggle();
     setTimeout(this.renderItems.bind(this));
@@ -129,6 +151,10 @@ export default class ToggleBlock {
     return this.wrapper;
   }
 
+  /**
+   * Renders the items view and assigns the properties required to look
+   * like a block inside the toggle.
+   */
   renderItems() {
     const originalIndex = this.api.blocks.getCurrentBlockIndex();
     const icon = this.wrapper.firstChild;
@@ -184,16 +210,40 @@ export default class ToggleBlock {
     return icon;
   }
 
+  /**
+   * Hides and shows the toggle items.
+   * It's called when is required to render saved data or creating new blocks
+   * inside the toggle.
+   *
+   * @param {number} index - toggle index
+   * @param {array} items - toggle items
+   */
   _hideAndShowBlocks(index, items) {
     const toggleIndex = index + 1;
     this._iterateOnItems(items, toggleIndex);
   }
 
+  /**
+   * Hides and shows the toggle items.
+   * It's called when is required to render the toggle items
+   * clicking the toggle icon
+   *
+   * @param {array} items - toggle items
+   */
   _hideAndShowBlocksClicking(items) {
     const toggleIndex = this.api.blocks.getCurrentBlockIndex();
     this._iterateOnItems(items, toggleIndex);
   }
 
+  /**
+   * Hides and shows the toggle paragraphs.
+   * If the toggle status is closed, the hidden attribute is added
+   * to the container paragraph. Otherwise, the hidden attribute is
+   * removed.
+   *
+   * @param {array} items - toggle items
+   * @param {number} toggleIndex - toggle index
+   */
   _iterateOnItems(items, toggleIndex) {
     let index = toggleIndex;
     if (this.data.status === 'closed') {
@@ -207,6 +257,11 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * Extracts Tool's data from the view
+   * @param {HTMLDivElement} blockContent - Toggle tools rendered view
+   * @returns {ToggleBlockData} - saved data
+   */
   save(blockContent) {
     const caption = blockContent.textContent;
     const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
