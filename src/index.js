@@ -84,6 +84,7 @@ export default class ToggleBlock {
       const content = holder.firstChild;
       const item = content.firstChild;
 
+      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
       holder.setAttribute('foreignKey', foreignKey);
       holder.setAttribute('id', id);
 
@@ -111,6 +112,7 @@ export default class ToggleBlock {
       const content = holder.firstChild;
       const item = content.firstChild;
 
+      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
       holder.setAttribute('foreignKey', this.wrapper.id);
       holder.setAttribute('id', id);
 
