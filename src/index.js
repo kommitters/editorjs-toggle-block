@@ -137,12 +137,50 @@ export default class ToggleBlock {
     input.addEventListener('keyup', this.setPlaceHolder.bind(this));
     input.setAttribute('placeholder', 'Toggle');
 
+    const defaultContent = document.createElement('div');
+
+    defaultContent.classList.add('toggle-block__content-default');
+    defaultContent.setAttribute('hidden', true);
+    defaultContent.innerHTML = 'Empty toggle. Click or drop blocks inside.';
+    defaultContent.addEventListener('click', this.clickInDefaultContent.bind(this));
+
     // Calculates the number of toggle items
     input.addEventListener('focus', this.calculateChildren.bind(this));
     input.addEventListener('focusout', this.calculateChildren.bind(this));
+    input.addEventListener('focus', this.setDefaultContent.bind(this));
+    input.addEventListener('focusout', this.setDefaultContent.bind(this));
 
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
+    this.wrapper.appendChild(defaultContent);
+  }
+
+  clickInDefaultContent() {
+    const originalIndex = this.api.blocks.getCurrentBlockIndex();
+    const foreignKey = this.wrapper.id;
+    const index = originalIndex + 1;
+    const id = crypto.randomUUID();
+
+    this.api.blocks.insert();
+
+    const newBlock = this.api.blocks.getBlockByIndex(index);
+
+    newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
+    newBlock.holder.setAttribute('foreignKey', foreignKey);
+    newBlock.holder.setAttribute('id', id);
+
+    document.getElementById(id).firstChild.firstChild.focus();
+    this.setDefaultContent();
+  }
+
+  setDefaultContent() {
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+
+    if (children.length === 0) {
+      this.wrapper.lastChild.removeAttribute('hidden');
+    } else {
+      this.wrapper.lastChild.setAttribute('hidden', true);
+    }
   }
 
   setPlaceHolder(e) {
