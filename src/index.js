@@ -1,6 +1,6 @@
 import './index.css';
-import toggleIconPrimary from '../assets/toggleIcon.svg';
-import toggleIconSecondary from '../assets/toggleIconSecondary.svg';
+import toggleIconClosed from '../assets/toggleIconClosed.svg';
+import toggleIconOpen from '../assets/toggleIconOpen.svg';
 
 /**
  * ToggleBlock for the Editor.js
@@ -22,7 +22,7 @@ export default class ToggleBlock {
   static get toolbox() {
     return {
       title: 'Toggle',
-      icon: toggleIconPrimary,
+      icon: toggleIconClosed,
     };
   }
 
@@ -130,7 +130,7 @@ export default class ToggleBlock {
     const icon = document.createElement('span');
 
     icon.classList.add('toggle-block__icon');
-    icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecondary;
+    icon.innerHTML = this.data.status === 'closed' ? toggleIconClosed : toggleIconOpen;
 
     const input = document.createElement('div');
 
@@ -208,10 +208,10 @@ export default class ToggleBlock {
    * @returns {string} icon - toggle icon
    */
   _resolveToggleAction() {
-    let icon = toggleIconPrimary;
+    let icon = toggleIconClosed;
 
     if (this.data.status === 'closed') {
-      icon = toggleIconSecondary;
+      icon = toggleIconOpen;
       this.data.status = 'open';
     } else {
       this.data.status = 'closed';
