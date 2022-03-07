@@ -1,6 +1,6 @@
 import './index.css';
-import toggleIconPrimary from '../assets/toggleIcon.svg';
-import toggleIconSecondary from '../assets/toggleIconSecondary.svg';
+import toggleIconClosed from '../assets/toggleIconClosed.svg';
+import toggleIconOpen from '../assets/toggleIconOpen.svg';
 
 /**
  * ToggleBlock for the Editor.js
@@ -22,7 +22,7 @@ export default class ToggleBlock {
   static get toolbox() {
     return {
       title: 'Toggle',
-      icon: toggleIconPrimary,
+      icon: toggleIconClosed,
     };
   }
 
@@ -80,12 +80,16 @@ export default class ToggleBlock {
       this.api.blocks.insert();
 
       const newBlock = this.api.blocks.getBlockByIndex(index);
+      const { holder } = newBlock;
+      const content = holder.firstChild;
+      const item = content.firstChild;
 
-      newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
-      newBlock.holder.setAttribute('foreignKey', foreignKey);
-      newBlock.holder.setAttribute('id', id);
+      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
+      holder.setAttribute('foreignKey', foreignKey);
+      holder.setAttribute('id', id);
 
-      document.getElementById(id).firstChild.firstChild.focus();
+      item.classList.add('toggle-block__item');
+      item.focus();
     }
   }
 
@@ -104,12 +108,16 @@ export default class ToggleBlock {
       const index = this.api.blocks.getCurrentBlockIndex();
       const newBlock = this.api.blocks.getBlockByIndex(index);
       const id = crypto.randomUUID();
+      const { holder } = newBlock;
+      const content = holder.firstChild;
+      const item = content.firstChild;
 
-      newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
-      newBlock.holder.setAttribute('foreignKey', this.wrapper.id);
-      newBlock.holder.setAttribute('id', id);
+      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
+      holder.setAttribute('foreignKey', this.wrapper.id);
+      holder.setAttribute('id', id);
 
-      document.getElementById(id).firstChild.firstChild.focus();
+      item.classList.add('toggle-block__item');
+      item.focus();
     }
   }
 
@@ -124,7 +132,7 @@ export default class ToggleBlock {
     const icon = document.createElement('span');
 
     icon.classList.add('toggle-block__icon');
-    icon.innerHTML = this.data.status === 'closed' ? toggleIconPrimary : toggleIconSecondary;
+    icon.innerHTML = this.data.status === 'closed' ? toggleIconClosed : toggleIconOpen;
 
     const input = document.createElement('div');
 
@@ -234,11 +242,15 @@ export default class ToggleBlock {
       this.api.blocks.insert(type, data, {}, index += 1, true);
 
       const newBlock = this.api.blocks.getBlockByIndex(index);
+      const { holder } = newBlock;
+      const content = holder.firstChild;
+      const item = content.firstChild;
 
-      newBlock.holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
-      newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
-      newBlock.holder.setAttribute('foreignKey', foreignKey);
-      newBlock.holder.setAttribute('id', crypto.randomUUID());
+      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
+      holder.setAttribute('foreignKey', foreignKey);
+      holder.setAttribute('id', crypto.randomUUID());
+
+      item.classList.add('toggle-block__item');
     });
 
     if (editorBlocks > 1) {
@@ -251,16 +263,16 @@ export default class ToggleBlock {
   /**
    * Converts the toggle status to its opposite, including its icon.
    * If the toggle status is open, then now will be closed and its icon
-   * will be the main. Otherwise, will be open and its icon will be the
-   * Secondary.
+   * will be the right arrow (toggleIconClosed). Otherwise, will be open
+   * and its icon will be the down arrow (toggleIconOpen).
    *
    * @returns {string} icon - toggle icon
    */
   _resolveToggleAction() {
-    let icon = toggleIconPrimary;
+    let icon = toggleIconClosed;
 
     if (this.data.status === 'closed') {
-      icon = toggleIconSecondary;
+      icon = toggleIconOpen;
       this.data.status = 'open';
     } else {
       this.data.status = 'closed';
