@@ -202,8 +202,8 @@ export default class ToggleBlock {
   /**
    * Converts the toggle status to its opposite, including its icon.
    * If the toggle status is open, then now will be closed and its icon
-   * will be the main. Otherwise, will be open and its icon will be the
-   * Secondary.
+   * will be the right arrow (toggleIconClosed). Otherwise, will be open
+   * and its icon will be the down arrow (toggleIconOpen).
    *
    * @returns {string} icon - toggle icon
    */
