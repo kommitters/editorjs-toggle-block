@@ -161,16 +161,16 @@ export default class ToggleBlock {
 
   /**
    * Sets the default content. If the toggle has no other blocks inside it,
-   * so remove the hidden tag in the default content, otherwise adds the hidden tag.
+   * so sets the value 'false' for the hidden tag in the default content,
+   * otherwise sets the value 'true'.
    */
   setDefaultContent() {
     const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    const { firstChild, lastChild } = this.wrapper;
+    const value = (children.length > 0);
 
-    if (children.length === 0) {
-      this.wrapper.lastChild.removeAttribute('hidden');
-    } else {
-      this.wrapper.lastChild.setAttribute('hidden', true);
-    }
+    lastChild.hidden = value;
+    firstChild.style.color = (children.length === 0) ? 'gray' : 'black';
   }
 
   /**
