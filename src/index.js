@@ -200,20 +200,12 @@ export default class ToggleBlock {
    * @param {KeyboardEvent} e - key up event
    */
   setPlaceHolder(e) {
-    if (this.wrapper.children[1].textContent.length === 0) {
-      if (e.code === 'Backspace' || e.code === 'Enter') {
-        this.wrapper.children[1].textContent = '';
-      }
-    }
-  }
+    if (e.code === 'Backspace' || e.code === 'Enter') {
+      const { children } = this.wrapper;
+      const { length } = children[1].textContent;
 
-  /**
-   * Establishes the icon color, if the toggle has no other blocks inside it,
-   * sets the gray color, otherwise sets the black color.
-   */
-  calculateChildren() {
-    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-    this.wrapper.firstChild.style.color = children.length === 0 ? 'gray' : 'black';
+      if (length === 0) children[1].textContent = '';
+    }
   }
 
   /**
