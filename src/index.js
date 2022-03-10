@@ -180,10 +180,15 @@ export default class ToggleBlock {
    * @param {KeyboardEvent} e - key down event
    */
   removeToggle(e) {
-    if (e.code === 'Backspace' && this.wrapper.children[1].textContent.length === 0) {
-      const index = this.api.blocks.getCurrentBlockIndex();
-      this.api.blocks.delete(index);
-      this.api.blocks.insert();
+    if (e.code === 'Backspace') {
+      const { children } = this.wrapper;
+      const { length } = children[1].textContent;
+
+      if (length === 0) {
+        const index = this.api.blocks.getCurrentBlockIndex();
+        this.api.blocks.delete(index);
+        this.api.blocks.insert();
+      }
     }
   }
 
