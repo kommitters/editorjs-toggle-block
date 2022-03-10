@@ -227,41 +227,25 @@ export default class ToggleBlock {
    * like a block inside the toggle.
    */
   renderItems() {
-    const originalIndex = this.api.blocks.getCurrentBlockIndex();
     const icon = this.wrapper.firstChild;
-    const foreignKey = this.wrapper.id;
     const editorBlocks = this.api.blocks.getBlocksCount();
-    let index = editorBlocks > 1 ? originalIndex + 1 : originalIndex;
+
+    let originalIndex = this.api.blocks.getCurrentBlockIndex();
+    let index = (editorBlocks > 1) ? originalIndex + 1 : originalIndex;
 
     icon.addEventListener('click', () => {
-      const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-
       icon.innerHTML = this._resolveToggleAction();
-      this._hideAndShowBlocksClicking(children.length);
+      this._hideAndShowBlocks();
     });
 
     this.data.items.forEach((block) => {
       const { type, data } = block;
-
       this.api.blocks.insert(type, data, {}, index += 1, true);
-
-      const newBlock = this.api.blocks.getBlockByIndex(index);
-      const { holder } = newBlock;
-      const content = holder.firstChild;
-      const item = content.firstChild;
-
-      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
-      holder.setAttribute('foreignKey', foreignKey);
-      holder.setAttribute('id', crypto.randomUUID());
-
-      item.classList.add('toggle-block__item');
+      this.setAttributesToNewBlock();
     });
 
-    if (editorBlocks > 1) {
-      this._hideAndShowBlocks(originalIndex, this.data.items.length);
-    } else {
-      this._hideAndShowBlocks(originalIndex - 1, this.data.items.length);
-    }
+    originalIndex -= (editorBlocks > 1) ? 0 : 1;
+    this._hideAndShowBlocks(originalIndex);
   }
 
   /**
