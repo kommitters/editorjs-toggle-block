@@ -154,20 +154,8 @@ export default class ToggleBlock {
    * Adds the actions to do when the default content is clicked.
    */
   clickInDefaultContent() {
-    const originalIndex = this.api.blocks.getCurrentBlockIndex();
-    const foreignKey = this.wrapper.id;
-    const index = originalIndex + 1;
-    const id = crypto.randomUUID();
-
     this.api.blocks.insert();
-
-    const newBlock = this.api.blocks.getBlockByIndex(index);
-
-    newBlock.holder.firstChild.firstChild.classList.add('toggle-block__item');
-    newBlock.holder.setAttribute('foreignKey', foreignKey);
-    newBlock.holder.setAttribute('id', id);
-
-    document.getElementById(id).firstChild.firstChild.focus();
+    this.setAttributesToNewBlock();
     this.setDefaultContent();
   }
 
