@@ -122,7 +122,7 @@ export default class ToggleBlock {
     const defaultContent = document.createElement('div');
 
     icon.classList.add('toggle-block__icon');
-    icon.innerHTML = this.data.status === 'closed' ? toggleIconClosed : toggleIconOpen;
+    icon.innerHTML = (this.data.status === 'closed') ? toggleIconClosed : toggleIconOpen;
 
     input.classList.add('toggle-block__input');
     input.contentEditable = true;
@@ -137,8 +137,6 @@ export default class ToggleBlock {
     input.setAttribute('placeholder', 'Toggle');
 
     // Calculates the number of toggle items
-    input.addEventListener('focus', this.calculateChildren.bind(this));
-    input.addEventListener('focusout', this.calculateChildren.bind(this));
     input.addEventListener('focus', this.setDefaultContent.bind(this));
     input.addEventListener('focusout', this.setDefaultContent.bind(this));
 
