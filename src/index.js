@@ -78,31 +78,34 @@ export default class ToggleBlock {
   }
 
   /**
-   * First it gets the index of the inserted block.
-   *
-   * After get the full block to manipulate it.
-   *
-   * After sends the properties required to identify it as a toggle item,
-   * and finally sends the focus again to the new block.
+   * Calls the method to add the required properties to the new block.
    *
    * @param {KeyboardEvent} e - key down event
    */
   createParagraphFromIt(e) {
-    if (e.code === 'Enter') {
-      const index = this.api.blocks.getCurrentBlockIndex();
-      const newBlock = this.api.blocks.getBlockByIndex(index);
-      const id = crypto.randomUUID();
-      const { holder } = newBlock;
-      const content = holder.firstChild;
-      const item = content.firstChild;
+    if (e.code === 'Enter') this.setAttributesToNewBlock();
+  }
 
-      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
-      holder.setAttribute('foreignKey', this.wrapper.id);
-      holder.setAttribute('id', id);
+  /**
+   * Gets the index of the new block, then assigns the required properties,
+   * and finally sends the focus.
+   */
+  setAttributesToNewBlock() {
+    const foreignKey = this.wrapper.id;
+    const index = this.api.blocks.getCurrentBlockIndex();
+    const id = crypto.randomUUID();
 
-      item.classList.add('toggle-block__item');
-      item.focus();
-    }
+    const newBlock = this.api.blocks.getBlockByIndex(index);
+    const { holder } = newBlock;
+    const content = holder.firstChild;
+    const item = content.firstChild;
+
+    holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
+    holder.setAttribute('foreignKey', foreignKey);
+    holder.setAttribute('id', id);
+
+    item.classList.add('toggle-block__item');
+    item.focus();
   }
 
   /**
