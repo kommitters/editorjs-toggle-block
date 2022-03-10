@@ -56,7 +56,8 @@ export default class ToggleBlock {
    *
    * After checks the toggle status, if this is 'closed' then open it.
    *
-   * After inserts a new block after the toggle index and the new block
+   * After inserts a new block after the toggle index and the a method
+   * is called to add the required properties to the new block.
    * gets the focus.
    *
    * @param {KeyboardEvent} e - key up event
@@ -66,30 +67,13 @@ export default class ToggleBlock {
       const originalIndex = this.api.blocks.getCurrentBlockIndex();
 
       if (this.data.status === 'closed') {
-        const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
         const icon = this.wrapper.firstChild;
-
         icon.innerHTML = this._resolveToggleAction();
-        this._hideAndShowBlocks(originalIndex - 1, children.length);
+        this._hideAndShowBlocks(originalIndex - 1);
       }
 
-      const foreignKey = this.wrapper.id;
-      const index = originalIndex + 1;
-      const id = crypto.randomUUID();
-
       this.api.blocks.insert();
-
-      const newBlock = this.api.blocks.getBlockByIndex(index);
-      const { holder } = newBlock;
-      const content = holder.firstChild;
-      const item = content.firstChild;
-
-      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
-      holder.setAttribute('foreignKey', foreignKey);
-      holder.setAttribute('id', id);
-
-      item.classList.add('toggle-block__item');
-      item.focus();
+      this.setAttributesToNewBlock();
     }
   }
 
