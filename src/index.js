@@ -270,65 +270,27 @@ export default class ToggleBlock {
   }
 
   /**
-   * Hides and shows the toggle items.
-   * It's called when is required to render saved data or creating new blocks
-   * inside the toggle.
+   * Hides and shows the toggle paragraphs or the default content.
+   * If the toggle status is closed, the added value to the hidden attribute
+   * in the container paragraph is 'true', otherwise is 'false'.
    *
    * @param {number} index - toggle index
-   * @param {array} items - toggle items
    */
-  _hideAndShowBlocks(index, items) {
-    const toggleIndex = index + 1;
-    this._iterateOnItems(items, toggleIndex);
-  }
+  _hideAndShowBlocks(index = null) {
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    const items = children.length;
+    const value = (this.data.status === 'closed');
 
-  /**
-   * Hides and shows the toggle items.
-   * It's called when is required to render the toggle items
-   * clicking the toggle icon
-   *
-   * @param {array} items - toggle items
-   */
-  _hideAndShowBlocksClicking(items) {
-    const toggleIndex = this.api.blocks.getCurrentBlockIndex();
-    this._iterateOnItems(items, toggleIndex);
-  }
+    let toggleIndex = index === null ? this.api.blocks.getCurrentBlockIndex() : index + 1;
 
-  /**
-   * Hides and shows the toggle paragraphs or the default content.
-   * If the toggle status is closed, the hidden attribute is added
-   * to the container paragraph. Otherwise, the hidden attribute is
-   * removed.
-   *
-   * @param {array} items - toggle items
-   * @param {number} toggleIndex - toggle index
-   */
-  _iterateOnItems(items, toggleIndex) {
-    let index = toggleIndex;
-
-    switch (this.data.status) {
-      case 'closed':
-        if (items > 0) {
-          for (let i = 0; i < items; i += 1) {
-            this.api.blocks.getBlockByIndex(index += 1).holder.setAttribute('hidden', true);
-          }
-        } else {
-          this.wrapper.lastChild.setAttribute('hidden', true);
-        }
-        break;
-
-      case 'open':
-        if (items > 0) {
-          for (let i = 0; i < items; i += 1) {
-            this.api.blocks.getBlockByIndex(index += 1).holder.removeAttribute('hidden');
-          }
-        } else {
-          this.wrapper.lastChild.removeAttribute('hidden');
-        }
-        break;
-
-      default:
-        break;
+    if (items > 0) {
+      for (let i = 0; i < items; i += 1) {
+        const { holder } = this.api.blocks.getBlockByIndex(toggleIndex += 1);
+        holder.hidden = value;
+      }
+    } else {
+      const { lastChild } = this.wrapper;
+      lastChild.hidden = value;
     }
   }
 
