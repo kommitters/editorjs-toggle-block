@@ -300,7 +300,8 @@ export default class ToggleBlock {
    * @returns {ToggleBlockData} - saved data
    */
   save(blockContent) {
-    const caption = blockContent.textContent;
+    const { children } = blockContent;
+    const caption = children[1].textContent;
     const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
     const items = [];
 
@@ -320,8 +321,10 @@ export default class ToggleBlock {
    * @returns {boolean} false if saved data isn't correct, otherwise true
    */
   validate(savedData) {
-    for (let i = 0; i < savedData.items.length; i += 1) {
-      if (savedData.items[i].type === undefined || savedData.items[i].data === undefined) {
+    const { items } = savedData;
+
+    for (let i = 0; i < items.length; i += 1) {
+      if (items[i].type === undefined || items[i].data === undefined) {
         return false;
       }
     }
