@@ -124,13 +124,6 @@ export default class ToggleBlock {
     icon.classList.add('toggle-block__icon');
     icon.innerHTML = toggleIcon;
 
-    // Add initial transition for the icon
-    const { status } = this.data;
-    const svg = icon.firstChild;
-
-    svg.style.transition = '0.5s';
-    svg.style.transform = `rotate(${status === 'closed' ? 0 : 90}deg)`;
-
     input.classList.add('toggle-block__input');
     input.contentEditable = true;
     input.innerHTML = this.data.text || '';
@@ -227,7 +220,23 @@ export default class ToggleBlock {
     this._createToggle();
     setTimeout(this.renderItems.bind(this));
 
+    // Adds initial transition for the icon
+    setTimeout(this.setInitialTransition.bind(this));
+
     return this.wrapper;
+  }
+
+  /**
+   * Adds the initial status for the icon, and establishes
+   * the delay for the transition displayed when the icon
+   * is clicked.
+   */
+  setInitialTransition() {
+    const { status } = this.data;
+    const icon = this.wrapper.firstChild;
+    const svg = icon.firstChild;
+    svg.style.transition = '0.5s';
+    svg.style.transform = `rotate(${status === 'closed' ? 0 : 90}deg)`;
   }
 
   /**
