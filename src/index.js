@@ -352,4 +352,34 @@ export default class ToggleBlock {
 
     return true;
   }
+
+  renderSettings() {
+    const settingsBar = document.getElementsByClassName('ce-settings--opened');
+    const optionsContainer = settingsBar[0];
+    const options = optionsContainer.lastChild;
+    const toggleIndex = this.api.blocks.getCurrentBlockIndex();
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+
+    setTimeout(() => {
+      const deleteButton = options.getElementsByClassName('ce-settings__button--delete')[0];
+      deleteButton.addEventListener('click', () => {
+        const classesList = deleteButton.classList;
+        const classes = Object.values(classesList);
+
+        if (classes.indexOf('clicked-to-destroy-toggle') === -1) {
+          deleteButton.classList.add('clicked-to-destroy-toggle');
+        } else {
+          this.removeFullToggle(toggleIndex, children);
+        }
+      });
+    }, 100);
+  }
+
+  removeFullToggle(toggleIndex, children) {
+    let blocks = children.length;
+    blocks += toggleIndex === 0 ? 0 : 1;
+    for (let i = toggleIndex; i < blocks; i += 1) {
+      this.api.blocks.delete(toggleIndex);
+    }
+  }
 }
