@@ -372,13 +372,13 @@ export default class ToggleBlock {
           this.removeFullToggle(toggleIndex, children);
         }
       });
-    }, 100);
+    });
   }
 
   removeFullToggle(toggleIndex, children) {
-    let blocks = children.length;
-    blocks += toggleIndex === 0 ? 0 : 1;
-    for (let i = toggleIndex; i < blocks; i += 1) {
+    const blocks = children.length;
+
+    for (let i = toggleIndex; i < toggleIndex + blocks; i += 1) {
       this.api.blocks.delete(toggleIndex);
     }
   }
