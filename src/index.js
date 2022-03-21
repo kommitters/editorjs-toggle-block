@@ -352,15 +352,17 @@ export default class ToggleBlock {
    * after the save method is executed.
    */
   restoreBlocks() {
-    const blocks = document.getElementsByClassName('toggle-block__item');
+    const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
     const { length } = blocks;
 
     for (let i = 0; i < length; i += 1) {
       const block = blocks[i];
-      const content = block.getAttribute('oldValue');
+      const wrap = block.firstChild;
+      const mainContainer = wrap.firstChild;
+      const content = mainContainer.getAttribute('oldValue');
 
-      block.textContent = content;
-      blocks[i].removeAttribute('oldValue');
+      mainContainer.textContent = content;
+      mainContainer.removeAttribute('oldValue');
     }
   }
 
