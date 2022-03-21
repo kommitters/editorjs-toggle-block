@@ -330,12 +330,38 @@ export default class ToggleBlock {
 
     blocks.forEach((block) => {
       items.push({ type: 'paragraph', data: { text: block.textContent } });
+
+      // Attributes and classes to restore the block later.
+      const wrap = block.firstChild;
+      const mainContainer = wrap.firstChild;
+
+      mainContainer.setAttribute('oldValue', block.textContent);
+      mainContainer.textContent = '';
     });
+
+    setTimeout(() => { this.restoreBlocks(); });
 
     return Object.assign(this.data, {
       text: caption,
       items: [...items],
     });
+  }
+
+  /**
+   * Gets the nested blocks and restores their original content
+   * after the save method is executed.
+   */
+  restoreBlocks() {
+    const blocks = document.getElementsByClassName('toggle-block__item');
+    const { length } = blocks;
+
+    for (let i = 0; i < length; i += 1) {
+      const block = blocks[i];
+      const content = block.getAttribute('oldValue');
+
+      block.textContent = content;
+      blocks[i].removeAttribute('oldValue');
+    }
   }
 
   /**
