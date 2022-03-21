@@ -1,7 +1,7 @@
 import createToggleBlock from './fixtures/toggle';
 import data from './fixtures/toolData';
 import {
-  getHiddenAttribute, generateFullToggle, createParagraph, destroyFullToggle,
+  getHiddenAttribute, generateFullToggle, createParagraph, destroyFullToggle, extractionBlock,
 } from './testHelpers';
 
 global.crypto = require('crypto');
@@ -217,6 +217,23 @@ describe('ToggleBlock', () => {
       destroyFullToggle(redactor, 4, children);
 
       expect(redactor.children.length).toBe(4);
+    });
+  });
+
+  describe('extraction block', () => {
+    let redactor;
+    let toggle;
+
+    beforeEach(() => {
+      redactor = document.querySelector('div.codex-editor__redactor');
+      toggle = generateFullToggle(toggleBlock);
+      toggle.forEach((block) => redactor.appendChild(block));
+    });
+
+    it('Extract de first block into the toggle', () => {
+      extractionBlock(redactor, 1);
+
+      expect(redactor.children.length).toBe(3);
     });
   });
 });

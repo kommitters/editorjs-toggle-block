@@ -52,3 +52,8 @@ export function destroyFullToggle(redactor, toggleIndex, blocks) {
     currentBlock.remove();
   }
 }
+
+export function extractionBlock(redactor, toggleIndex) {
+  const currentBlock = redactor.children[toggleIndex];
+  currentBlock.remove();
+}
