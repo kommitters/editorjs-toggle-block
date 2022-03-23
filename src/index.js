@@ -34,13 +34,23 @@ export default class ToggleBlock {
   }
 
   /**
+   * Notify core that the read-only mode is supported
+   *
+   * @returns {boolean}
+   */
+  static get isReadOnlySupported() {
+    return true;
+  }
+
+  /**
    * Render tool`s main Element and fill it with saved data
    *
    * @param {{data: object, api: object}}
    * data - Previously saved data
    * api - Editor.js API
+   * readOnly - read-only mode status
    */
-  constructor({ data, api }) {
+  constructor({ data, api, readOnly }) {
     this.data = {
       text: data.text || '',
       status: data.status || 'open',
@@ -48,6 +58,7 @@ export default class ToggleBlock {
     };
     this.api = api;
     this.wrapper = undefined;
+    this.readOnly = readOnly;
   }
 
   /**
