@@ -230,10 +230,12 @@ describe('ToggleBlock', () => {
       toggle.forEach((block) => redactor.appendChild(block));
     });
 
-    it('Extract de first block into the toggle', () => {
-      extractionBlock(redactor, 1);
+    it('Extract the first block into the toggle', () => {
+      const children = document.querySelectorAll(`div[foreignKey="${toggleBlock.wrapper.id}"]`);
+      extractionBlock(toggleBlock, redactor, 1);
 
-      expect(redactor.children.length).toBe(3);
+      expect(redactor.children.length).toBe(4);
+      expect(children.length).toBe(3);
     });
   });
 });

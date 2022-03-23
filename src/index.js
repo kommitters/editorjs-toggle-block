@@ -202,20 +202,17 @@ export default class ToggleBlock {
    *
    * @param {block} item
    * @param {KeyboardEvent} e
-   */
-   extractionBlock(item, e) {
+  */
+  extractionBlock(item, e) {
     if (e.code === 'Tab' && e.shiftKey) {
       const indexBlock = this.api.blocks.getCurrentBlockIndex();
-      const block = this.api.blocks.getBlockByIndex(indexBlock);
-      const { holder } = block;
-      const id = holder.getAttribute('foreignKey');
 
-      const children = document.querySelectorAll(`div[foreignKey="${id}"]`);
+      const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
       const length = children.length;
 
       this.api.blocks.delete(indexBlock);
 
-      this.api.blocks.insert('paragraph', { "text": item.textContent }, {}, indexBlock + length, true);
+      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, indexBlock + length, true);
     }
   }
 
