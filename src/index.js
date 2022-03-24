@@ -58,7 +58,7 @@ export default class ToggleBlock {
     };
     this.api = api;
     this.wrapper = undefined;
-    this.readOnly = readOnly;
+    this.readOnly = readOnly || false;
   }
 
   /**
@@ -101,9 +101,9 @@ export default class ToggleBlock {
    * Gets the index of the new block, then assigns the required properties,
    * and finally sends the focus.
    */
-  setAttributesToNewBlock() {
+  setAttributesToNewBlock(entryIndex = null) {
     const foreignKey = this.wrapper.id;
-    const index = this.api.blocks.getCurrentBlockIndex();
+    const index = this.readOnly ? entryIndex : this.api.blocks.getCurrentBlockIndex();
     const id = crypto.randomUUID();
 
     const newBlock = this.api.blocks.getBlockByIndex(index);
@@ -111,12 +111,15 @@ export default class ToggleBlock {
     const content = holder.firstChild;
     const item = content.firstChild;
 
-    holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
     holder.setAttribute('foreignKey', foreignKey);
     holder.setAttribute('id', id);
 
     item.classList.add('toggle-block__item');
-    item.focus();
+
+    if (!this.readOnly) {
+      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
+      item.focus();
+    }
   }
 
   /**
@@ -136,25 +139,30 @@ export default class ToggleBlock {
     icon.innerHTML = toggleIcon;
 
     input.classList.add('toggle-block__input');
-    input.contentEditable = true;
+    input.contentEditable = !this.readOnly;
     input.innerHTML = this.data.text || '';
 
-    // Events to create other blocks and destroy the toggle
-    input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
-    input.addEventListener('keydown', this.removeToggle.bind(this));
+    // Events
+    if (!this.readOnly) {
+      // Events to create other blocks and destroy the toggle
+      input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
+      input.addEventListener('keydown', this.removeToggle.bind(this));
 
-    // Establishes the placeholder for the toggle root when it's empty
-    input.addEventListener('keyup', this.setPlaceHolder.bind(this));
-    input.setAttribute('placeholder', 'Toggle');
+      // Establishes the placeholder for the toggle root when it's empty
+      input.addEventListener('keyup', this.setPlaceHolder.bind(this));
+      input.setAttribute('placeholder', 'Toggle');
 
-    // Calculates the number of toggle items
-    input.addEventListener('focus', this.setDefaultContent.bind(this));
-    input.addEventListener('focusout', this.setDefaultContent.bind(this));
+      // Calculates the number of toggle items
+      input.addEventListener('focus', this.setDefaultContent.bind(this));
+      input.addEventListener('focusout', this.setDefaultContent.bind(this));
+
+      // Event to add a block when the default content is clicked
+      defaultContent.addEventListener('click', this.clickInDefaultContent.bind(this));
+    }
 
     defaultContent.classList.add('toggle-block__content-default');
     defaultContent.setAttribute('hidden', true);
     defaultContent.innerHTML = 'Empty toggle. Click or drop blocks inside.';
-    defaultContent.addEventListener('click', this.clickInDefaultContent.bind(this));
 
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
@@ -231,7 +239,12 @@ export default class ToggleBlock {
    */
   render() {
     this._createToggle();
-    setTimeout(this.renderItems.bind(this));
+    if (!this.readOnly) {
+      setTimeout(this.renderItems.bind(this));
+    } else {
+      const index = this.api.blocks.getBlocksCount();
+      setTimeout(this.renderItems.bind(this, index));
+    }
 
     // Adds initial transition for the icon
     setTimeout(this.setInitialTransition.bind(this));
@@ -256,7 +269,7 @@ export default class ToggleBlock {
    * Renders the items view and assigns the properties required to look
    * like a block inside the toggle.
    */
-  renderItems() {
+  renderItems(entryIndex = null) {
     const icon = this.wrapper.firstChild;
     const editorBlocks = this.api.blocks.getBlocksCount();
 
@@ -266,17 +279,22 @@ export default class ToggleBlock {
     icon.addEventListener('click', () => {
       this._resolveToggleAction();
       setTimeout(() => {
-        this._hideAndShowBlocks();
+        const toggleIndex = this.readOnly ? (entryIndex - 1) : null;
+        this._hideAndShowBlocks(toggleIndex);
       }, 100);
     });
 
     this.data.items.forEach((block) => {
       const { type, data } = block;
-      this.api.blocks.insert(type, data, {}, index += 1, true);
-      this.setAttributesToNewBlock();
+
+      index += this.readOnly ? 0 : 1;
+      this.api.blocks.insert(type, data, {}, index, true);
+      this.setAttributesToNewBlock(index);
+      index += this.readOnly ? 1 : 0;
     });
 
     originalIndex -= (editorBlocks > 1) ? 0 : 1;
+    originalIndex -= this.readOnly ? 1 : 0;
     this._hideAndShowBlocks(originalIndex);
   }
 
