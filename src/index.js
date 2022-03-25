@@ -104,7 +104,7 @@ export default class ToggleBlock {
     holder.setAttribute('foreignKey', foreignKey);
     holder.setAttribute('id', id);
 
-    holder.addEventListener('keydown', this.extractionBlock.bind(this, item));
+    holder.addEventListener('keydown', this.extractBlock.bind(this, item));
 
     item.classList.add('toggle-block__item');
     item.focus();
@@ -203,7 +203,7 @@ export default class ToggleBlock {
    * @param {Object} item
    * @param {KeyboardEvent} e
    */
-  extractionBlock(item, e) {
+  extractBlock(item, e) {
     if (e.code === 'Tab' && e.shiftKey) {
       const indexBlock = this.api.blocks.getCurrentBlockIndex();
       const toggle = this.wrapper.children[1];
