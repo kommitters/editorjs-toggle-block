@@ -458,6 +458,10 @@ export default class ToggleBlock {
     return true;
   }
 
+  /**
+   * Adds an event in a existent button to destroy the nested blocks
+   * when the toggle root is removed.
+   */
   renderSettings() {
     const settingsBar = document.getElementsByClassName('ce-settings--opened');
     const optionsContainer = settingsBar[0];
@@ -480,6 +484,11 @@ export default class ToggleBlock {
     });
   }
 
+  /**
+   *
+   * @param {number} toggleIndex - toggle index
+   * @param {object} children - blocks inside the toggle
+   */
   removeFullToggle(toggleIndex, children) {
     const blocks = children.length;
 
