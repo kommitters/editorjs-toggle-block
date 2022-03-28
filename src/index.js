@@ -140,25 +140,30 @@ export default class ToggleBlock {
     icon.innerHTML = toggleIcon;
 
     input.classList.add('toggle-block__input');
-    input.contentEditable = true;
+    input.contentEditable = !this.readOnly;
     input.innerHTML = this.data.text || '';
 
-    // Events to create other blocks and destroy the toggle
-    input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
-    input.addEventListener('keydown', this.removeToggle.bind(this));
+    // Events
+    if (!this.readOnly) {
+      // Events to create other blocks and destroy the toggle
+      input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
+      input.addEventListener('keydown', this.removeToggle.bind(this));
 
-    // Establishes the placeholder for the toggle root when it's empty
-    input.addEventListener('keyup', this.setPlaceHolder.bind(this));
-    input.setAttribute('placeholder', 'Toggle');
+      // Establishes the placeholder for the toggle root when it's empty
+      input.addEventListener('keyup', this.setPlaceHolder.bind(this));
+      input.setAttribute('placeholder', 'Toggle');
 
-    // Calculates the number of toggle items
-    input.addEventListener('focus', this.setDefaultContent.bind(this));
-    input.addEventListener('focusout', this.setDefaultContent.bind(this));
+      // Calculates the number of toggle items
+      input.addEventListener('focus', this.setDefaultContent.bind(this));
+      input.addEventListener('focusout', this.setDefaultContent.bind(this));
+
+      // Event to add a block when the default content is clicked
+      defaultContent.addEventListener('click', this.clickInDefaultContent.bind(this));
+    }
 
     defaultContent.classList.add('toggle-block__content-default');
     defaultContent.setAttribute('hidden', true);
     defaultContent.innerHTML = 'Empty toggle. Click or drop blocks inside.';
-    defaultContent.addEventListener('click', this.clickInDefaultContent.bind(this));
 
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
