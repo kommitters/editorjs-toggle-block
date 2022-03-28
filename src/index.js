@@ -273,12 +273,9 @@ export default class ToggleBlock {
    */
   render() {
     this._createToggle();
-    if (!this.readOnly) {
-      setTimeout(this.renderItems.bind(this));
-    } else {
-      const index = this.api.blocks.getBlocksCount();
-      setTimeout(this.renderItems.bind(this, index));
-    }
+
+    // Renders the nested blocks after the toggle root is rendered
+    setTimeout(this.renderItems.bind(this));
 
     // Adds initial transition for the icon
     setTimeout(this.setInitialTransition.bind(this));
@@ -303,7 +300,7 @@ export default class ToggleBlock {
    * Renders the items view and assigns the properties required to look
    * like a block inside the toggle.
    */
-  renderItems(entryIndex = null) {
+  renderItems() {
     const icon = this.wrapper.firstChild;
 
     const toggle = this.wrapper.children[1];
@@ -322,22 +319,26 @@ export default class ToggleBlock {
     }
 
     let index = toggleRoot;
+    index += this.readOnly ? 1 : 0;
 
     icon.addEventListener('click', () => {
       this._resolveToggleAction();
       setTimeout(() => {
-        const toggleIndex = this.readOnly ? (entryIndex - 1) : null;
-        this._hideAndShowBlocks(toggleIndex);
+        this._hideAndShowBlocks(toggleRoot - 1);
       }, 100);
     });
 
     this.data.items.forEach((block) => {
       const { type, data } = block;
 
-      index += this.readOnly ? 0 : 1;
-      this.api.blocks.insert(type, data, {}, index, true);
+      if (this.readOnly) {
+        this.api.blocks.insert(type, data, {}, index, true);
+      } else {
+        this.api.blocks.insert(type, data, {}, index + 1, true);
+      }
+
       this.setAttributesToNewBlock(index);
-      index += this.readOnly ? 1 : 0;
+      index += 1;
     });
 
     this._hideAndShowBlocks(toggleRoot - 1);
