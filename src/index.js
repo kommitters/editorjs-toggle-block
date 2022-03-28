@@ -77,8 +77,8 @@ export default class ToggleBlock {
       const originalIndex = this.api.blocks.getCurrentBlockIndex();
 
       if (this.data.status === 'closed') {
-        this._resolveToggleAction();
-        this._hideAndShowBlocks(originalIndex - 1);
+        this.resolveToggleAction();
+        this.hideAndShowBlocks(originalIndex - 1);
       }
 
       setTimeout(() => {
@@ -127,7 +127,7 @@ export default class ToggleBlock {
    * Creates a toggle block view without paragraphs
    * and sets the default content.
    */
-  _createToggle() {
+  createToggle() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
     this.wrapper.id = crypto.randomUUID();
@@ -271,7 +271,7 @@ export default class ToggleBlock {
    * @returns {HTMLDivElement}
    */
   render() {
-    this._createToggle();
+    this.createToggle();
 
     // Renders the nested blocks after the toggle root is rendered
     setTimeout(this.renderItems.bind(this));
@@ -340,27 +340,23 @@ export default class ToggleBlock {
     index += this.readOnly ? 1 : 0;
 
     icon.addEventListener('click', () => {
-      this._resolveToggleAction();
+      this.resolveToggleAction();
       setTimeout(() => {
         const toggleIndex = this.readOnly ? (toggleRoot - 1) : null;
-        this._hideAndShowBlocks(toggleIndex);
+        this.hideAndShowBlocks(toggleIndex);
       }, 100);
     });
 
     this.data.items.forEach((block) => {
       const { type, data } = block;
 
-      if (this.readOnly) {
-        this.api.blocks.insert(type, data, {}, index, true);
-      } else {
-        this.api.blocks.insert(type, data, {}, index + 1, true);
-      }
-
+      index += !this.readOnly ? 1 : 0;
+      this.api.blocks.insert(type, data, {}, index, true);
       this.setAttributesToNewBlock(index);
-      index += 1;
+      index += this.readOnly ? 1 : 0;
     });
 
-    this._hideAndShowBlocks(toggleRoot - 1);
+    this.hideAndShowBlocks(toggleRoot - 1);
   }
 
   /**
@@ -371,7 +367,7 @@ export default class ToggleBlock {
    *
    * @returns {string} icon - toggle icon
    */
-  _resolveToggleAction() {
+  resolveToggleAction() {
     const icon = this.wrapper.firstChild;
     const svg = icon.firstChild;
 
@@ -393,7 +389,7 @@ export default class ToggleBlock {
    *
    * @param {number} index - toggle index
    */
-  _hideAndShowBlocks(index = null) {
+  hideAndShowBlocks(index = null) {
     const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
     const items = children.length;
     const value = (this.data.status === 'closed');
