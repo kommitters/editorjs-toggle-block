@@ -101,9 +101,9 @@ export default class ToggleBlock {
    * Gets the index of the new block, then assigns the required properties,
    * and finally sends the focus.
    */
-  setAttributesToNewBlock() {
+  setAttributesToNewBlock(entryIndex = null) {
     const foreignKey = this.wrapper.id;
-    const index = this.api.blocks.getCurrentBlockIndex();
+    const index = this.readOnly ? entryIndex : this.api.blocks.getCurrentBlockIndex();
     const id = crypto.randomUUID();
 
     const newBlock = this.api.blocks.getBlockByIndex(index);
@@ -111,14 +111,16 @@ export default class ToggleBlock {
     const content = holder.firstChild;
     const item = content.firstChild;
 
-    holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
     holder.setAttribute('foreignKey', foreignKey);
     holder.setAttribute('id', id);
 
-    holder.addEventListener('keydown', this.extractBlock.bind(this, item));
-
     item.classList.add('toggle-block__item');
-    item.focus();
+
+    if (!this.readOnly) {
+      holder.addEventListener('keydown', this.extractBlock.bind(this, item));
+      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
+      item.focus();
+    }
   }
 
   /**
