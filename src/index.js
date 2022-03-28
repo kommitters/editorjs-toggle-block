@@ -271,10 +271,23 @@ export default class ToggleBlock {
    */
   renderItems(entryIndex = null) {
     const icon = this.wrapper.firstChild;
-    const editorBlocks = this.api.blocks.getBlocksCount();
 
-    let originalIndex = this.api.blocks.getCurrentBlockIndex();
-    let index = (editorBlocks > 1) ? originalIndex + 1 : originalIndex;
+    const toggle = this.wrapper.children[1];
+    let currentBlock = {};
+    let toggleRoot;
+
+    while (currentBlock[1] !== toggle) {
+      toggleRoot = this.api.blocks.getCurrentBlockIndex();
+
+      const block = this.api.blocks.getBlockByIndex(toggleRoot);
+      const { holder } = block;
+      const blockCover = holder.firstChild;
+      const blockContent = blockCover.firstChild;
+      currentBlock = blockContent.children;
+      this.api.caret.setToNextBlock('end', 0);
+    }
+
+    let index = toggleRoot;
 
     icon.addEventListener('click', () => {
       this._resolveToggleAction();
@@ -293,9 +306,7 @@ export default class ToggleBlock {
       index += this.readOnly ? 1 : 0;
     });
 
-    originalIndex -= (editorBlocks > 1) ? 0 : 1;
-    originalIndex -= this.readOnly ? 1 : 0;
-    this._hideAndShowBlocks(originalIndex);
+    this._hideAndShowBlocks(toggleRoot - 1);
   }
 
   /**
