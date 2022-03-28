@@ -140,7 +140,7 @@ export default class ToggleBlock {
     icon.innerHTML = toggleIcon;
 
     input.classList.add('toggle-block__input');
-    input.contentEditable = !this.readOnly;
+    input.setAttribute('contentEditable', !this.readOnly);
     input.innerHTML = this.data.text || '';
 
     // Events
