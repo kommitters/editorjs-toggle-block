@@ -342,7 +342,8 @@ export default class ToggleBlock {
     icon.addEventListener('click', () => {
       this._resolveToggleAction();
       setTimeout(() => {
-        this._hideAndShowBlocks(toggleRoot - 1);
+        const toggleIndex = this.readOnly ? (toggleRoot - 1) : null;
+        this._hideAndShowBlocks(toggleIndex);
       }, 100);
     });
 
