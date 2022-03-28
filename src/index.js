@@ -272,6 +272,8 @@ export default class ToggleBlock {
    */
   render() {
     this._createToggle();
+
+    // Renders the nested blocks after the toggle root is rendered
     setTimeout(this.renderItems.bind(this));
 
     // Adds initial transition for the icon
@@ -299,26 +301,65 @@ export default class ToggleBlock {
    */
   renderItems() {
     const icon = this.wrapper.firstChild;
-    const editorBlocks = this.api.blocks.getBlocksCount();
+    let toggleRoot;
 
-    let originalIndex = this.api.blocks.getCurrentBlockIndex();
-    let index = (editorBlocks > 1) ? originalIndex + 1 : originalIndex;
+    if (this.readOnly) {
+      const blocksInEditor = this.api.blocks.getBlocksCount();
+      const currentBlock = this.api.blocks.getCurrentBlockIndex();
+      const initial = blocksInEditor - currentBlock;
+      const redactor = document.getElementsByClassName('codex-editor__redactor')[0];
+      const { children } = redactor;
+      const { length } = children;
+
+      for (let i = initial; i < length; i += 1) {
+        const blockCover = children[i].firstChild;
+        const blockContainer = blockCover.firstChild;
+        const { id } = blockContainer;
+
+        if (id === this.wrapper.id) {
+          toggleRoot = i;
+          break;
+        }
+      }
+    } else {
+      const toggle = this.wrapper.children[1];
+      let currentBlock = {};
+
+      while (currentBlock[1] !== toggle) {
+        toggleRoot = this.api.blocks.getCurrentBlockIndex();
+        const block = this.api.blocks.getBlockByIndex(toggleRoot);
+        const { holder } = block;
+        const blockCover = holder.firstChild;
+        const blockContent = blockCover.firstChild;
+        currentBlock = blockContent.children;
+
+        this.api.caret.setToNextBlock('end', 0);
+      }
+    }
+    let index = toggleRoot;
+    index += this.readOnly ? 1 : 0;
 
     icon.addEventListener('click', () => {
       this._resolveToggleAction();
       setTimeout(() => {
-        this._hideAndShowBlocks();
+        this._hideAndShowBlocks(toggleRoot - 1);
       }, 100);
     });
 
     this.data.items.forEach((block) => {
       const { type, data } = block;
-      this.api.blocks.insert(type, data, {}, index += 1, true);
-      this.setAttributesToNewBlock();
+
+      if (this.readOnly) {
+        this.api.blocks.insert(type, data, {}, index, true);
+      } else {
+        this.api.blocks.insert(type, data, {}, index + 1, true);
+      }
+
+      this.setAttributesToNewBlock(index);
+      index += 1;
     });
 
-    originalIndex -= (editorBlocks > 1) ? 0 : 1;
-    this._hideAndShowBlocks(originalIndex);
+    this._hideAndShowBlocks(toggleRoot - 1);
   }
 
   /**
