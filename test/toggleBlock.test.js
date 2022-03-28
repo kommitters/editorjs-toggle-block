@@ -1,3 +1,4 @@
+import ToggleBlock from '../src';
 import createToggleBlock from './fixtures/toggle';
 import data from './fixtures/toolData';
 import {
@@ -236,6 +237,30 @@ describe('ToggleBlock', () => {
 
       expect(redactor.children.length).toBe(4);
       expect(children.length).toBe(3);
+    });
+  });
+
+  describe('validates read-only mode', () => {
+    let toggleBlockReadyOnly;
+
+    it('when is enable', () => {
+      toggleBlockReadyOnly = new ToggleBlock({ data, api: {}, readOnly: true });
+      toggleBlockReadyOnly.render();
+
+      const { children } = toggleBlockReadyOnly.wrapper;
+      const contentEditable = children[1].getAttribute('contentEditable');
+
+      expect(contentEditable).toBe('false');
+    });
+
+    it('when is disabled', () => {
+      toggleBlock = new ToggleBlock({ data, api: {}, readOnly: false });
+      toggleBlock.render();
+
+      const { children } = toggleBlock.wrapper;
+      const contentEditable = children[1].getAttribute('contentEditable');
+
+      expect(contentEditable).toBe('true');
     });
   });
 });
