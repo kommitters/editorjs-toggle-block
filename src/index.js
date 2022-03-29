@@ -42,43 +42,25 @@ export default class ToggleBlock {
     return true;
   }
 
-  static establishListener() {
+  /**
+   * Adds listener in the editor to create a toggle
+   * through the '>' char and the 'Space' key
+   */
+  nestBlock() {
     const redactor = document.activeElement;
-    redactor.addEventListener('keydown', (e) => {
-      if (e.code === 'ArrowRight') {
+    redactor.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
         const blockContainer = document.activeElement;
-        if (blockContainer.textContent[0] === '>') {
-          const blockCover = blockContainer.parentElement;
-          const block = blockCover.parentElement;
+        const content = blockContainer.textContent;
+        const { length } = content;
 
-          const previousBlock = block.previousElementSibling;
-          const previousCover = previousBlock.firstChild;
-          const previousContainer = previousCover.firstChild;
-
-          const foreignId = previousBlock.getAttribute('foreignKey');
-          const toggleId = previousContainer.getAttribute('id');
-
-          const foreignKey = foreignId !== null ? foreignId : toggleId;
-          const id = crypto.randomUUID();
-          const holder = block;
-          const content = holder.firstChild;
-          const item = content.firstChild;
-
-          holder.setAttribute('foreignKey', foreignKey);
-          holder.setAttribute('id', id);
-
-          item.classList.add('toggle-block__item');
-
-          const toggle = document.getElementById(foreignKey);
-          toggle.children[1].focus();
+        if ((content[0] === '>') && (length - 1 === 1)) {
+          const invocatorBlock = this.api.blocks.getCurrentBlockIndex();
+          this.api.blocks.insert('toggle', {}, this.api, invocatorBlock, true);
+          this.api.blocks.delete(invocatorBlock + 1);
         }
       }
     });
-  }
-
-  static get shortcut() {
-    this.establishListener();
-    return 'CONTROL+RIGHT';
   }
 
   /**
@@ -98,6 +80,7 @@ export default class ToggleBlock {
     this.api = api;
     this.wrapper = undefined;
     this.readOnly = readOnly || false;
+    this.nestBlock();
   }
 
   /**
