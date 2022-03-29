@@ -76,6 +76,11 @@ export default class ToggleBlock {
     });
   }
 
+  static get shortcut() {
+    this.establishListener();
+    return 'CONTROL+RIGHT';
+  }
+
   /**
    * Render tool`s main Element and fill it with saved data
    *
