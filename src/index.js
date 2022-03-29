@@ -42,6 +42,40 @@ export default class ToggleBlock {
     return true;
   }
 
+  static establishListener() {
+    const redactor = document.activeElement;
+    redactor.addEventListener('keydown', (e) => {
+      if (e.code === 'ArrowRight') {
+        const blockContainer = document.activeElement;
+        if (blockContainer.textContent[0] === '>') {
+          const blockCover = blockContainer.parentElement;
+          const block = blockCover.parentElement;
+
+          const previousBlock = block.previousElementSibling;
+          const previousCover = previousBlock.firstChild;
+          const previousContainer = previousCover.firstChild;
+
+          const foreignId = previousBlock.getAttribute('foreignKey');
+          const toggleId = previousContainer.getAttribute('id');
+
+          const foreignKey = foreignId !== null ? foreignId : toggleId;
+          const id = crypto.randomUUID();
+          const holder = block;
+          const content = holder.firstChild;
+          const item = content.firstChild;
+
+          holder.setAttribute('foreignKey', foreignKey);
+          holder.setAttribute('id', id);
+
+          item.classList.add('toggle-block__item');
+
+          const toggle = document.getElementById(foreignKey);
+          toggle.children[1].focus();
+        }
+      }
+    });
+  }
+
   /**
    * Render tool`s main Element and fill it with saved data
    *
