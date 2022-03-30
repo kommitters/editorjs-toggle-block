@@ -534,19 +534,25 @@ export default class ToggleBlock {
     });
   }
 
+  /**
+   * Adds listener in the editor to nest a block
+   * inside a toggle through the 'Tab' key
+   */
   nestBlock() {
     const redactor = document.activeElement;
     redactor.addEventListener('keyup', (e) => {
-      if (e.code === 'Space') {
-        const blockContainer = document.activeElement;
-        if (blockContainer.textContent[0] === '>') {
-          const blockCover = blockContainer.parentElement;
-          const block = blockCover.parentElement;
+      const blockContainer = document.activeElement;
+      const currentBlock = this.api.blocks.getCurrentBlockIndex();
 
-          const previousBlock = block.previousElementSibling;
-          const previousCover = previousBlock.firstChild;
-          const previousContainer = previousCover.firstChild;
+      if (currentBlock > 0 && !this.isPartOfAToggle(blockContainer) && e.code === 'Tab') {
+        const blockCover = blockContainer.parentElement;
+        const block = blockCover.parentElement;
 
+        const previousBlock = block.previousElementSibling;
+        const previousCover = previousBlock.firstChild;
+        const previousContainer = previousCover.firstChild;
+
+        if (this.isPartOfAToggle(previousContainer)) {
           const foreignId = previousBlock.getAttribute('foreignKey');
           const toggleId = previousContainer.getAttribute('id');
 
@@ -557,6 +563,8 @@ export default class ToggleBlock {
             foreignKey = toggleId;
           }
 
+          block.setAttribute('will-be-a-nested-block', true);
+
           const toggleRoot = document.getElementById(foreignKey);
           toggleRoot.children[1].focus();
         }
@@ -564,9 +572,36 @@ export default class ToggleBlock {
     });
   }
 
+  /**
+  * Sets the required attributes to convert an external block
+  * of the toggle into a block inside the toggle.
+   */
   setAttributesToNestBlock() {
-    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-    const { length } = children;
-    this.setAttributesToNewBlock(length + 1);
+    const blockIndex = this.api.blocks.getCurrentBlockIndex();
+    const block = this.api.blocks.getBlockByIndex(blockIndex);
+    const { holder } = block;
+    const willBeABlock = holder.getAttribute('will-be-a-nested-block');
+
+    if (willBeABlock) {
+      holder.removeAttribute('will-be-a-nested-block');
+      this.setAttributesToNewBlock(blockIndex);
+      this.api.toolbar.close();
+    }
+  }
+
+  /**
+   * Validates if a block contains one of the classes to be
+   * part of a toggle. If It has it returns 'true' (It's part
+   * of a toggle), otherwise returns 'false' (It's another
+   * type of block)
+   *
+   * @param {HTMLDivElement} block - Block to be validated
+   * @returns {boolean}
+   */
+  isPartOfAToggle(block) {
+    const classes = Array.from(block.classList);
+    const answer = classes.includes('toggle-block__item') || (classes.includes('toggle-block__input') || classes.includes('toggle-block__selector'));
+
+    return answer;
   }
 }
