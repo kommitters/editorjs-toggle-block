@@ -60,6 +60,7 @@ export default class ToggleBlock {
     this.wrapper = undefined;
     this.readOnly = readOnly || false;
     this.createToggleWithShortcut();
+    this.nestBlock();
   }
 
   /**
@@ -160,6 +161,8 @@ export default class ToggleBlock {
 
       // Event to add a block when the default content is clicked
       defaultContent.addEventListener('click', this.clickInDefaultContent.bind(this));
+
+      input.addEventListener('focus', this.setAttributesToNestBlock.bind(this));
     }
 
     defaultContent.classList.add('toggle-block__content-default');
@@ -529,5 +532,41 @@ export default class ToggleBlock {
         }
       }
     });
+  }
+
+  nestBlock() {
+    const redactor = document.activeElement;
+    redactor.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        const blockContainer = document.activeElement;
+        if (blockContainer.textContent[0] === '>') {
+          const blockCover = blockContainer.parentElement;
+          const block = blockCover.parentElement;
+
+          const previousBlock = block.previousElementSibling;
+          const previousCover = previousBlock.firstChild;
+          const previousContainer = previousCover.firstChild;
+
+          const foreignId = previousBlock.getAttribute('foreignKey');
+          const toggleId = previousContainer.getAttribute('id');
+
+          let foreignKey;
+          if (foreignId) {
+            foreignKey = foreignId;
+          } else if (toggleId) {
+            foreignKey = toggleId;
+          }
+
+          const toggleRoot = document.getElementById(foreignKey);
+          toggleRoot.children[1].focus();
+        }
+      }
+    });
+  }
+
+  setAttributesToNestBlock() {
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    const { length } = children;
+    this.setAttributesToNewBlock(length + 1);
   }
 }
