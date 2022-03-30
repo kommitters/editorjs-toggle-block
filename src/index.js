@@ -162,7 +162,7 @@ export default class ToggleBlock {
       // Event to add a block when the default content is clicked
       defaultContent.addEventListener('click', this.clickInDefaultContent.bind(this));
 
-      input.addEventListener('focus', this.setAttributesToNestBlock.bind(this));
+      input.addEventListener('focus', this.setNestedBlockAttributes.bind(this));
     }
 
     defaultContent.classList.add('toggle-block__content-default');
@@ -526,9 +526,9 @@ export default class ToggleBlock {
         const { length } = content;
 
         if ((content[0] === '>') && (length - 1 === 1)) {
-          const invocatorBlock = this.api.blocks.getCurrentBlockIndex();
-          this.api.blocks.insert('toggle', {}, this.api, invocatorBlock, true);
-          this.api.blocks.delete(invocatorBlock + 1);
+          const blockCaller = this.api.blocks.getCurrentBlockIndex();
+          this.api.blocks.insert('toggle', {}, this.api, blockCaller, true);
+          this.api.blocks.delete(blockCaller + 1);
         }
       }
     });
@@ -576,7 +576,7 @@ export default class ToggleBlock {
   * Sets the required attributes to convert an external block
   * of the toggle into a block inside the toggle.
    */
-  setAttributesToNestBlock() {
+  setNestedBlockAttributes() {
     const blockIndex = this.api.blocks.getCurrentBlockIndex();
     const block = this.api.blocks.getBlockByIndex(blockIndex);
     const { holder } = block;
