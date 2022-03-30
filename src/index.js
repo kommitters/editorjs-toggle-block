@@ -46,7 +46,7 @@ export default class ToggleBlock {
    * Adds listener in the editor to create a toggle
    * through the '>' char and the 'Space' key
    */
-  nestBlock() {
+  createToggleWithShortcut() {
     const redactor = document.activeElement;
     redactor.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
@@ -80,7 +80,7 @@ export default class ToggleBlock {
     this.api = api;
     this.wrapper = undefined;
     this.readOnly = readOnly || false;
-    this.nestBlock();
+    this.createToggleWithShortcut();
   }
 
   /**
