@@ -326,14 +326,11 @@ export default class ToggleBlock {
     let toggleRoot;
 
     if (this.readOnly) {
-      const blocksInEditor = this.api.blocks.getBlocksCount();
-      const currentBlock = this.api.blocks.getCurrentBlockIndex();
-      const initial = blocksInEditor - currentBlock;
       const redactor = document.getElementsByClassName('codex-editor__redactor')[0];
       const { children } = redactor;
       const { length } = children;
 
-      for (let i = initial; i < length; i += 1) {
+      for (let i = 0; i < length; i += 1) {
         const blockCover = children[i].firstChild;
         const blockContainer = blockCover.firstChild;
         const { id } = blockContainer;
