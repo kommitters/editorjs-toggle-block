@@ -193,11 +193,7 @@ export default class ToggleBlock {
     const { status } = this.data;
     const value = (children.length > 0 || status === 'closed');
 
-    if (value) {
-      lastChild.classList.add('hidden');
-    } else {
-      lastChild.classList.remove('hidden');
-    }
+    lastChild.classList.toggle('hidden', value);
 
     firstChild.style.color = (children.length === 0) ? 'gray' : 'black';
   }
@@ -409,11 +405,7 @@ export default class ToggleBlock {
     } else {
       const { lastChild } = this.wrapper;
 
-      if (value) {
-        lastChild.classList.add('hidden');
-      } else {
-        lastChild.classList.remove('hidden');
-      }
+      lastChild.classList.toggle('hidden', value);
     }
   }
 
