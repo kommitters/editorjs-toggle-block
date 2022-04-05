@@ -480,24 +480,26 @@ export default class ToggleBlock {
    * through the '>' char and the 'Space' key
    */
   createToggleWithShortcut() {
-    const redactor = document.activeElement;
-    redactor.addEventListener('keyup', (e) => {
-      if (e.code === 'Space') {
-        const blockContainer = document.activeElement;
-        const content = blockContainer.textContent;
-        const { length } = content;
+    if (!this.readOnly) {
+      const redactor = document.activeElement;
+      redactor.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') {
+          const blockContainer = document.activeElement;
+          const content = blockContainer.textContent;
+          const { length } = content;
 
-        if ((content[0] === '>') && (length - 1 === 1)) {
-          const blockCaller = this.api.blocks.getCurrentBlockIndex();
-          this.api.blocks.insert('toggle', {}, this.api, blockCaller, true);
-          this.api.blocks.delete(blockCaller + 1);
+          if ((content[0] === '>') && (length - 1 === 1)) {
+            const blockCaller = this.api.blocks.getCurrentBlockIndex();
+            this.api.blocks.insert('toggle', {}, this.api, blockCaller, true);
+            this.api.blocks.delete(blockCaller + 1);
 
-          setTimeout(() => {
-            this.api.caret.setToBlock(blockCaller);
-          });
+            setTimeout(() => {
+              this.api.caret.setToBlock(blockCaller);
+            });
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   /**
