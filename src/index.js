@@ -404,11 +404,10 @@ export default class ToggleBlock {
    * @param {number} index - toggle index
    */
   hideAndShowBlocks(index = null) {
-    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-    const items = children.length;
+    const items = parseInt(this.wrapper.getAttribute('items'), 10);
     const value = (this.data.status === 'closed');
 
-    let toggleIndex = index === null ? this.api.blocks.getCurrentBlockIndex() : index + 1;
+    let toggleIndex = index === null ? this.api.blocks.getCurrentBlockIndex() : index;
 
     if (items > 0) {
       for (let i = 0; i < items; i += 1) {
