@@ -217,10 +217,9 @@ export default class ToggleBlock {
 
       if (length === 0) {
         const index = this.api.blocks.getCurrentBlockIndex();
-        const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
 
         this.api.blocks.delete(index);
-        this.removeFullToggle(index, blocks);
+        this.removeFullToggle(index);
       }
     }
   }
