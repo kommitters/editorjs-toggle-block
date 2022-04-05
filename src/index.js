@@ -234,8 +234,7 @@ export default class ToggleBlock {
     if (e.code === 'Tab' && e.shiftKey) {
       const indexBlock = this.api.blocks.getCurrentBlockIndex();
       const toggle = this.wrapper.children[1];
-      const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-      const { length } = children;
+      const items = parseInt(this.wrapper.getAttribute('items'), 10);
 
       let currentBlock = {};
       let index;
@@ -252,7 +251,8 @@ export default class ToggleBlock {
       }
 
       this.api.blocks.delete(indexBlock);
-      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + length, true);
+      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + items, true);
+      this.updateItems(-1);
     }
   }
 
