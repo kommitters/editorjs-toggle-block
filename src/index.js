@@ -429,34 +429,12 @@ export default class ToggleBlock {
   save(blockContent) {
     const { children } = blockContent;
     const caption = children[1].textContent;
-    const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-    const items = [];
-
-    blocks.forEach((block) => {
-      items.push({ type: 'paragraph', data: { text: block.textContent } });
-    });
+    const items = parseInt(blockContent.getAttribute('items'), 10);
 
     return Object.assign(this.data, {
       text: caption,
-      items: [...items],
+      items,
     });
-  }
-
-  /**
-   * Validates Toggle block data
-   * @param {object} savedData - Data received after saving
-   * @returns {boolean} false if saved data isn't correct, otherwise true
-   */
-  validate(savedData) {
-    const { items } = savedData;
-
-    for (let i = 0; i < items.length; i += 1) {
-      if (items[i].type === undefined || items[i].data === undefined) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   /**
