@@ -575,4 +575,25 @@ export default class ToggleBlock {
 
     return answer;
   }
+
+  /**
+   *
+   * @param {string} paragraphId - paragraph identifier
+   * @param {KeyboardEvent} e - key down event
+   */
+  removeBlock(paragraphId, e) {
+    if (e.code === 'Backspace') {
+      const block = document.getElementById(paragraphId);
+
+      if (block === null) {
+        this.updateItems(-1);
+      }
+    }
+  }
+
+  updateItems(val) {
+    let items = parseInt(this.wrapper.getAttribute('items'), 10);
+    items += val;
+    this.wrapper.setAttribute('items', items);
+  }
 }
