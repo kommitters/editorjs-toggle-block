@@ -171,7 +171,7 @@ export default class ToggleBlock {
       input.addEventListener('focus', this.setNestedBlockAttributes.bind(this));
     }
 
-    defaultContent.classList.add('toggle-block__content-default', 'hidden');
+    defaultContent.classList.add('toggle-block__content-default', 'toggle-block__hidden');
     defaultContent.innerHTML = 'Empty toggle. Click or drop blocks inside.';
 
     this.wrapper.appendChild(icon);
@@ -200,7 +200,7 @@ export default class ToggleBlock {
     const items = parseInt(this.wrapper.getAttribute('items'), 10);
     const value = (items > 0 || status === 'closed');
 
-    lastChild.classList.toggle('hidden', value);
+    lastChild.classList.toggle('toggle-block__hidden', value);
     firstChild.style.color = (items === 0) ? 'gray' : 'black';
   }
 
@@ -417,7 +417,7 @@ export default class ToggleBlock {
     } else {
       const { lastChild } = this.wrapper;
 
-      lastChild.classList.toggle('hidden', value);
+      lastChild.classList.toggle('toggle-block__hidden', value);
     }
   }
 
@@ -488,7 +488,7 @@ export default class ToggleBlock {
           const content = blockContainer.textContent;
           const { length } = content;
 
-          if ((content[0] === '>') && (length - 1 === 1)) {
+          if ((content[0] === '>') && (length - 1 === 1) && !this.isPartOfAToggle(blockContainer)) {
             const blockCaller = this.api.blocks.getCurrentBlockIndex();
             this.api.blocks.insert('toggle', {}, this.api, blockCaller, true);
             this.api.blocks.delete(blockCaller + 1);

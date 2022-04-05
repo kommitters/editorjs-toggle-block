@@ -1,6 +1,6 @@
 export function getHiddenAttribute(redactor) {
   const children = redactor.querySelectorAll('div[hidden="true"]');
-  const defaultContent = redactor.querySelectorAll('div.hidden');
+  const defaultContent = redactor.querySelectorAll('div.toggle-block__hidden');
   return (children.length + defaultContent.length) - 1;
 }
 
