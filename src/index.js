@@ -195,14 +195,13 @@ export default class ToggleBlock {
    * otherwise sets the value 'true'.
    */
   setDefaultContent() {
-    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
     const { firstChild, lastChild } = this.wrapper;
     const { status } = this.data;
-    const value = (children.length > 0 || status === 'closed');
+    const items = parseInt(this.wrapper.getAttribute('items'), 10);
+    const value = (items > 0 || status === 'closed');
 
     lastChild.classList.toggle('hidden', value);
-
-    firstChild.style.color = (children.length === 0) ? 'gray' : 'black';
+    firstChild.style.color = (items === 0) ? 'gray' : 'black';
   }
 
   /**
