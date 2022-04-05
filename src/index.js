@@ -138,6 +138,7 @@ export default class ToggleBlock {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
     this.wrapper.id = crypto.randomUUID();
+    this.wrapper.setAttribute('items', this.data.items);
 
     const icon = document.createElement('span');
     const input = document.createElement('div');
