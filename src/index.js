@@ -283,7 +283,7 @@ export default class ToggleBlock {
     this.createToggle();
 
     // Renders the nested blocks after the toggle root is rendered
-    setTimeout(this.renderItems.bind(this));
+    setTimeout(() => this.renderItems());
 
     // Adds initial transition for the icon
     setTimeout(this.setInitialTransition.bind(this));
