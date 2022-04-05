@@ -394,8 +394,6 @@ export default class ToggleBlock {
       this.data.status = 'closed';
       svg.style.transform = 'rotate(0deg)';
     }
-
-    return icon;
   }
 
   /**
