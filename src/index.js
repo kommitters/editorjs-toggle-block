@@ -507,37 +507,39 @@ export default class ToggleBlock {
    * inside a toggle through the 'Tab' key
    */
   nestBlock() {
-    const redactor = document.activeElement;
-    redactor.addEventListener('keyup', (e) => {
-      const blockContainer = document.activeElement;
-      const currentBlock = this.api.blocks.getCurrentBlockIndex();
+    if (!this.readOnly) {
+      const redactor = document.activeElement;
+      redactor.addEventListener('keyup', (e) => {
+        const blockContainer = document.activeElement;
+        const currentBlock = this.api.blocks.getCurrentBlockIndex();
 
-      if (currentBlock > 0 && !this.isPartOfAToggle(blockContainer) && e.code === 'Tab') {
-        const blockCover = blockContainer.parentElement;
-        const block = blockCover.parentElement;
+        if (currentBlock > 0 && !this.isPartOfAToggle(blockContainer) && e.code === 'Tab') {
+          const blockCover = blockContainer.parentElement;
+          const block = blockCover.parentElement;
 
-        const previousBlock = block.previousElementSibling;
-        const previousCover = previousBlock.firstChild;
-        const previousContainer = previousCover.firstChild;
+          const previousBlock = block.previousElementSibling;
+          const previousCover = previousBlock.firstChild;
+          const previousContainer = previousCover.firstChild;
 
-        if (this.isPartOfAToggle(previousContainer)) {
-          const foreignId = previousBlock.getAttribute('foreignKey');
-          const toggleId = previousContainer.getAttribute('id');
+          if (this.isPartOfAToggle(previousContainer)) {
+            const foreignId = previousBlock.getAttribute('foreignKey');
+            const toggleId = previousContainer.getAttribute('id');
 
-          let foreignKey;
-          if (foreignId) {
-            foreignKey = foreignId;
-          } else if (toggleId) {
-            foreignKey = toggleId;
+            let foreignKey;
+            if (foreignId) {
+              foreignKey = foreignId;
+            } else if (toggleId) {
+              foreignKey = toggleId;
+            }
+
+            block.setAttribute('will-be-a-nested-block', true);
+
+            const toggleRoot = document.getElementById(foreignKey);
+            toggleRoot.children[1].focus();
           }
-
-          block.setAttribute('will-be-a-nested-block', true);
-
-          const toggleRoot = document.getElementById(foreignKey);
-          toggleRoot.children[1].focus();
         }
-      }
-    });
+      });
+    }
   }
 
   /**
