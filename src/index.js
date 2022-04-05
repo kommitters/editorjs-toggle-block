@@ -109,7 +109,7 @@ export default class ToggleBlock {
    */
   setAttributesToNewBlock(entryIndex = null) {
     const foreignKey = this.wrapper.id;
-    const index = this.readOnly ? entryIndex : this.api.blocks.getCurrentBlockIndex();
+    const index = entryIndex === null ? this.api.blocks.getCurrentBlockIndex() : entryIndex;
     const id = crypto.randomUUID();
 
     const newBlock = this.api.blocks.getBlockByIndex(index);
@@ -125,6 +125,7 @@ export default class ToggleBlock {
     if (!this.readOnly) {
       holder.addEventListener('keydown', this.extractBlock.bind(this, item));
       holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
+      holder.addEventListener('keydown', this.removeBlock.bind(this, id));
       item.focus();
     }
   }
