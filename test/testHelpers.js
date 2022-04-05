@@ -28,16 +28,16 @@ export function createNestedBlock(toggleBlock, data) {
   return newBlock;
 }
 
-export function generateFullToggle(toggleBlock) {
+export function generateFullToggle(toggleBlock, data) {
   const answer = [];
   let newBlock;
 
   answer.push(toggleBlock.render());
 
-  toggleBlock.data.items.forEach((item) => {
-    newBlock = createNestedBlock(toggleBlock, item.data);
+  for (let i = 1; i < data.length; i += 1) {
+    newBlock = createNestedBlock(toggleBlock, data[i].data);
     answer.push(newBlock);
-  });
+  }
 
   return answer;
 }
@@ -74,12 +74,11 @@ export function createDefaultBlock(data) {
 
 export function extractionBlock(toggleBlock, redactor, toggleIndex) {
   const currentBlock = redactor.children[toggleIndex];
-  const { items } = toggleBlock.data;
-  const { data } = items[toggleIndex - 1];
-  const extractedBlock = createDefaultBlock(data);
+  const extractedBlock = createDefaultBlock(currentBlock.textContent);
 
   currentBlock.remove();
   redactor.appendChild(extractedBlock);
+  toggleBlock.updateItems(-1);
 }
 
 export function createToggle(e, editor, toggleBlock) {
