@@ -184,6 +184,7 @@ export default class ToggleBlock {
    */
   clickInDefaultContent() {
     this.api.blocks.insert();
+    this.updateItems(1);
     this.setAttributesToNewBlock();
     this.setDefaultContent();
   }
