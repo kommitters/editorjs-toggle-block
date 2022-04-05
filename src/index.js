@@ -54,7 +54,7 @@ export default class ToggleBlock {
     this.data = {
       text: data.text || '',
       status: data.status || 'open',
-      items: data.items || [],
+      items: parseInt(data.items, 10) || 0,
     };
     this.api = api;
     this.wrapper = undefined;
