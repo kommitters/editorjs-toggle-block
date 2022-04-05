@@ -191,8 +191,8 @@ export default class ToggleBlock {
 
   /**
    * Sets the default content. If the toggle has no other blocks inside it,
-   * so sets the value 'false' for the hidden tag in the default content,
-   * otherwise sets the value 'true'.
+   * so sets the 'block__hidden tag' in the default content,
+   * otherwise it removes it.
    */
   setDefaultContent() {
     const { firstChild, lastChild } = this.wrapper;
@@ -225,7 +225,8 @@ export default class ToggleBlock {
   }
 
   /**
-   * this method extract a single block with shift + tab combination
+   * Extracts a nested block from a toggle
+   * with 'shift + tab' combination
    *
    * @param {Object} item
    * @param {KeyboardEvent} e
@@ -428,7 +429,8 @@ export default class ToggleBlock {
    */
   save(blockContent) {
     const { children } = blockContent;
-    const caption = children[1].textContent;
+    const caption = children[1].innerHTML;
+
     const items = parseInt(blockContent.getAttribute('items'), 10);
 
     return Object.assign(this.data, {
@@ -463,6 +465,7 @@ export default class ToggleBlock {
   }
 
   /**
+   * Removes a toggle root and its nested blocks.
    *
    * @param {number} toggleIndex - toggle index
    * @param {object} children - blocks inside the toggle
@@ -577,7 +580,8 @@ export default class ToggleBlock {
   }
 
   /**
-   *
+   * When a nested block is removes, the 'items' attribute
+   * is updated, subtracting from it an unit.
    * @param {string} paragraphId - paragraph identifier
    * @param {KeyboardEvent} e - key down event
    */
@@ -591,6 +595,12 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * Increase the indicated value to 'items'
+   * attribute, i.e., items += val
+   *
+   * @param {number} val - integer number
+   */
   updateItems(val) {
     let items = parseInt(this.wrapper.getAttribute('items'), 10);
     items += val;
