@@ -309,7 +309,9 @@ export default class ToggleBlock {
    * like a block inside the toggle.
    */
   renderItems() {
+    const blocksInEditor = this.api.blocks.getBlocksCount();
     const icon = this.wrapper.firstChild;
+    const items = parseInt(this.wrapper.getAttribute('items'), 10);
     let toggleRoot;
 
     if (this.readOnly) {
@@ -342,27 +344,35 @@ export default class ToggleBlock {
         this.api.caret.setToNextBlock('end', 0);
       }
     }
-    let index = toggleRoot;
-    index += this.readOnly ? 1 : 0;
+
+    if (toggleRoot + items < blocksInEditor) {
+      for (let i = toggleRoot + 1, j = 0; i <= toggleRoot + items; i += 1) {
+        const block = this.api.blocks.getBlockByIndex(i);
+        const { holder } = block;
+        const cover = holder.firstChild;
+        const content = cover.firstChild;
+
+        if (!this.isPartOfAToggle(content)) {
+          this.setAttributesToNewBlock(i);
+          j += 1;
+        } else {
+          this.wrapper.setAttribute('items', j);
+          break;
+        }
+      }
+    } else {
+      this.wrapper.setAttribute('items', 0);
+    }
 
     icon.addEventListener('click', () => {
       this.resolveToggleAction();
       setTimeout(() => {
-        const toggleIndex = this.readOnly ? (toggleRoot - 1) : null;
+        const toggleIndex = this.readOnly ? toggleRoot : null;
         this.hideAndShowBlocks(toggleIndex);
       }, 100);
     });
 
-    this.data.items.forEach((block) => {
-      const { type, data } = block;
-
-      index += !this.readOnly ? 1 : 0;
-      this.api.blocks.insert(type, data, {}, index, true);
-      this.setAttributesToNewBlock(index);
-      index += this.readOnly ? 1 : 0;
-    });
-
-    this.hideAndShowBlocks(toggleRoot - 1);
+    this.hideAndShowBlocks(toggleRoot);
   }
 
   /**
