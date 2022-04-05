@@ -467,10 +467,10 @@ export default class ToggleBlock {
    * @param {number} toggleIndex - toggle index
    * @param {object} children - blocks inside the toggle
    */
-  removeFullToggle(toggleIndex, children) {
-    const blocks = children.length;
+  removeFullToggle(toggleIndex) {
+    const items = parseInt(this.wrapper.getAttribute('items'), 10);
 
-    for (let i = toggleIndex; i < toggleIndex + blocks; i += 1) {
+    for (let i = toggleIndex; i < toggleIndex + items; i += 1) {
       this.api.blocks.delete(toggleIndex);
     }
   }
