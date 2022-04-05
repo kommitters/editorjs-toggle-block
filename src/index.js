@@ -556,6 +556,7 @@ export default class ToggleBlock {
       holder.removeAttribute('will-be-a-nested-block');
       this.setAttributesToNewBlock(blockIndex);
       this.api.toolbar.close();
+      this.updateItems(1);
     }
   }
 
