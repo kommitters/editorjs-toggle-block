@@ -446,7 +446,6 @@ export default class ToggleBlock {
     const optionsContainer = settingsBar[0];
     const options = optionsContainer.lastChild;
     const toggleIndex = this.api.blocks.getCurrentBlockIndex();
-    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
 
     setTimeout(() => {
       const deleteButton = options.getElementsByClassName('ce-settings__button--delete')[0];
@@ -457,7 +456,7 @@ export default class ToggleBlock {
         if (classes.indexOf('clicked-to-destroy-toggle') === -1) {
           deleteButton.classList.add('clicked-to-destroy-toggle');
         } else {
-          this.removeFullToggle(toggleIndex, children);
+          this.removeFullToggle(toggleIndex);
         }
       });
     });
