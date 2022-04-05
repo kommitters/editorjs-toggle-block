@@ -80,11 +80,12 @@ export default class ToggleBlock {
 
       if (this.data.status === 'closed') {
         this.resolveToggleAction();
-        this.hideAndShowBlocks(originalIndex - 1);
+        this.hideAndShowBlocks(originalIndex);
       }
 
       setTimeout(() => {
         this.api.blocks.insert();
+        this.updateItems(1);
         this.setAttributesToNewBlock();
       }, 100);
     }
