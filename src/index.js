@@ -97,7 +97,10 @@ export default class ToggleBlock {
    * @param {KeyboardEvent} e - key down event
    */
   createParagraphFromIt(e) {
-    if (e.code === 'Enter') this.setAttributesToNewBlock();
+    if (e.code === 'Enter') {
+      this.updateItems(1);
+      this.setAttributesToNewBlock();
+    }
   }
 
   /**
