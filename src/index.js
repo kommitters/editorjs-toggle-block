@@ -59,8 +59,7 @@ export default class ToggleBlock {
     this.api = api;
     this.wrapper = undefined;
     this.readOnly = readOnly || false;
-    this.createToggleWithShortcut();
-    this.nestBlock();
+    this.addListeners();
   }
 
   /**
@@ -479,69 +478,68 @@ export default class ToggleBlock {
   }
 
   /**
-   * Adds listener in the editor to create a toggle
-   * through the '>' char and the 'Space' key
+   * Adds the required listeners to call the toggle shortcuts
+   * on the editor.
    */
-  createToggleWithShortcut() {
-    if (!this.readOnly) {
-      const redactor = document.activeElement;
-      redactor.addEventListener('keyup', (e) => {
-        if (e.code === 'Space') {
-          const blockContainer = document.activeElement;
-          const content = blockContainer.textContent;
-          const { length } = content;
-
-          if ((content[0] === '>') && (length - 1 === 1) && !this.isPartOfAToggle(blockContainer)) {
-            const blockCaller = this.api.blocks.getCurrentBlockIndex();
-            this.api.blocks.insert('toggle', {}, this.api, blockCaller, true);
-            this.api.blocks.delete(blockCaller + 1);
-
-            setTimeout(() => {
-              this.api.caret.setToBlock(blockCaller);
-            });
-          }
-        }
-      });
-    }
-  }
-
-  /**
-   * Adds listener in the editor to nest a block
-   * inside a toggle through the 'Tab' key
-   */
-  nestBlock() {
+  addListeners() {
     if (!this.readOnly) {
       const redactor = document.activeElement;
       redactor.addEventListener('keyup', (e) => {
         const blockContainer = document.activeElement;
         const currentBlock = this.api.blocks.getCurrentBlockIndex();
 
-        if (currentBlock > 0 && !this.isPartOfAToggle(blockContainer) && e.code === 'Tab') {
-          const blockCover = blockContainer.parentElement;
-          const block = blockCover.parentElement;
-
-          const previousBlock = block.previousElementSibling;
-          const previousCover = previousBlock.firstChild;
-          const previousContainer = previousCover.firstChild;
-
-          if (this.isPartOfAToggle(previousContainer)) {
-            const foreignId = previousBlock.getAttribute('foreignKey');
-            const toggleId = previousContainer.getAttribute('id');
-
-            let foreignKey;
-            if (foreignId) {
-              foreignKey = foreignId;
-            } else if (toggleId) {
-              foreignKey = toggleId;
-            }
-
-            block.setAttribute('will-be-a-nested-block', true);
-
-            const toggleRoot = document.getElementById(foreignKey);
-            toggleRoot.children[1].focus();
-          }
+        if (e.code === 'Space') {
+          this.createToggleWithShortcut(blockContainer);
+        } else if (currentBlock > 0 && !this.isPartOfAToggle(blockContainer) && e.code === 'Tab') {
+          this.nestBlock(blockContainer);
         }
       });
+    }
+  }
+
+  /**
+   * Creates a toggle through the '>' char and the 'Space' key
+   */
+  createToggleWithShortcut(blockContainer) {
+    const content = blockContainer.textContent;
+
+    if ((content[0] === '>') && !this.isPartOfAToggle(blockContainer)) {
+      const blockCaller = this.api.blocks.getCurrentBlockIndex();
+      this.api.blocks.insert('toggle', { text: content.slice(2) }, this.api, blockCaller, true);
+      this.api.blocks.delete(blockCaller + 1);
+
+      setTimeout(() => {
+        this.api.caret.setToBlock(blockCaller);
+      });
+    }
+  }
+
+  /**
+   * Nests a block inside a toggle through the 'Tab' key
+   */
+  nestBlock(blockContainer) {
+    const blockCover = blockContainer.parentElement;
+    const block = blockCover.parentElement;
+
+    const previousBlock = block.previousElementSibling;
+    const previousCover = previousBlock.firstChild;
+    const previousContainer = previousCover.firstChild;
+
+    if (this.isPartOfAToggle(previousContainer)) {
+      const foreignId = previousBlock.getAttribute('foreignKey');
+      const toggleId = previousContainer.getAttribute('id');
+
+      let foreignKey;
+      if (foreignId) {
+        foreignKey = foreignId;
+      } else if (toggleId) {
+        foreignKey = toggleId;
+      }
+
+      block.setAttribute('will-be-a-nested-block', true);
+
+      const toggleRoot = document.getElementById(foreignKey);
+      toggleRoot.children[1].focus();
     }
   }
 
