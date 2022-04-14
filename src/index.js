@@ -56,10 +56,12 @@ export default class ToggleBlock {
       status: data.status || 'open',
       items: parseInt(data.items, 10) || 0,
     };
+    this.itemsId = [];
     this.api = api;
     this.wrapper = undefined;
     this.readOnly = readOnly || false;
     this.addListeners();
+    this.addSupportForUndoAndRedoActions();
   }
 
   /**
@@ -127,6 +129,7 @@ export default class ToggleBlock {
       holder.addEventListener('keydown', this.removeBlock.bind(this, id));
       item.focus();
     }
+    this.itemsId.push(newBlock.id);
   }
 
   /**
@@ -137,7 +140,7 @@ export default class ToggleBlock {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
     this.wrapper.id = crypto.randomUUID();
-    this.wrapper.setAttribute('items', this.data.items);
+    // this.wrapper.setAttribute('items', this.data.items);
 
     const icon = document.createElement('span');
     const input = document.createElement('div');
@@ -196,11 +199,11 @@ export default class ToggleBlock {
   setDefaultContent() {
     const { firstChild, lastChild } = this.wrapper;
     const { status } = this.data;
-    const items = parseInt(this.wrapper.getAttribute('items'), 10);
-    const value = (items > 0 || status === 'closed');
+    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
+    const value = (this.data.items > 0 || status === 'closed');
 
     lastChild.classList.toggle('toggle-block__hidden', value);
-    firstChild.style.color = (items === 0) ? 'gray' : 'black';
+    firstChild.style.color = (this.data.items === 0) ? 'gray' : 'black';
   }
 
   /**
@@ -234,7 +237,7 @@ export default class ToggleBlock {
     if (e.code === 'Tab' && e.shiftKey) {
       const indexBlock = this.api.blocks.getCurrentBlockIndex();
       const toggle = this.wrapper.children[1];
-      const items = parseInt(this.wrapper.getAttribute('items'), 10);
+      // const items = parseInt(this.wrapper.getAttribute('items'), 10);
 
       let currentBlock = {};
       let index;
@@ -251,7 +254,7 @@ export default class ToggleBlock {
       }
 
       this.api.blocks.delete(indexBlock);
-      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + items, true);
+      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + this.data.items, true);
       this.updateItems(-1);
     }
   }
@@ -311,7 +314,7 @@ export default class ToggleBlock {
   renderItems() {
     const blocksInEditor = this.api.blocks.getBlocksCount();
     const icon = this.wrapper.firstChild;
-    const items = parseInt(this.wrapper.getAttribute('items'), 10);
+    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
     let toggleRoot;
 
     if (this.readOnly) {
@@ -345,8 +348,8 @@ export default class ToggleBlock {
       }
     }
 
-    if (toggleRoot + items < blocksInEditor) {
-      for (let i = toggleRoot + 1, j = 0; i <= toggleRoot + items; i += 1) {
+    if (toggleRoot + this.data.items < blocksInEditor) {
+      for (let i = toggleRoot + 1, j = 0; i <= toggleRoot + this.data.items; i += 1) {
         const block = this.api.blocks.getBlockByIndex(i);
         const { holder } = block;
         const cover = holder.firstChild;
@@ -356,12 +359,14 @@ export default class ToggleBlock {
           this.setAttributesToNewBlock(i);
           j += 1;
         } else {
-          this.wrapper.setAttribute('items', j);
+          this.data.items = j;
+          // this.wrapper.setAttribute('items', j);
           break;
         }
       }
     } else {
-      this.wrapper.setAttribute('items', 0);
+      this.data.items = 0;
+      // this.wrapper.setAttribute('items', 0);
     }
 
     icon.addEventListener('click', () => {
@@ -404,13 +409,13 @@ export default class ToggleBlock {
    * @param {number} index - toggle index
    */
   hideAndShowBlocks(index = null) {
-    const items = parseInt(this.wrapper.getAttribute('items'), 10);
+    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
     const value = (this.data.status === 'closed');
 
     let toggleIndex = index === null ? this.api.blocks.getCurrentBlockIndex() : index;
 
-    if (items > 0) {
-      for (let i = 0; i < items; i += 1) {
+    if (this.data.items > 0) {
+      for (let i = 0; i < this.data.items; i += 1) {
         const { holder } = this.api.blocks.getBlockByIndex(toggleIndex += 1);
         holder.hidden = value;
       }
@@ -430,11 +435,8 @@ export default class ToggleBlock {
     const { children } = blockContent;
     const caption = children[1].innerHTML;
 
-    const items = parseInt(blockContent.getAttribute('items'), 10);
-
     return Object.assign(this.data, {
       text: caption,
-      items,
     });
   }
 
@@ -470,9 +472,9 @@ export default class ToggleBlock {
    * @param {object} children - blocks inside the toggle
    */
   removeFullToggle(toggleIndex) {
-    const items = parseInt(this.wrapper.getAttribute('items'), 10);
+    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
 
-    for (let i = toggleIndex; i < toggleIndex + items; i += 1) {
+    for (let i = toggleIndex; i < toggleIndex + this.data.items; i += 1) {
       this.api.blocks.delete(toggleIndex);
     }
   }
@@ -494,6 +496,38 @@ export default class ToggleBlock {
           this.nestBlock(blockContainer);
         }
       });
+    }
+  }
+
+  addSupportForUndoAndRedoActions() {
+    const target = document.querySelector('div.codex-editor__redactor');
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          setTimeout(this.restoreItemAttributes.bind(this));
+        }
+      });
+    });
+
+    const config = { attributes: true, childList: true, characterData: true };
+
+    observer.observe(target, config);
+  }
+
+  restoreItemAttributes() {
+    if (this.wrapper !== undefined) {
+      const items = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+      const { length } = items;
+
+      if (length < this.data.items) {
+        const currentIndex = this.api.blocks.getCurrentBlockIndex();
+        const currentBlock = this.api.blocks.getBlockByIndex(currentIndex);
+
+        if (this.itemsId.includes(currentBlock.id)) {
+          this.setAttributesToNewBlock(currentIndex);
+        }
+      }
     }
   }
 
@@ -600,8 +634,6 @@ export default class ToggleBlock {
    * @param {number} val - integer number
    */
   updateItems(val) {
-    let items = parseInt(this.wrapper.getAttribute('items'), 10);
-    items += val;
-    this.wrapper.setAttribute('items', items);
+    this.data.items += val;
   }
 }
