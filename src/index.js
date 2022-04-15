@@ -97,11 +97,9 @@ export default class ToggleBlock {
    *
    * @param {KeyboardEvent} e - key down event
    */
-  createParagraphFromIt(e) {
-    if (e.code === 'Enter') {
-      this.updateItems(1);
-      this.setAttributesToNewBlock();
-    }
+  createParagraphFromIt() {
+    this.updateItems(1);
+    this.setAttributesToNewBlock();
   }
 
   /**
@@ -124,12 +122,32 @@ export default class ToggleBlock {
     item.classList.add('toggle-block__item');
 
     if (!this.readOnly) {
-      holder.addEventListener('keydown', this.extractBlock.bind(this, item));
-      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
-      holder.addEventListener('keydown', this.removeBlock.bind(this, id));
+      holder.addEventListener('keydown', (e) => this.setEventsToNestedBlock(e));
       item.focus();
     }
     this.itemsId.push(newBlock.id);
+  }
+
+  /**
+   * Sets the events to be listened through the holder
+   * in a nested block.
+   *
+   * @param {KeyboardEvent} e - key down event
+   */
+  setEventsToNestedBlock(e) {
+    if (e.code === 'Enter') {
+      this.createParagraphFromIt();
+    } else {
+      const indexBlock = this.api.blocks.getCurrentBlockIndex();
+      const nestedBlock = this.api.blocks.getBlockByIndex(indexBlock);
+      const { holder } = nestedBlock;
+
+      if (e.code === 'Tab' && e.shiftKey) {
+        this.extractBlock(indexBlock, holder);
+      } else if (e.code === 'Backspace') {
+        setTimeout(this.removeBlock.bind(this, holder.id));
+      }
+    }
   }
 
   /**
@@ -207,22 +225,47 @@ export default class ToggleBlock {
   }
 
   /**
-   * If the toggle root is empty and the key event received is 'backspace'
-   * the toggle root is removed.
+   * Deletes the toggle structure and converts the main text and the nested blocks
+   * in regular blocks.
    *
    * @param {KeyboardEvent} e - key down event
    */
   removeToggle(e) {
     if (e.code === 'Backspace') {
       const { children } = this.wrapper;
-      const { length } = children[1].textContent;
+      const content = children[1].innerHTML;
 
-      if (length === 0) {
+      const cursorPosition = document.getSelection();
+
+      if (cursorPosition.focusOffset === 0) {
         const index = this.api.blocks.getCurrentBlockIndex();
+        const breakLine = content.indexOf('<br>');
+        const end = breakLine === -1 ? content.length : breakLine;
+        const { items } = this.data;
 
+        this.removeItemAttributes(index, items);
         this.api.blocks.delete(index);
-        this.removeFullToggle(index);
+        this.api.blocks.insert('paragraph', { text: content.slice(0, end) }, {}, index, 1);
+        this.api.caret.setToBlock(index);
       }
+    }
+  }
+
+  /**
+   * Converts the nested blocks in regular blocks.
+   *
+   * @param {number} entryIndex - toggle index
+   * @param {number} items - number of nested blocks
+   */
+  removeItemAttributes(entryIndex, items) {
+    for (let i = 1; i < items + 1; i += 1) {
+      const newBlock = this.api.blocks.getBlockByIndex(entryIndex + i);
+      const { holder } = newBlock;
+      const content = holder.firstChild;
+      const item = content.firstChild;
+
+      this.api.blocks.delete(entryIndex + i);
+      this.api.blocks.insert('paragraph', { text: item.innerHTML }, {}, entryIndex + i, true);
     }
   }
 
@@ -230,33 +273,32 @@ export default class ToggleBlock {
    * Extracts a nested block from a toggle
    * with 'shift + tab' combination
    *
-   * @param {Object} item
-   * @param {KeyboardEvent} e
+   * @param {number} blockIndex - block index
+   * @param {HTMLDivElement} holderBlock - block holder
    */
-  extractBlock(item, e) {
-    if (e.code === 'Tab' && e.shiftKey) {
-      const indexBlock = this.api.blocks.getCurrentBlockIndex();
-      const toggle = this.wrapper.children[1];
-      // const items = parseInt(this.wrapper.getAttribute('items'), 10);
+  extractBlock(blockIndex, blockHolder) {
+    const cover = blockHolder.firstChild;
+    const container = cover.firstChild;
+    const toggle = this.wrapper.children[1];
+    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
 
-      let currentBlock = {};
-      let index;
+    let currentBlock = {};
+    let index;
 
-      while (currentBlock[1] !== toggle) {
-        this.api.caret.setToPreviousBlock('end', 0);
-        index = this.api.blocks.getCurrentBlockIndex();
+    while (currentBlock[1] !== toggle) {
+      this.api.caret.setToPreviousBlock('end', 0);
+      index = this.api.blocks.getCurrentBlockIndex();
 
-        const block = this.api.blocks.getBlockByIndex(index);
-        const { holder } = block;
-        const blockCover = holder.firstChild;
-        const blockContent = blockCover.firstChild;
-        currentBlock = blockContent.children;
-      }
-
-      this.api.blocks.delete(indexBlock);
-      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + this.data.items, true);
-      this.updateItems(-1);
+      const toggleBlock = this.api.blocks.getBlockByIndex(index);
+      const { holder } = toggleBlock;
+      const blockCover = holder.firstChild;
+      const blockContent = blockCover.firstChild;
+      currentBlock = blockContent.children;
     }
+
+    this.api.blocks.delete(blockIndex);
+    this.api.blocks.insert('paragraph', { text: container.textContent }, {}, index + this.data.items, true);
+    this.updateItems(-1);
   }
 
   /**
@@ -615,15 +657,12 @@ export default class ToggleBlock {
    * When a nested block is removes, the 'items' attribute
    * is updated, subtracting from it an unit.
    * @param {string} paragraphId - paragraph identifier
-   * @param {KeyboardEvent} e - key down event
    */
-  removeBlock(paragraphId, e) {
-    if (e.code === 'Backspace') {
-      const block = document.getElementById(paragraphId);
+  removeBlock(paragraphId) {
+    const block = document.getElementById(paragraphId);
 
-      if (block === null) {
-        this.updateItems(-1);
-      }
+    if (block === null) {
+      this.updateItems(-1);
     }
   }
 
