@@ -94,8 +94,6 @@ export default class ToggleBlock {
 
   /**
    * Calls the method to add the required properties to the new block.
-   *
-   * @param {KeyboardEvent} e - key down event
    */
   createParagraphFromIt() {
     this.updateItems(1);
