@@ -539,6 +539,10 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * Adds mutation observer to restore the item attributes when the
+   * editorjs-undo plugin is executed and they're lost.
+   */
   addSupportForUndoAndRedoActions() {
     const target = document.querySelector('div.codex-editor__redactor');
 
@@ -555,6 +559,9 @@ export default class ToggleBlock {
     observer.observe(target, config);
   }
 
+  /**
+   * Restores the item attributes to nested blocks.
+   */
   restoreItemAttributes() {
     if (this.wrapper !== undefined) {
       const items = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
