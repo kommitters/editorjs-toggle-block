@@ -158,6 +158,9 @@ export default class ToggleBlock {
       input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
       input.addEventListener('keydown', this.removeToggle.bind(this));
 
+      // Sets the focus at the end of the text when a nested block is deleted with the backspace key
+      input.addEventListener('focusin', () => this.setFocusToggleRootAtTheEnd());
+
       // Establishes the placeholder for the toggle root when it's empty
       input.addEventListener('keyup', this.setPlaceHolder.bind(this));
       input.setAttribute('placeholder', 'Toggle');
@@ -178,6 +181,22 @@ export default class ToggleBlock {
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
     this.wrapper.appendChild(defaultContent);
+  }
+
+  /**
+   * Sets the focus at the end of the toggle root when
+   * a nested block is deleted through the backspace key.
+   */
+  setFocusToggleRootAtTheEnd() {
+    const toggle = document.activeElement;
+    const selection = window.getSelection();
+    const range = document.createRange();
+
+    selection.removeAllRanges();
+    range.selectNodeContents(toggle);
+    range.collapse(false);
+    selection.addRange(range);
+    toggle.focus();
   }
 
   /**
