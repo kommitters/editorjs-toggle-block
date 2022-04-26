@@ -86,7 +86,6 @@ export default class ToggleBlock {
 
       setTimeout(() => {
         this.api.blocks.insert();
-        this.updateItems(1);
         this.setAttributesToNewBlock();
       }, 100);
     }
@@ -97,10 +96,7 @@ export default class ToggleBlock {
    * @param {KeyboardEvent} e - key down event
    */
   createParagraphFromIt(e) {
-    if (e.code === 'Enter') {
-      this.updateItems(1);
-      this.setAttributesToNewBlock();
-    }
+    if (e.code === 'Enter') this.setAttributesToNewBlock();
   }
 
   /**
@@ -204,7 +200,6 @@ export default class ToggleBlock {
    */
   clickInDefaultContent() {
     this.api.blocks.insert();
-    this.updateItems(1);
     this.setAttributesToNewBlock();
     this.setDefaultContent();
   }
@@ -280,7 +275,8 @@ export default class ToggleBlock {
     if (e.code === 'Tab' && e.shiftKey) {
       const indexBlock = this.api.blocks.getCurrentBlockIndex();
       const toggle = this.wrapper.children[1];
-      // const items = parseInt(this.wrapper.getAttribute('items'), 10);
+      const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+      const { length } = children;
 
       let currentBlock = {};
       let index;
@@ -297,8 +293,7 @@ export default class ToggleBlock {
       }
 
       this.api.blocks.delete(indexBlock);
-      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + this.data.items, true);
-      this.updateItems(-1);
+      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + length, true);
     }
   }
 
@@ -662,28 +657,20 @@ export default class ToggleBlock {
   }
 
   /**
-   * When a nested block is removes, the 'items' attribute
+   * When a nested block is removed, the 'items' attribute
    * is updated, subtracting from it an unit.
    * @param {string} paragraphId - paragraph identifier
+   * @param {string} id - block identifier
    * @param {KeyboardEvent} e - key down event
    */
-  removeBlock(paragraphId, e) {
+  removeBlock(paragraphId, id, e) {
     if (e.code === 'Backspace') {
       const block = document.getElementById(paragraphId);
 
       if (block === null) {
-        this.updateItems(-1);
+        const position = this.itemsId.indexOf(id);
+        this.itemsId.splice(position, 1);
       }
     }
-  }
-
-  /**
-   * Increase the indicated value to 'items'
-   * attribute, i.e., items += val
-   *
-   * @param {number} val - integer number
-   */
-  updateItems(val) {
-    this.data.items += val;
   }
 }
