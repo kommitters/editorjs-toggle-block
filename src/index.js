@@ -545,19 +545,21 @@ export default class ToggleBlock {
    * when the undo action is executed and they're lost.
    */
   addSupportForUndoAndRedoActions() {
-    const target = document.querySelector('div.codex-editor__redactor');
+    if (!this.readOnly) {
+      const target = document.querySelector('div.codex-editor__redactor');
 
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          setTimeout(this.restoreItemAttributes.bind(this));
-        }
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            setTimeout(this.restoreItemAttributes.bind(this));
+          }
+        });
       });
-    });
 
-    const config = { attributes: true, childList: true, characterData: true };
+      const config = { attributes: true, childList: true, characterData: true };
 
-    observer.observe(target, config);
+      observer.observe(target, config);
+    }
   }
 
   /**
@@ -565,16 +567,11 @@ export default class ToggleBlock {
    */
   restoreItemAttributes() {
     if (this.wrapper !== undefined) {
-      const items = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-      const { length } = items;
+      const index = this.api.blocks.getCurrentBlockIndex();
+      const block = this.api.blocks.getBlockByIndex(index);
 
-      if (length < this.data.items) {
-        const currentIndex = this.api.blocks.getCurrentBlockIndex();
-        const currentBlock = this.api.blocks.getBlockByIndex(currentIndex);
-
-        if (this.itemsId.includes(currentBlock.id)) {
-          this.setAttributesToNewBlock(currentIndex);
-        }
+      if (this.itemsId.includes(block.id) && !this.isPartOfAToggle(document.activeElement)) {
+        this.setAttributesToNewBlock(index);
       }
     }
   }
