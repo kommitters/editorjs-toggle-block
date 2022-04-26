@@ -472,9 +472,11 @@ export default class ToggleBlock {
   save(blockContent) {
     const { children } = blockContent;
     const caption = children[1].innerHTML;
+    const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
 
     return Object.assign(this.data, {
       text: caption,
+      items: blocks.length,
     });
   }
 
