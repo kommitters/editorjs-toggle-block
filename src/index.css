@@ -38,9 +38,12 @@
   background-color: transparent;
 }
 
-.toggle-block__item,
 .toggle-block__content-default {
   margin-left: 20px;
+}
+
+.toggle-block__item {
+  margin-left: 39px;
 }
 
 .toggle-block__content-default {

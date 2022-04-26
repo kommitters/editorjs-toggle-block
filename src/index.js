@@ -120,7 +120,7 @@ export default class ToggleBlock {
     holder.setAttribute('foreignKey', foreignKey);
     holder.setAttribute('id', id);
 
-    item.classList.add('toggle-block__item');
+    holder.classList.add('toggle-block__item');
 
     if (!this.readOnly) {
       holder.addEventListener('keydown', this.extractBlock.bind(this, item));
