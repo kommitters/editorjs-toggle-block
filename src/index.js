@@ -54,7 +54,7 @@ export default class ToggleBlock {
     this.data = {
       text: data.text || '',
       status: data.status || 'open',
-      items: parseInt(data.items, 10) || 0,
+      items: data.items || 0,
     };
     this.itemsId = [];
     this.api = api;
@@ -109,6 +109,11 @@ export default class ToggleBlock {
     const id = crypto.randomUUID();
 
     const newBlock = this.api.blocks.getBlockByIndex(index);
+
+    if (!this.itemsId.includes(newBlock.id)) {
+      this.itemsId.splice(index - 1, 0, newBlock.id);
+    }
+
     const { holder } = newBlock;
     const content = holder.firstChild;
     const item = content.firstChild;
@@ -121,10 +126,9 @@ export default class ToggleBlock {
     if (!this.readOnly) {
       holder.addEventListener('keydown', this.extractBlock.bind(this, item));
       holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
-      holder.addEventListener('keydown', this.removeBlock.bind(this, id));
+      holder.addEventListener('keydown', this.removeBlock.bind(this, id, newBlock.id));
       item.focus();
     }
-    this.itemsId.push(newBlock.id);
   }
 
   /**
@@ -135,7 +139,6 @@ export default class ToggleBlock {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
     this.wrapper.id = crypto.randomUUID();
-    // this.wrapper.setAttribute('items', this.data.items);
 
     const icon = document.createElement('span');
     const input = document.createElement('div');
@@ -210,13 +213,13 @@ export default class ToggleBlock {
    * otherwise it removes it.
    */
   setDefaultContent() {
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
     const { firstChild, lastChild } = this.wrapper;
     const { status } = this.data;
-    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
-    const value = (this.data.items > 0 || status === 'closed');
+    const value = (children.length > 0 || status === 'closed');
 
     lastChild.classList.toggle('toggle-block__hidden', value);
-    firstChild.style.color = (this.data.items === 0) ? 'gray' : 'black';
+    firstChild.style.color = (children.length === 0) ? 'gray' : 'black';
   }
 
   /**
@@ -236,9 +239,9 @@ export default class ToggleBlock {
         const index = this.api.blocks.getCurrentBlockIndex();
         const breakLine = content.indexOf('<br>');
         const end = breakLine === -1 ? content.length : breakLine;
-        const { items } = this.data;
+        const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
 
-        this.removeItemAttributes(index, items);
+        this.removeItemAttributes(index, blocks);
         this.api.blocks.delete(index);
         this.api.blocks.insert('paragraph', { text: content.slice(0, end) }, {}, index, 1);
         this.api.caret.setToBlock(index);
@@ -352,7 +355,6 @@ export default class ToggleBlock {
   renderItems() {
     const blocksInEditor = this.api.blocks.getBlocksCount();
     const icon = this.wrapper.firstChild;
-    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
     let toggleRoot;
 
     if (this.readOnly) {
@@ -398,13 +400,11 @@ export default class ToggleBlock {
           j += 1;
         } else {
           this.data.items = j;
-          // this.wrapper.setAttribute('items', j);
           break;
         }
       }
     } else {
       this.data.items = 0;
-      // this.wrapper.setAttribute('items', 0);
     }
 
     icon.addEventListener('click', () => {
@@ -447,19 +447,19 @@ export default class ToggleBlock {
    * @param {number} index - toggle index
    */
   hideAndShowBlocks(index = null) {
-    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
     const value = (this.data.status === 'closed');
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    const { length } = children;
 
     let toggleIndex = index === null ? this.api.blocks.getCurrentBlockIndex() : index;
 
-    if (this.data.items > 0) {
-      for (let i = 0; i < this.data.items; i += 1) {
+    if (length > 0) {
+      for (let i = 0; i < length; i += 1) {
         const { holder } = this.api.blocks.getBlockByIndex(toggleIndex += 1);
         holder.hidden = value;
       }
     } else {
       const { lastChild } = this.wrapper;
-
       lastChild.classList.toggle('toggle-block__hidden', value);
     }
   }
@@ -510,9 +510,10 @@ export default class ToggleBlock {
    * @param {object} children - blocks inside the toggle
    */
   removeFullToggle(toggleIndex) {
-    // const items = parseInt(this.wrapper.getAttribute('items'), 10);
+    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    const { length } = children;
 
-    for (let i = toggleIndex; i < toggleIndex + this.data.items; i += 1) {
+    for (let i = toggleIndex; i < toggleIndex + length; i += 1) {
       this.api.blocks.delete(toggleIndex);
     }
   }
