@@ -181,7 +181,7 @@ export default class ToggleBlock {
       const { length } = children;
 
       if (length > 0) {
-        const destiny = index + length + 1;
+        const destiny = index + length;
         this.api.blocks.move(entryIndex, destiny);
       }
     }, 100);
