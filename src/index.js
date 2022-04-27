@@ -93,10 +93,9 @@ export default class ToggleBlock {
 
   /**
    * Calls the method to add the required properties to the new block.
-   * @param {KeyboardEvent} e - key down event
    */
-  createParagraphFromIt(e) {
-    if (e.code === 'Enter') this.setAttributesToNewBlock();
+  createParagraphFromIt() {
+    this.setAttributesToNewBlock();
   }
 
   /**
@@ -124,11 +123,59 @@ export default class ToggleBlock {
     holder.classList.add('toggle-block__item');
 
     if (!this.readOnly) {
-      holder.addEventListener('keydown', this.extractBlock.bind(this, item));
-      holder.addEventListener('keydown', this.createParagraphFromIt.bind(this));
-      holder.addEventListener('keydown', this.removeBlock.bind(this, id, newBlock.id));
+      holder.onkeydown = this.setEventsToNestedBlock.bind(this);
       item.focus();
     }
+  }
+
+  /**
+   * Sets the events to be listened through the holder
+   * in a nested block.
+   *
+   * @param {KeyboardEvent} e - key down event
+   */
+  setEventsToNestedBlock(e) {
+    if (e.code === 'Enter') {
+      this.createParagraphFromIt();
+    } else {
+      const indexBlock = this.api.blocks.getCurrentBlockIndex();
+      const nestedBlock = this.api.blocks.getBlockByIndex(indexBlock);
+      const { holder } = nestedBlock;
+
+      if (e.code === 'Tab' && e.shiftKey) {
+        this.extractBlock(indexBlock);
+      } else if (e.code === 'Backspace') {
+        setTimeout(this.removeBlock.bind(this, holder.id));
+      }
+    }
+  }
+
+  /**
+   * Gets the index of the new block, then assigns the required properties,
+   * and finally sends the focus.
+   */
+  removeAttributesFromNewBlock(entryIndex = null) {
+    const index = entryIndex === null ? this.api.blocks.getCurrentBlockIndex() : entryIndex;
+
+    const newBlock = this.api.blocks.getBlockByIndex(index);
+
+    if (!this.itemsId.includes(newBlock.id)) {
+      const i = this.itemsId.indexOf(newBlock.id);
+      this.itemsId.splice(i, 1);
+    }
+
+    const { holder } = newBlock;
+    const content = holder.firstChild;
+    const item = content.firstChild;
+
+    holder.removeAttribute('foreignKey');
+    holder.removeAttribute('id');
+
+    holder.classList.remove('toggle-block__item');
+
+    holder.onkeydown = {};
+    this.api.toolbar.close();
+    setTimeout(() => item.focus(), 100);
   }
 
   /**
@@ -274,30 +321,24 @@ export default class ToggleBlock {
    * @param {HTMLDivElement} item - block container
    * @param {KeyboardEvent} e - key down event
    */
-  extractBlock(item, e) {
-    if (e.code === 'Tab' && e.shiftKey) {
-      const indexBlock = this.api.blocks.getCurrentBlockIndex();
-      const toggle = this.wrapper.children[1];
-      const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-      const { length } = children;
+  extractBlock(entryIndex) {
+    const toggle = this.wrapper.children[1];
 
-      let currentBlock = {};
-      let index;
+    let currentBlock = {};
+    let index;
 
-      while (currentBlock[1] !== toggle) {
-        this.api.caret.setToPreviousBlock('end', 0);
-        index = this.api.blocks.getCurrentBlockIndex();
+    while (currentBlock[1] !== toggle) {
+      this.api.caret.setToPreviousBlock('end', 0);
+      index = this.api.blocks.getCurrentBlockIndex();
 
-        const block = this.api.blocks.getBlockByIndex(index);
-        const { holder } = block;
-        const blockCover = holder.firstChild;
-        const blockContent = blockCover.firstChild;
-        currentBlock = blockContent.children;
-      }
-
-      this.api.blocks.delete(indexBlock);
-      this.api.blocks.insert('paragraph', { text: item.textContent }, {}, index + length, true);
+      const block = this.api.blocks.getBlockByIndex(index);
+      const { holder } = block;
+      const blockCover = holder.firstChild;
+      const blockContent = blockCover.firstChild;
+      currentBlock = blockContent.children;
     }
+
+    this.removeAttributesFromNewBlock(entryIndex);
   }
 
   /**
@@ -636,7 +677,6 @@ export default class ToggleBlock {
       holder.removeAttribute('will-be-a-nested-block');
       this.setAttributesToNewBlock(blockIndex);
       this.api.toolbar.close();
-      this.updateItems(1);
     }
   }
 
@@ -661,16 +701,13 @@ export default class ToggleBlock {
    * is updated, subtracting from it an unit.
    * @param {string} paragraphId - paragraph identifier
    * @param {string} id - block identifier
-   * @param {KeyboardEvent} e - key down event
    */
-  removeBlock(paragraphId, id, e) {
-    if (e.code === 'Backspace') {
-      const block = document.getElementById(paragraphId);
+  removeBlock(paragraphId, id) {
+    const block = document.getElementById(paragraphId);
 
-      if (block === null) {
-        const position = this.itemsId.indexOf(id);
-        this.itemsId.splice(position, 1);
-      }
+    if (block === null) {
+      const position = this.itemsId.indexOf(id);
+      this.itemsId.splice(position, 1);
     }
   }
 }
