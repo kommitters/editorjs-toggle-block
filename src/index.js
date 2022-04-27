@@ -156,34 +156,43 @@ export default class ToggleBlock {
    */
   removeAttributesFromNewBlock(entryIndex = null) {
     const index = entryIndex === null ? this.api.blocks.getCurrentBlockIndex() : entryIndex;
-
     const newBlock = this.api.blocks.getBlockByIndex(index);
+    const { holder } = newBlock;
 
     if (!this.itemsId.includes(newBlock.id)) {
       const i = this.itemsId.indexOf(newBlock.id);
       this.itemsId.splice(i, 1);
     }
 
-    const { holder } = newBlock;
-    const content = holder.firstChild;
-    const item = content.firstChild;
-
     holder.removeAttribute('foreignKey');
     holder.removeAttribute('id');
-
-    holder.classList.remove('toggle-block__item');
-
     holder.onkeydown = {};
+
     this.api.toolbar.close();
+
     setTimeout(() => {
-      item.focus();
+      holder.focus();
       const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
       const { length } = children;
 
       if (length > 0) {
-        const destiny = index + length;
-        this.api.blocks.move(entryIndex, destiny);
+        let destiny = index;
+        let blockContent = this.wrapper;
+        let holderBlock = this.wrapper;
+
+        while ((this.isPartOfAToggle(holderBlock) || this.isPartOfAToggle(blockContent))) {
+          this.api.caret.setToNextBlock('end', 0);
+          destiny = this.api.blocks.getCurrentBlockIndex();
+          const block = this.api.blocks.getBlockByIndex(destiny);
+          holderBlock = block.holder;
+          const blockCover = holderBlock.firstChild;
+          blockContent = blockCover.firstChild;
+        }
+        this.api.caret.setToBlock(index);
+        this.api.blocks.move(destiny);
       }
+
+      holder.classList.remove('toggle-block__item');
     }, 100);
   }
 
@@ -327,8 +336,7 @@ export default class ToggleBlock {
    * Extracts a nested block from a toggle
    * with 'shift + tab' combination
    *
-   * @param {HTMLDivElement} item - block container
-   * @param {KeyboardEvent} e - key down event
+   * @param {HTMLDivElement} entryIndex - block index
    */
   extractBlock(entryIndex) {
     const toggle = this.wrapper.children[1];
@@ -559,7 +567,6 @@ export default class ToggleBlock {
    * Removes a toggle root and its nested blocks.
    *
    * @param {number} toggleIndex - toggle index
-   * @param {object} children - blocks inside the toggle
    */
   removeFullToggle(toggleIndex) {
     const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
@@ -581,9 +588,12 @@ export default class ToggleBlock {
         const blockContainer = document.activeElement;
         const currentBlock = this.api.blocks.getCurrentBlockIndex();
 
+        const blockCover = blockContainer.parentElement;
+        const block = blockCover.parentElement;
+
         if (e.code === 'Space') {
           this.createToggleWithShortcut(blockContainer);
-        } else if (currentBlock > 0 && !this.isPartOfAToggle(blockContainer) && e.code === 'Tab') {
+        } else if (currentBlock > 0 && !(this.isPartOfAToggle(blockContainer) || this.isPartOfAToggle(block)) && e.code === 'Tab') {
           this.nestBlock(blockContainer);
         }
       });
@@ -601,7 +611,7 @@ export default class ToggleBlock {
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.type === 'childList') {
-            setTimeout(this.restoreItemAttributes.bind(this));
+            setTimeout(this.restoreItemAttributes.bind(this, mutation));
           }
         });
       });
@@ -615,13 +625,17 @@ export default class ToggleBlock {
   /**
    * Restores the item attributes to nested blocks.
    */
-  restoreItemAttributes() {
+  restoreItemAttributes(mutation) {
     if (this.wrapper !== undefined) {
       const index = this.api.blocks.getCurrentBlockIndex();
       const block = this.api.blocks.getBlockByIndex(index);
+      const currentBlockValidation = !this.isPartOfAToggle(block.holder);
 
-      if (this.itemsId.includes(block.id) && !this.isPartOfAToggle(document.activeElement)) {
+      if (this.itemsId.includes(block.id) && currentBlockValidation) {
         this.setAttributesToNewBlock(index);
+      } else if (this.isPartOfAToggle(mutation.removedNodes[0]) && currentBlockValidation) {
+        this.setAttributesToNewBlock(index);
+        this.itemsId[index] = block.id;
       }
     }
   }
@@ -654,7 +668,7 @@ export default class ToggleBlock {
     const previousCover = previousBlock.firstChild;
     const previousContainer = previousCover.firstChild;
 
-    if (this.isPartOfAToggle(previousContainer)) {
+    if (this.isPartOfAToggle(previousContainer) || this.isPartOfAToggle(previousBlock)) {
       const foreignId = previousBlock.getAttribute('foreignKey');
       const toggleId = previousContainer.getAttribute('id');
 
