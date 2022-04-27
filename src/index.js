@@ -175,7 +175,16 @@ export default class ToggleBlock {
 
     holder.onkeydown = {};
     this.api.toolbar.close();
-    setTimeout(() => item.focus(), 100);
+    setTimeout(() => {
+      item.focus();
+      const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+      const { length } = children;
+
+      if (length > 0) {
+        const destiny = index + length + 1;
+        this.api.blocks.move(entryIndex, destiny);
+      }
+    }, 100);
   }
 
   /**
