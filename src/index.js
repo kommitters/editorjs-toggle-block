@@ -26,14 +26,6 @@ export default class ToggleBlock {
   }
 
   /**
-   * Disables the creation of new EditorJS blocks by pressing
-   * 'enter' when in a toggle block.
-   */
-  static get enableLineBreaks() {
-    return true;
-  }
-
-  /**
    * Notify core that the read-only mode is supported
    *
    * @returns {boolean}
@@ -83,9 +75,7 @@ export default class ToggleBlock {
         this.resolveToggleAction();
         this.hideAndShowBlocks(originalIndex);
       }
-
-      this.api.blocks.insert();
-      this.setAttributesToNewBlock();
+      setTimeout(() => this.setAttributesToNewBlock());
     }
   }
 
@@ -195,7 +185,7 @@ export default class ToggleBlock {
     // Events
     if (!this.readOnly) {
       // Events to create other blocks and destroy the toggle
-      input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
+      input.addEventListener('keydown', (e) => this.createParagraphFromToggleRoot(e));
       input.addEventListener('keydown', this.removeToggle.bind(this));
 
       // Sets the focus at the end of the text when a nested block is deleted with the backspace key
