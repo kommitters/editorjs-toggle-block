@@ -77,13 +77,27 @@ export default class ToggleBlock {
    */
   createParagraphFromToggleRoot(e) {
     if (e.code === 'Enter') {
+      const currentPosition = document.getSelection().focusOffset;
       const originalIndex = this.api.blocks.getCurrentBlockIndex();
+      const block = this.api.blocks.getBlockByIndex(originalIndex);
+      const { holder } = block;
+      const blockCover = holder.firstChild;
+      const blockContent = blockCover.firstChild;
+      const content = blockContent.children[1].innerHTML;
+
+      const breakLine = content.indexOf('<br>');
+      const end = breakLine === -1 ? content.length : breakLine;
 
       if (this.data.status === 'closed') {
         this.resolveToggleAction();
         this.hideAndShowBlocks(originalIndex);
       }
-      setTimeout(() => this.setAttributesToNewBlock());
+
+      const newText = content.slice(end + 4, currentPosition.focusOffset);
+      blockContent.children[1].innerHTML = content.slice(currentPosition.focusOffset, end);
+
+      this.api.blocks.insert('paragraph', { text: newText }, {}, originalIndex + 1, 1);
+      this.setAttributesToNewBlock();
     }
   }
 
@@ -140,34 +154,58 @@ export default class ToggleBlock {
 
       if (e.code === 'Tab' && e.shiftKey) {
         this.extractBlock(indexBlock);
-      } else if (e.code === 'Backspace') {
-        this.removeBlock(holder.id);
+      }
+      if (e.code === 'Backspace') {
+        const cursorPosition = document.getSelection().focusOffset;
+        this.removeBlock(holder, nestedBlock.id, cursorPosition);
       }
     }
   }
 
   /**
-   * Gets the index of the new block, then assigns the required properties,
-   * and finally sends the focus.
+   * When a nested block is removed, the 'items' attribute
+   * is updated, subtracting from it an unit.
+   * @param {string} id - block identifier
+   */
+  removeBlock(holder, id, cursorPosition) {
+    if (cursorPosition === 0) {
+      const currentBlock = holder.nextSibling;
+      const blockCover = currentBlock.firstChild;
+      const blockContent = blockCover.firstChild;
+      const oldContent = blockContent.innerHTML;
+
+      const toggleCover = holder.firstChild;
+      const toggleContent = toggleCover.firstChild;
+
+      toggleContent.children[1].innerHTML += oldContent;
+
+      const position = this.itemsId.indexOf(id);
+      this.itemsId.splice(position, 1);
+
+      const togglePosition = this.api.blocks.getCurrentBlockIndex();
+      this.api.blocks.delete(togglePosition + 1);
+    }
+  }
+
+  /**
+   * Removes all properties of a nested block.
+   *
+   * @param {number} destiny - block position
    */
   removeAttributesFromNewBlock(destiny) {
-    this.api.blocks.move(destiny);
+    const newBlock = this.api.blocks.getBlockByIndex(destiny);
+    const { holder } = newBlock;
 
-    setTimeout(() => {
-      const newBlock = this.api.blocks.getBlockByIndex(destiny);
-      const { holder } = newBlock;
+    if (!this.itemsId.includes(newBlock.id)) {
+      const i = this.itemsId.indexOf(newBlock.id);
+      this.itemsId.splice(i, 1);
+    }
 
-      if (!this.itemsId.includes(newBlock.id)) {
-        const i = this.itemsId.indexOf(newBlock.id);
-        this.itemsId.splice(i, 1);
-      }
-
-      holder.removeAttribute('foreignKey');
-      holder.removeAttribute('id');
-      holder.onkeydown = {};
-      holder.classList.remove('toggle-block__item');
-    }, 150);
-    this.api.toolbar.close();
+    holder.removeAttribute('foreignKey');
+    holder.removeAttribute('id');
+    holder.onkeydown = {};
+    holder.onkeyup = {};
+    holder.classList.remove('toggle-block__item');
   }
 
   /**
@@ -193,7 +231,7 @@ export default class ToggleBlock {
     // Events
     if (!this.readOnly) {
       // Events to create other blocks and destroy the toggle
-      input.addEventListener('keydown', (e) => this.createParagraphFromToggleRoot(e));
+      input.addEventListener('keyup', this.createParagraphFromToggleRoot.bind(this));
       input.addEventListener('keydown', this.removeToggle.bind(this));
 
       // Sets the focus at the end of the text when a nested block is deleted with the backspace key
@@ -280,29 +318,14 @@ export default class ToggleBlock {
         const end = breakLine === -1 ? content.length : breakLine;
         const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
 
-        this.removeItemAttributes(index, blocks);
+        for (let i = 1; i < blocks.length + 1; i += 1) {
+          this.removeAttributesFromNewBlock(index + i);
+        }
+
         this.api.blocks.delete(index);
         this.api.blocks.insert('paragraph', { text: content.slice(0, end) }, {}, index, 1);
         this.api.caret.setToBlock(index);
       }
-    }
-  }
-
-  /**
-   * Converts the nested blocks in regular blocks.
-   *
-   * @param {number} entryIndex - toggle index
-   * @param {number} items - number of nested blocks
-   */
-  removeItemAttributes(entryIndex, items) {
-    for (let i = 1; i < items + 1; i += 1) {
-      const newBlock = this.api.blocks.getBlockByIndex(entryIndex + i);
-      const { holder } = newBlock;
-      const content = holder.firstChild;
-      const item = content.firstChild;
-
-      this.api.blocks.delete(entryIndex + i);
-      this.api.blocks.insert('paragraph', { text: item.innerHTML }, {}, entryIndex + i, true);
     }
   }
 
@@ -333,7 +356,13 @@ export default class ToggleBlock {
     const destiny = index + items.length;
 
     this.api.caret.setToBlock(entryIndex);
-    this.removeAttributesFromNewBlock(destiny);
+
+    if (items.length > 1) {
+      this.api.blocks.move(destiny);
+    }
+
+    setTimeout(() => this.removeAttributesFromNewBlock(destiny), 200);
+    this.api.toolbar.close();
   }
 
   /**
@@ -702,20 +731,5 @@ export default class ToggleBlock {
     const answer = classes.includes('toggle-block__item') || (classes.includes('toggle-block__input') || classes.includes('toggle-block__selector'));
 
     return answer;
-  }
-
-  /**
-   * When a nested block is removed, the 'items' attribute
-   * is updated, subtracting from it an unit.
-   * @param {string} paragraphId - paragraph identifier
-   * @param {string} id - block identifier
-   */
-  removeBlock(paragraphId, id) {
-    const block = document.getElementById(paragraphId);
-
-    if (block === null) {
-      const position = this.itemsId.indexOf(id);
-      this.itemsId.splice(position, 1);
-    }
   }
 }
