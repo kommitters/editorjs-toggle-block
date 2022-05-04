@@ -26,6 +26,14 @@ export default class ToggleBlock {
   }
 
   /**
+   * Disables the creation of new EditorJS blocks by pressing
+   * 'enter' when in a toggle block.
+   */
+  static get enableLineBreaks() {
+    return true;
+  }
+
+  /**
    * Notify core that the read-only mode is supported
    *
    * @returns {boolean}
