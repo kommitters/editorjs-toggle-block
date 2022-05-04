@@ -685,13 +685,7 @@ export default class ToggleBlock {
     if (this.isPartOfAToggle(previousContainer) || this.isPartOfAToggle(previousBlock)) {
       const foreignId = previousBlock.getAttribute('foreignKey');
       const toggleId = previousContainer.getAttribute('id');
-
-      let foreignKey;
-      if (foreignId) {
-        foreignKey = foreignId;
-      } else if (toggleId) {
-        foreignKey = toggleId;
-      }
+      const foreignKey = foreignId || toggleId;
 
       block.setAttribute('will-be-a-nested-block', true);
 
