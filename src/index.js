@@ -54,6 +54,7 @@ export default class ToggleBlock {
     this.data = {
       text: data.text || '',
       status: data.status || 'open',
+      fk: data.fk || crypto.randomUUID(),
       items: data.items || 0,
     };
     this.itemsId = [];
@@ -62,6 +63,7 @@ export default class ToggleBlock {
     this.readOnly = readOnly || false;
     this.addListeners();
     this.addSupportForUndoAndRedoActions();
+    this.addSupportForDragAndDropActions();
   }
 
   /**
@@ -215,7 +217,7 @@ export default class ToggleBlock {
   createToggle() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('toggle-block__selector');
-    this.wrapper.id = crypto.randomUUID();
+    this.wrapper.id = this.data.fk;
 
     const icon = document.createElement('span');
     const input = document.createElement('div');
@@ -631,6 +633,49 @@ export default class ToggleBlock {
       const config = { attributes: true, childList: true, characterData: true };
 
       observer.observe(target, config);
+    }
+  }
+
+  addSupportForDragAndDropActions() {
+    if (!this.readOnly) {
+      if (this.wrapper === undefined) {
+        setTimeout(() => this.addSupportForDragAndDropActions(), 250);
+        return;
+      }
+
+      const settingsButton = document.querySelector('.ce-toolbar__settings-btn');
+
+      settingsButton.setAttribute('draggable', 'true');
+      settingsButton.addEventListener('dragstart', () => {
+        this.startBlock = this.api.blocks.getCurrentBlockIndex();
+        this.nameDragged = this.api.blocks.getBlockByIndex(this.startBlock).name;
+        this.holderDragged = this.api.blocks.getBlockByIndex(this.startBlock).holder;
+      });
+
+      document.addEventListener('drop', (event) => {
+        if (this.nameDragged === 'toggle') {
+          const isCurrentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`) !== null;
+          if (isCurrentToggleDropped) {
+            const { target } = event;
+            if (document.contains(target)) {
+              const dropTarget = target.classList.contains('ce-block') ? target : target.closest('.ce-block');
+              if (dropTarget && dropTarget !== this.holderDragged) {
+                let endBlock = Array.from(dropTarget.parentNode.children).indexOf(dropTarget);
+
+                endBlock = this.startBlock < endBlock ? endBlock + 1 : endBlock;
+                let children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+                setTimeout(() => {
+                  children = this.startBlock >= endBlock ? [...children].reverse() : children;
+                  children.forEach((child) => {
+                    const childIndex = Array.from(dropTarget.parentNode.children).indexOf(child);
+                    this.api.blocks.move(endBlock, childIndex);
+                  });
+                });
+              }
+            }
+          }
+        }
+      });
     }
   }
 
