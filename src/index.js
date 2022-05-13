@@ -636,6 +636,10 @@ export default class ToggleBlock {
     }
   }
 
+  /**
+   * Adds drop listener to move the childs item
+   * when the drag and drop action is executed.
+   */
   addSupportForDragAndDropActions() {
     if (!this.readOnly) {
       if (this.wrapper === undefined) {
@@ -667,8 +671,8 @@ export default class ToggleBlock {
                 endBlock = this.startBlock < endBlock ? endBlock + 1 : endBlock;
                 let children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
                 setTimeout(() => {
-                  const isTargetAToggle = dropTarget.querySelectorAll('.toggle-block__selector').length > 0
-                    || dropTarget.getAttribute('foreignKey') !== null;
+                  const isTargetAToggle = (dropTarget.querySelectorAll('.toggle-block__selector').length > 0
+                    || dropTarget.getAttribute('foreignKey') !== null) && this.startBlock >= endBlock;
 
                   if (isTargetAToggle) {
                     const foreignKey = dropTarget.getAttribute('foreignKey') !== null
@@ -681,7 +685,7 @@ export default class ToggleBlock {
 
                   children = this.startBlock >= endBlock ? [...children].reverse() : children;
                   children.forEach((child) => {
-                    const childIndex = Array.from(dropTarget.parentNode.children).indexOf(child);
+                    const childIndex = getIndex(dropTarget, child);
                     this.api.blocks.move(endBlock, childIndex);
                     if (isTargetAToggle) {
                       this.setAttributesToNewBlock(endBlock, this.wrapper.id);
