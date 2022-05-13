@@ -696,7 +696,15 @@ export default class ToggleBlock {
                   this.setAttributesToNewBlock(newToggleIndex, foreignKey);
                 }
 
-                setTimeout(() => this.moveChildren(dropTarget, endBlock));
+                setTimeout(() => {
+                  this.moveChildren(dropTarget, endBlock);
+
+                  // If we are dropping out of a toggle we have to remove the attributes
+                  if (!isTargetAToggle) {
+                    const newToggleIndex = this.getIndex(this.holderDragged);
+                    this.removeAttributesFromNewBlock(newToggleIndex);
+                  }
+                });
               }
             }
           }
@@ -721,6 +729,7 @@ export default class ToggleBlock {
       if (isToggle) {
         const toggleIndex = this.getIndex(child);
         toggles.forEach((toggle) => this.moveChildren(child, toggleIndex + 1, toggle.getAttribute('id')));
+
         endBlock -= Math.abs(endBlock - toggleIndex);
         console.log(endBlock);
       }
