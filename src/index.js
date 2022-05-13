@@ -522,6 +522,7 @@ export default class ToggleBlock {
       children.forEach((child) => {
         child.hidden = value === 'closed';
 
+        // Check if this child is a toggle and hide his children too
         const toggles = child.querySelectorAll('.toggle-block__selector');
         const isToggle = toggles.length > 0;
         if (isToggle) {
@@ -640,6 +641,8 @@ export default class ToggleBlock {
     }
   }
 
+  getIndex = (target) => Array.from(target.parentNode.children).indexOf(target);
+
   /**
    * Adds drop listener to move the childs item
    * when the drag and drop action is executed.
@@ -650,8 +653,6 @@ export default class ToggleBlock {
         setTimeout(() => this.addSupportForDragAndDropActions(), 250);
         return;
       }
-
-      const getIndex = (context, target) => Array.from(context.parentNode.children).indexOf(target);
 
       // Set status in attribute to a proper hide and show
       const toggleBlock = document.querySelector(`#${this.wrapper.id}`).parentNode.parentNode;
@@ -676,41 +677,54 @@ export default class ToggleBlock {
             if (document.contains(target)) {
               const dropTarget = target.classList.contains('ce-block') ? target : target.closest('.ce-block');
               if (dropTarget && dropTarget !== this.holderDragged) {
-                let endBlock = getIndex(dropTarget, dropTarget);
+                let endBlock = this.getIndex(dropTarget);
 
                 // Control the toggle's children will be positioned down of the parent
                 endBlock = this.startBlock < endBlock ? endBlock + 1 : endBlock;
 
-                // Get the children of the dropped toggle
-                let children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-                setTimeout(() => {
-                  // Check if the item dropped is another toggle
-                  const isTargetAToggle = (dropTarget.querySelectorAll('.toggle-block__selector').length > 0
-                    || dropTarget.getAttribute('foreignKey') !== null) && this.startBlock >= endBlock;
+                // Check if the item dropped is another toggle
+                const isTargetAToggle = dropTarget.querySelectorAll('.toggle-block__selector').length > 0
+                  || dropTarget.getAttribute('foreignKey') !== null;
 
-                  // If is a toggle we have to add the attributes to make it a part of the toggle
-                  if (isTargetAToggle) {
-                    const foreignKey = dropTarget.getAttribute('foreignKey') !== null
-                      ? dropTarget.getAttribute('foreignKey')
-                      : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
+                // If is a toggle we have to add the attributes to make it a part of the toggle
+                if (isTargetAToggle) {
+                  const foreignKey = dropTarget.getAttribute('foreignKey') !== null
+                    ? dropTarget.getAttribute('foreignKey')
+                    : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
 
-                    const newToggleIndex = getIndex(dropTarget, this.holderDragged);
-                    this.setAttributesToNewBlock(newToggleIndex, foreignKey);
-                  }
+                  const newToggleIndex = this.getIndex(this.holderDragged);
+                  this.setAttributesToNewBlock(newToggleIndex, foreignKey);
+                }
 
-                  // Move all the children to the parent position
-                  children = this.startBlock >= endBlock ? [...children].reverse() : children;
-                  children.forEach((child) => {
-                    const childIndex = getIndex(dropTarget, child);
-                    this.api.blocks.move(endBlock, childIndex);
-                  });
-                });
+                setTimeout(() => this.moveChildren(dropTarget, endBlock));
               }
             }
           }
         }
       });
     }
+  }
+
+  moveChildren(dropTarget, endBlock, fk = this.wrapper.id) {
+    // Get the children of the dropped toggle
+    let children = document.querySelectorAll(`div[foreignKey="${fk}"]`);
+
+    // Move all the children to the parent position
+    children = this.startBlock >= endBlock ? [...children].reverse() : children;
+    children.forEach((child) => {
+      const childIndex = this.getIndex(child);
+      this.api.blocks.move(endBlock, childIndex);
+
+      // If this child is a toggle we have to move his children too
+      const toggles = child.querySelectorAll('.toggle-block__selector');
+      const isToggle = toggles.length > 0;
+      if (isToggle) {
+        const toggleIndex = this.getIndex(child);
+        toggles.forEach((toggle) => this.moveChildren(child, toggleIndex + 1, toggle.getAttribute('id')));
+        endBlock -= Math.abs(endBlock - toggleIndex);
+        console.log(endBlock);
+      }
+    });
   }
 
   /**
