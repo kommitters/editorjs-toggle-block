@@ -92,7 +92,7 @@ export default class ToggleBlock {
 
       if (this.data.status === 'closed') {
         this.resolveToggleAction();
-        this.hideAndShowBlocks(originalIndex);
+        this.hideAndShowBlocks();
       }
 
       const newText = content.slice(end + 4, currentPosition.focusOffset);
@@ -114,8 +114,7 @@ export default class ToggleBlock {
    * Gets the index of the new block, then assigns the required properties,
    * and finally sends the focus.
    */
-  setAttributesToNewBlock(entryIndex = null) {
-    const foreignKey = this.wrapper.id;
+  setAttributesToNewBlock(entryIndex = null, foreignKey = this.wrapper.id) {
     const index = entryIndex === null ? this.api.blocks.getCurrentBlockIndex() : entryIndex;
     const id = crypto.randomUUID();
 
@@ -477,12 +476,11 @@ export default class ToggleBlock {
     icon.addEventListener('click', () => {
       this.resolveToggleAction();
       setTimeout(() => {
-        const toggleIndex = this.readOnly ? toggleRoot : null;
-        this.hideAndShowBlocks(toggleIndex);
+        this.hideAndShowBlocks();
       });
     });
 
-    this.hideAndShowBlocks(toggleRoot);
+    this.hideAndShowBlocks();
   }
 
   /**
@@ -513,18 +511,20 @@ export default class ToggleBlock {
    *
    * @param {number} index - toggle index
    */
-  hideAndShowBlocks(index = null) {
+  hideAndShowBlocks(foreignKey = this.wrapper.id) {
     const value = (this.data.status === 'closed');
-    const children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    const children = document.querySelectorAll(`div[foreignKey="${foreignKey}"]`);
     const { length } = children;
 
-    let toggleIndex = index === null ? this.api.blocks.getCurrentBlockIndex() : index;
-
     if (length > 0) {
-      for (let i = 0; i < length; i += 1) {
-        const { holder } = this.api.blocks.getBlockByIndex(toggleIndex += 1);
-        holder.hidden = value;
-      }
+      children.forEach((child) => {
+        child.hidden = value;
+
+        const isToggle = child.querySelectorAll('.toggle-block__selector').length > 0;
+        if (isToggle) {
+          this.hideAndShowBlocks(child.querySelector('.toggle-block__selector').getAttribute('id'));
+        }
+      });
     } else {
       const { lastChild } = this.wrapper;
       lastChild.classList.toggle('toggle-block__hidden', value);
@@ -643,6 +643,8 @@ export default class ToggleBlock {
         return;
       }
 
+      const getIndex = (context, target) => Array.from(context.parentNode.children).indexOf(target);
+
       const settingsButton = document.querySelector('.ce-toolbar__settings-btn');
 
       settingsButton.setAttribute('draggable', 'true');
@@ -660,15 +662,30 @@ export default class ToggleBlock {
             if (document.contains(target)) {
               const dropTarget = target.classList.contains('ce-block') ? target : target.closest('.ce-block');
               if (dropTarget && dropTarget !== this.holderDragged) {
-                let endBlock = Array.from(dropTarget.parentNode.children).indexOf(dropTarget);
+                let endBlock = getIndex(dropTarget, dropTarget);
 
                 endBlock = this.startBlock < endBlock ? endBlock + 1 : endBlock;
                 let children = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
                 setTimeout(() => {
+                  const isTargetAToggle = dropTarget.querySelectorAll('.toggle-block__selector').length > 0
+                    || dropTarget.getAttribute('foreignKey') !== null;
+
+                  if (isTargetAToggle) {
+                    const foreignKey = dropTarget.getAttribute('foreignKey') !== null
+                      ? dropTarget.getAttribute('foreignKey')
+                      : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
+
+                    const newToggleIndex = getIndex(dropTarget, this.holderDragged);
+                    this.setAttributesToNewBlock(newToggleIndex, foreignKey);
+                  }
+
                   children = this.startBlock >= endBlock ? [...children].reverse() : children;
                   children.forEach((child) => {
                     const childIndex = Array.from(dropTarget.parentNode.children).indexOf(child);
                     this.api.blocks.move(endBlock, childIndex);
+                    if (isTargetAToggle) {
+                      this.setAttributesToNewBlock(endBlock, this.wrapper.id);
+                    }
                   });
                 });
               }
