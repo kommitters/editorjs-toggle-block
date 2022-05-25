@@ -697,7 +697,7 @@ export default class ToggleBlock {
                 // Verify if the toggle dropped is the same of this eventListener
                 const isCurrentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`) !== null;
                 if (isCurrentToggleDropped) {
-                  this.moveChildren(dropTarget, endBlock);
+                  this.moveChildren(endBlock);
                 }
               }
 
@@ -713,7 +713,7 @@ export default class ToggleBlock {
     }
   }
 
-  moveChildren(dropTarget, endBlock, fk = this.wrapper.id) {
+  moveChildren(endBlock, fk = this.wrapper.id) {
     // Get the children of the dropped toggle
     let children = document.querySelectorAll(`div[foreignKey="${fk}"]`);
 
