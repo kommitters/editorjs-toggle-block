@@ -667,46 +667,46 @@ export default class ToggleBlock {
       });
 
       document.addEventListener('drop', (event) => {
-        // Verify if the item droped is the toggle
-        if (this.nameDragged === 'toggle') {
-          // Verify if the toggle dropped is same of this eventListener
-          const isCurrentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`) !== null;
-          if (isCurrentToggleDropped) {
-            // Get the position when item was dropped
-            const { target } = event;
-            if (document.contains(target)) {
-              const dropTarget = target.classList.contains('ce-block') ? target : target.closest('.ce-block');
-              if (dropTarget && dropTarget !== this.holderDragged) {
-                let endBlock = this.getIndex(dropTarget);
+        // Get the position when item was dropped
+        const { target } = event;
+        if (document.contains(target)) {
+          const dropTarget = target.classList.contains('ce-block') ? target : target.closest('.ce-block');
+          if (dropTarget && dropTarget !== this.holderDragged) {
+            let endBlock = this.getIndex(dropTarget);
 
-                // Control the toggle's children will be positioned down of the parent
-                endBlock = this.startBlock < endBlock ? endBlock + 1 : endBlock;
+            // Control the toggle's children will be positioned down of the parent
+            endBlock = this.startBlock < endBlock ? endBlock + 1 : endBlock;
 
-                // Check if the item dropped is another toggle
-                const isTargetAToggle = dropTarget.querySelectorAll('.toggle-block__selector').length > 0
-                  || dropTarget.getAttribute('foreignKey') !== null;
+            // Check if the item dropped is another toggle
+            const isTargetAToggle = dropTarget.querySelectorAll('.toggle-block__selector').length > 0
+              || dropTarget.getAttribute('foreignKey') !== null;
 
-                // If is a toggle we have to add the attributes to make it a part of the toggle
-                if (isTargetAToggle) {
-                  const foreignKey = dropTarget.getAttribute('foreignKey') !== null
-                    ? dropTarget.getAttribute('foreignKey')
-                    : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
+            // If is a toggle we have to add the attributes to make it a part of the toggle
+            if (isTargetAToggle) {
+              const foreignKey = dropTarget.getAttribute('foreignKey') !== null
+                ? dropTarget.getAttribute('foreignKey')
+                : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
 
-                  const newToggleIndex = this.getIndex(this.holderDragged);
-                  this.setAttributesToNewBlock(newToggleIndex, foreignKey);
-                }
-
-                setTimeout(() => {
-                  this.moveChildren(dropTarget, endBlock);
-
-                  // If we are dropping out of a toggle we have to remove the attributes
-                  if (!isTargetAToggle) {
-                    const newToggleIndex = this.getIndex(this.holderDragged);
-                    this.removeAttributesFromNewBlock(newToggleIndex);
-                  }
-                });
-              }
+              const newToggleIndex = this.getIndex(this.holderDragged);
+              this.setAttributesToNewBlock(newToggleIndex, foreignKey);
             }
+
+            setTimeout(() => {
+              // Verify if the item droped is the toggle
+              if (this.nameDragged === 'toggle') {
+                // Verify if the toggle dropped is the same of this eventListener
+                const isCurrentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`) !== null;
+                if (isCurrentToggleDropped) {
+                  this.moveChildren(dropTarget, endBlock);
+                }
+              }
+
+              // If we are dropping out of a toggle we have to remove the attributes
+              if (!isTargetAToggle) {
+                const newToggleIndex = this.getIndex(this.holderDragged);
+                this.removeAttributesFromNewBlock(newToggleIndex);
+              }
+            });
           }
         }
       });
