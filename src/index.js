@@ -729,7 +729,7 @@ export default class ToggleBlock {
       if (isToggle) {
         const toggleIndex = this.getIndex(child);
         const fix = this.startBlock < endBlock ? 0 : 1;
-        toggles.forEach((toggle) => this.moveChildren(child, toggleIndex + fix, toggle.getAttribute('id')));
+        toggles.forEach((toggle) => this.moveChildren(toggleIndex + fix, toggle.getAttribute('id')));
 
         const dif = Math.abs(endBlock - toggleIndex);
         endBlock = this.startBlock < endBlock ? endBlock + dif : endBlock - dif;
