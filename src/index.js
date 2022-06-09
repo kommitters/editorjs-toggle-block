@@ -553,33 +553,124 @@ export default class ToggleBlock {
   }
 
   /**
-   * Adds an event in a existent button to destroy the nested blocks
-   * when the toggle root is removed.
+   * Return the number of blocks inside the root Toggle
+   * @param {string} fk - The id of the root Toggle
+   */
+  getNumberOfDecendents(fk) {
+    let number = 0;
+    const listChildren = document.querySelectorAll(`div[foreignKey="${fk}"]`);
+    listChildren.forEach((child) => {
+      // Evaluate if the child is a toggle
+      if (child.hasAttribute('status')) {
+        const childId = child.querySelector('.toggle-block__selector').getAttribute('id');
+        number += this.getNumberOfDecendents(childId) + 1;
+      } else {
+        number += 1;
+      }
+    });
+    return number;
+  }
+
+  /**
+   * Highlight the blocks that belongs to the Toggle
+   * @param {string} fk - The id of the root Toggle
+   */
+  highlightToggleItems(fk) {
+    const listChildren = document.querySelectorAll(`div[foreignKey="${fk}"]`);
+    listChildren.forEach((child) => {
+      child.classList.add('ce-block--selected');
+      // Evaluate if the child is a toggle, then highlight also its children
+      if (child.hasAttribute('status')) {
+        const childId = child.querySelector('.toggle-block__selector').getAttribute('id');
+        this.highlightToggleItems(childId);
+      }
+    });
+  }
+
+  /**
+   * Adds events for the move up, move down and delete options in the toolbar
    */
   renderSettings() {
     const settingsBar = document.getElementsByClassName('ce-settings--opened');
     const optionsContainer = settingsBar[0];
     const options = optionsContainer.lastChild;
     const toggleIndex = this.api.blocks.getCurrentBlockIndex();
-    const listChildren = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
 
-    for (let i = 0; i < listChildren.length; i += 1) {
-      listChildren[i].classList.add('ce-block--selected');
-    }
+    this.highlightToggleItems(this.wrapper.id);
 
     setTimeout(() => {
-      const deleteButton = options.getElementsByClassName('ce-settings__button--delete')[0];
-      deleteButton.addEventListener('click', () => {
-        const classesList = deleteButton.classList;
-        const classes = Object.values(classesList);
+      const moveDownButton = options.getElementsByClassName('ce-tune-move-down')[0];
+      if (moveDownButton) {
+        moveDownButton.addEventListener('click', () => {
+          this.moveDownToggle(toggleIndex);
+        });
+      }
 
-        if (classes.indexOf('clicked-to-destroy-toggle') === -1) {
-          deleteButton.classList.add('clicked-to-destroy-toggle');
-        } else {
-          this.removeFullToggle(toggleIndex);
-        }
-      });
+      const moveUpButton = options.getElementsByClassName('ce-tune-move-up')[0];
+      if (moveUpButton) {
+        moveUpButton.addEventListener('click', () => {
+          this.moveUpToggle(toggleIndex);
+        });
+      }
+
+      const deleteButton = options.getElementsByClassName('ce-settings__button--delete')[0];
+      if (deleteButton) {
+        deleteButton.addEventListener('click', () => {
+          const classesList = deleteButton.classList;
+          const classes = Object.values(classesList);
+
+          if (classes.indexOf('clicked-to-destroy-toggle') === -1) {
+            deleteButton.classList.add('clicked-to-destroy-toggle');
+          } else {
+            this.removeFullToggle(toggleIndex);
+          }
+        });
+      }
     });
+  }
+
+  /**
+   * Move down one block all the Toggle with all its children and nested toggles
+   * @param {number} ToggleInitialIndex //Index of the root toggle before it is moved down one block
+   */
+  moveDownToggle(ToggleInitialIndex) {
+    if (!this.readOnly) {
+      this.api.toolbar.close();
+      const currentToggleIndex = this.api.blocks.getCurrentBlockIndex();
+
+      // Move back the root of the Toogle to its initial position
+      this.api.blocks.move(ToggleInitialIndex, currentToggleIndex);
+
+      // Move the block which is below the Toggle to above the Toggle
+      const decendents = this.getNumberOfDecendents(this.wrapper.id);
+      const indexBlockAfterToggle = currentToggleIndex + decendents;
+      const blocks = this.api.blocks.getBlocksCount();
+      if (ToggleInitialIndex >= 0 && indexBlockAfterToggle <= (blocks - 1)) {
+        this.api.blocks.move(ToggleInitialIndex, indexBlockAfterToggle);
+      }
+    }
+  }
+
+  /**
+   * Move up one block all the Toggle with all its children and nested toggles
+   * @param {number} ToggleInitialIndex //Index of the root toggle before is moved up one block
+   */
+  moveUpToggle(ToggleInitialIndex) {
+    if (!this.readOnly) {
+      this.api.toolbar.close();
+      const currentToggleIndex = this.api.blocks.getCurrentBlockIndex();
+
+      // Move back the root of the Toogle to its initial position
+      this.api.blocks.move(ToggleInitialIndex, currentToggleIndex);
+
+      // Move the block which is above the Toggle to below the Toggle
+      const indexBlockBeforeToggle = ToggleInitialIndex - 1;
+      const indexEndOfToggle = ToggleInitialIndex + this.getNumberOfDecendents(this.wrapper.id);
+      const blocks = this.api.blocks.getBlocksCount();
+      if (indexBlockBeforeToggle >= 0 && indexEndOfToggle <= (blocks - 1)) {
+        this.api.blocks.move(indexEndOfToggle, indexBlockBeforeToggle);
+      }
+    }
   }
 
   /**
