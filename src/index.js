@@ -556,19 +556,18 @@ export default class ToggleBlock {
    * Return the number of blocks inside the root Toggle
    * @param {string} fk - The id of the root Toggle
    */
-  getNumberOfDecendents(fk) {
-    let number = 0;
+  getDecendentsNumber(fk) {
+    let counter = 0;
     const listChildren = document.querySelectorAll(`div[foreignKey="${fk}"]`);
     listChildren.forEach((child) => {
       // Evaluate if the child is a toggle
       if (child.hasAttribute('status')) {
         const childId = child.querySelector('.toggle-block__selector').getAttribute('id');
-        number += this.getNumberOfDecendents(childId) + 1;
-      } else {
-        number += 1;
+        counter += this.getDecendentsNumber(childId);
       }
+      counter += 1;
     });
-    return number;
+    return counter;
   }
 
   /**
@@ -602,14 +601,14 @@ export default class ToggleBlock {
       const moveDownButton = options.getElementsByClassName('ce-tune-move-down')[0];
       if (moveDownButton) {
         moveDownButton.addEventListener('click', () => {
-          this.moveDownToggle(toggleIndex);
+          this.moveToggle(toggleIndex, 0);
         });
       }
 
       const moveUpButton = options.getElementsByClassName('ce-tune-move-up')[0];
       if (moveUpButton) {
         moveUpButton.addEventListener('click', () => {
-          this.moveUpToggle(toggleIndex);
+          this.moveToggle(toggleIndex, 1);
         });
       }
 
@@ -630,46 +629,128 @@ export default class ToggleBlock {
   }
 
   /**
-   * Move down one block all the Toggle with all its children and nested toggles
-   * @param {number} ToggleInitialIndex //Index of the root toggle before it is moved down one block
+   * Move the Toggle with all its children and nested toggles.
+   * Index of the root toggle before it is moved by editorjs core.
+   * @param {number} toggleInitialIndex
+   * @param {number} direction // 0: Move down || 1: Move up
    */
-  moveDownToggle(ToggleInitialIndex) {
+  moveToggle(toggleInitialIndex, direction) {
     if (!this.readOnly) {
       this.api.toolbar.close();
       const currentToggleIndex = this.api.blocks.getCurrentBlockIndex();
+      const decendents = this.getDecendentsNumber(this.wrapper.id);
+      const blocks = this.api.blocks.getBlocksCount();
+      const toggleEndIndex = toggleInitialIndex + decendents;
 
       // Move back the root of the Toogle to its initial position
-      this.api.blocks.move(ToggleInitialIndex, currentToggleIndex);
+      this.api.blocks.move(toggleInitialIndex, currentToggleIndex);
 
-      // Move the block which is below the Toggle to above the Toggle
-      const decendents = this.getNumberOfDecendents(this.wrapper.id);
-      const indexBlockAfterToggle = currentToggleIndex + decendents;
-      const blocks = this.api.blocks.getBlocksCount();
-      if (ToggleInitialIndex >= 0 && indexBlockAfterToggle <= (blocks - 1)) {
-        this.api.blocks.move(ToggleInitialIndex, indexBlockAfterToggle);
+      if (toggleInitialIndex >= 0 && toggleEndIndex <= (blocks - 1)) {
+        if (direction === 0) {
+          this.moveDown(toggleInitialIndex, toggleEndIndex);
+        } else {
+          this.moveUp(toggleInitialIndex, toggleEndIndex);
+        }
       }
     }
   }
 
   /**
-   * Move up one block all the Toggle with all its children and nested toggles
-   * @param {number} ToggleInitialIndex //Index of the root toggle before is moved up one block
+   * Move down the whole current toggle to the next corresponding position
+   * @param {number} toggleInitialIndex // index of the root of the current toggle
+   * @param {number} toggleEndIndex // index of the last child of the current toggle
    */
-  moveUpToggle(ToggleInitialIndex) {
-    if (!this.readOnly) {
-      this.api.toolbar.close();
-      const currentToggleIndex = this.api.blocks.getCurrentBlockIndex();
+  moveDown(toggleInitialIndex, toggleEndIndex) {
+    const blockAfterToggleIndex = toggleEndIndex + 1;
+    const blockAfterToggle = this.api.blocks.getBlockByIndex(blockAfterToggleIndex);
+    const { holder } = blockAfterToggle;
 
-      // Move back the root of the Toogle to its initial position
-      this.api.blocks.move(ToggleInitialIndex, currentToggleIndex);
+    this.api.blocks.move(toggleInitialIndex, blockAfterToggleIndex);
 
-      // Move the block which is above the Toggle to below the Toggle
-      const indexBlockBeforeToggle = ToggleInitialIndex - 1;
-      const indexEndOfToggle = ToggleInitialIndex + this.getNumberOfDecendents(this.wrapper.id);
-      const blocks = this.api.blocks.getBlocksCount();
-      if (indexBlockBeforeToggle >= 0 && indexEndOfToggle <= (blocks - 1)) {
-        this.api.blocks.move(indexEndOfToggle, indexBlockBeforeToggle);
+    // Evaluate if the block is a toggle to move its children
+    if (blockAfterToggle.name === 'toggle') {
+      const id = holder.querySelector('.toggle-block__selector').getAttribute('id');
+      const children = this.getDecendentsNumber(id);
+      this.moveDecendents(children, toggleInitialIndex + 1, blockAfterToggleIndex + 1, 0);
+    }
+  }
+
+  /**
+   * Move down the whole current toggle to the next corresponding position
+   * @param {number} toggleInitialIndex // index of the root of the current toggle
+   * @param {number} toggleEndIndex // index of the last child of the current toggle
+   */
+  moveUp(toggleInitialIndex, toggleEndIndex) {
+    const blockBeforeToggleIndex = toggleInitialIndex - 1;
+    const blockBeforeToggle = this.api.blocks.getBlockByIndex(blockBeforeToggleIndex);
+    if (blockBeforeToggle.name === 'toggle') {
+      return;
+    }
+    const { holder } = blockBeforeToggle;
+    // Evaluate if the block is an item of a toggle to move the whole parent toggle
+    if (holder.hasAttribute('foreignKey')) {
+      const currentToggle = this.api.blocks.getBlockByIndex(toggleInitialIndex).holder;
+      const currentToggleFk = currentToggle.getAttribute('foreignKey');
+      const fk = holder.getAttribute('foreignKey');
+      if (fk !== currentToggleFk) {
+        const parentBlockIdx = this.findIndexOfParentBlock(currentToggleFk, fk, toggleInitialIndex);
+        const parentBlock = this.api.blocks.getBlockByIndex(parentBlockIdx).holder;
+        const id = parentBlock.querySelector('.toggle-block__selector').getAttribute('id');
+        const children = this.getDecendentsNumber(id);
+        this.api.blocks.move(toggleEndIndex, parentBlockIdx);
+        this.moveDecendents(children, toggleEndIndex, parentBlockIdx, 1);
+        return;
       }
+    }
+    this.api.blocks.move(toggleEndIndex, blockBeforeToggleIndex);
+  }
+
+  /**
+   * Returns the index of the root of the toggle which is at the same level of the toggle that it
+   * is expected to be moved
+   *
+   * fk of the toggle that is going to be moved
+   * @param {string} currentToggleFk
+   * @param {string} blockFk // fk of block which is above of the current toggle root
+   * @param {number} toggleInitialIndex // index of the root of the current toggle root
+   * @returns
+   */
+  findIndexOfParentBlock(currentToggleFk, blockFk, toggleInitialIndex) {
+    const NestedToggleChildren = this.getDecendentsNumber(blockFk);
+    const parentBlockIndex = toggleInitialIndex - (NestedToggleChildren + 1);
+    const parentBlock = this.api.blocks.getBlockByIndex(parentBlockIndex).holder;
+    if (parentBlock.hasAttribute('foreignKey')) {
+      const parentBlockFk = parentBlock.getAttribute('foreignKey');
+      if (parentBlockFk !== currentToggleFk) {
+        const beforeBlock = this.api.blocks.getBlockByIndex(parentBlockIndex - 1).holder;
+        if (beforeBlock.hasAttribute('foreignKey')) {
+          const fk = beforeBlock.getAttribute('foreignKey');
+          if (fk !== parentBlockFk) {
+            return this.findIndexOfParentBlock(currentToggleFk, fk, parentBlockIndex);
+          }
+        }
+      }
+    }
+    return parentBlockIndex;
+  }
+
+  /**
+   * Move all the children of the toggle that is being moved
+   * @param {number} children // Number of children of the current toggle
+   * @param {number} finalIndex // index to calculate where children are going to be moved
+   * @param {number} parentInitialIndex // index to calculate where the children are
+   * @param {number} direction // 0: to move from top to bottom || 1: to move from bottom to the top
+   */
+  moveDecendents(children, finalIndex, parentInitialIndex, direction) {
+    let childrenCurrentPosition = parentInitialIndex;
+    let childrenFinalPosition = finalIndex;
+    while (children) {
+      this.api.blocks.move(childrenFinalPosition, childrenCurrentPosition);
+      if (direction === 0) {
+        childrenCurrentPosition += 1;
+        childrenFinalPosition += 1;
+      }
+      children -= 1;
     }
   }
 

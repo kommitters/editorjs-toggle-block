@@ -344,7 +344,7 @@ describe('ToggleBlock', () => {
     });
   });
 
-  describe('validates the getNumberOfDecendents method', () => {
+  describe('validates the getDecendentsNumber method', () => {
     let toggle;
     let redactor;
 
@@ -357,7 +357,7 @@ describe('ToggleBlock', () => {
     it('returns the number of children', () => {
       toggleBlock.render();
       const { id } = toggleBlock.wrapper;
-      const numberOfChildren = toggleBlock.getNumberOfDecendents(id);
+      const numberOfChildren = toggleBlock.getDecendentsNumber(id);
       expect(numberOfChildren).toBe(toggleBlock.data.items);
     });
   });
