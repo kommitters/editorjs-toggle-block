@@ -230,7 +230,7 @@ describe('ToggleBlock', () => {
     let toggleBlockReadyOnly;
 
     it('when is enable', () => {
-      toggleBlockReadyOnly = new ToggleBlock({ data, api: {}, readOnly: true });
+      toggleBlockReadyOnly = new ToggleBlock({ data, api: editor, readOnly: true });
       toggleBlockReadyOnly.render();
 
       const { children } = toggleBlockReadyOnly.wrapper;
@@ -240,7 +240,7 @@ describe('ToggleBlock', () => {
     });
 
     it('when is disabled', () => {
-      toggleBlock = new ToggleBlock({ data, api: {}, readOnly: false });
+      toggleBlock = new ToggleBlock({ data, api: editor, readOnly: false });
       toggleBlock.render();
 
       const { children } = toggleBlock.wrapper;
