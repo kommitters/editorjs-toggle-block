@@ -59,6 +59,22 @@ export default class ToggleBlock {
     };
     this.itemsId = [];
     this.api = api;
+    const {
+      toolbar: {
+        close,
+      },
+      blocks: {
+        getCurrentBlockIndex,
+        getBlockByIndex,
+        getBlocksCount,
+        move,
+      },
+    } = this.api;
+    this.close = close;
+    this.getCurrentBlockIndex = getCurrentBlockIndex;
+    this.getBlocksCount = getBlocksCount;
+    this.getBlockByIndex = getBlockByIndex;
+    this.move = move;
     this.wrapper = undefined;
     this.readOnly = readOnly || false;
     this.addListeners();
@@ -598,19 +614,8 @@ export default class ToggleBlock {
     this.highlightToggleItems(this.wrapper.id);
 
     setTimeout(() => {
-      const moveDownButton = options.getElementsByClassName('ce-tune-move-down')[0];
-      if (moveDownButton) {
-        moveDownButton.addEventListener('click', () => {
-          this.moveToggle(toggleIndex, 0);
-        });
-      }
-
-      const moveUpButton = options.getElementsByClassName('ce-tune-move-up')[0];
-      if (moveUpButton) {
-        moveUpButton.addEventListener('click', () => {
-          this.moveToggle(toggleIndex, 1);
-        });
-      }
+      this.addEventsMoveButtons('ce-tune-move-down', 0, options, toggleIndex);
+      this.addEventsMoveButtons('ce-tune-move-up', 1, options, toggleIndex);
 
       const deleteButton = options.getElementsByClassName('ce-settings__button--delete')[0];
       if (deleteButton) {
@@ -628,6 +633,19 @@ export default class ToggleBlock {
     });
   }
 
+  addEventsMoveButtons(className, movement, options, toggleIndex) {
+    const list = options.getElementsByClassName(className);
+    if (!list.length) {
+      return;
+    }
+    const moveButton = list[0];
+    if (moveButton) {
+      moveButton.addEventListener('click', () => {
+        this.moveToggle(toggleIndex, movement);
+      });
+    }
+  }
+
   /**
    * Move the Toggle with all its children and nested toggles.
    * Index of the root toggle before it is moved by editorjs core.
@@ -636,14 +654,14 @@ export default class ToggleBlock {
    */
   moveToggle(toggleInitialIndex, direction) {
     if (!this.readOnly) {
-      this.api.toolbar.close();
-      const currentToggleIndex = this.api.blocks.getCurrentBlockIndex();
+      this.close();
+      const currentToggleIndex = this.getCurrentBlockIndex();
       const decendents = this.getDecendentsNumber(this.wrapper.id);
-      const blocks = this.api.blocks.getBlocksCount();
+      const blocks = this.getBlocksCount();
       const toggleEndIndex = toggleInitialIndex + decendents;
 
       // Move back the root of the Toogle to its initial position
-      this.api.blocks.move(toggleInitialIndex, currentToggleIndex);
+      this.move(toggleInitialIndex, currentToggleIndex);
 
       if (toggleInitialIndex >= 0 && toggleEndIndex <= (blocks - 1)) {
         if (direction === 0) {
@@ -662,10 +680,10 @@ export default class ToggleBlock {
    */
   moveDown(toggleInitialIndex, toggleEndIndex) {
     const blockAfterToggleIndex = toggleEndIndex + 1;
-    const blockAfterToggle = this.api.blocks.getBlockByIndex(blockAfterToggleIndex);
+    const blockAfterToggle = this.getBlockByIndex(blockAfterToggleIndex);
     const { holder } = blockAfterToggle;
 
-    this.api.blocks.move(toggleInitialIndex, blockAfterToggleIndex);
+    this.move(toggleInitialIndex, blockAfterToggleIndex);
 
     // Evaluate if the block is a toggle to move its children
     if (blockAfterToggle.name === 'toggle') {
@@ -682,27 +700,27 @@ export default class ToggleBlock {
    */
   moveUp(toggleInitialIndex, toggleEndIndex) {
     const blockBeforeToggleIndex = toggleInitialIndex - 1;
-    const blockBeforeToggle = this.api.blocks.getBlockByIndex(blockBeforeToggleIndex);
+    const blockBeforeToggle = this.getBlockByIndex(blockBeforeToggleIndex);
     if (blockBeforeToggle.name === 'toggle') {
       return;
     }
     const { holder } = blockBeforeToggle;
     // Evaluate if the block is an item of a toggle to move the whole parent toggle
     if (holder.hasAttribute('foreignKey')) {
-      const currentToggle = this.api.blocks.getBlockByIndex(toggleInitialIndex).holder;
+      const currentToggle = this.getBlockByIndex(toggleInitialIndex).holder;
       const currentToggleFk = currentToggle.getAttribute('foreignKey');
       const fk = holder.getAttribute('foreignKey');
       if (fk !== currentToggleFk) {
         const parentBlockIdx = this.findIndexOfParentBlock(currentToggleFk, fk, toggleInitialIndex);
-        const parentBlock = this.api.blocks.getBlockByIndex(parentBlockIdx).holder;
+        const parentBlock = this.getBlockByIndex(parentBlockIdx).holder;
         const id = parentBlock.querySelector('.toggle-block__selector').getAttribute('id');
         const children = this.getDecendentsNumber(id);
-        this.api.blocks.move(toggleEndIndex, parentBlockIdx);
+        this.move(toggleEndIndex, parentBlockIdx);
         this.moveDecendents(children, toggleEndIndex, parentBlockIdx, 1);
         return;
       }
     }
-    this.api.blocks.move(toggleEndIndex, blockBeforeToggleIndex);
+    this.move(toggleEndIndex, blockBeforeToggleIndex);
   }
 
   /**
@@ -718,11 +736,11 @@ export default class ToggleBlock {
   findIndexOfParentBlock(currentToggleFk, blockFk, toggleInitialIndex) {
     const NestedToggleChildren = this.getDecendentsNumber(blockFk);
     const parentBlockIndex = toggleInitialIndex - (NestedToggleChildren + 1);
-    const parentBlock = this.api.blocks.getBlockByIndex(parentBlockIndex).holder;
+    const parentBlock = this.getBlockByIndex(parentBlockIndex).holder;
     if (parentBlock.hasAttribute('foreignKey')) {
       const parentBlockFk = parentBlock.getAttribute('foreignKey');
       if (parentBlockFk !== currentToggleFk) {
-        const beforeBlock = this.api.blocks.getBlockByIndex(parentBlockIndex - 1).holder;
+        const beforeBlock = this.getBlockByIndex(parentBlockIndex - 1).holder;
         if (beforeBlock.hasAttribute('foreignKey')) {
           const fk = beforeBlock.getAttribute('foreignKey');
           if (fk !== parentBlockFk) {
@@ -745,7 +763,7 @@ export default class ToggleBlock {
     let childrenCurrentPosition = parentInitialIndex;
     let childrenFinalPosition = finalIndex;
     while (children) {
-      this.api.blocks.move(childrenFinalPosition, childrenCurrentPosition);
+      this.move(childrenFinalPosition, childrenCurrentPosition);
       if (direction === 0) {
         childrenCurrentPosition += 1;
         childrenFinalPosition += 1;
