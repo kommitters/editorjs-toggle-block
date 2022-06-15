@@ -871,23 +871,42 @@ export default class ToggleBlock {
             const isTargetAToggle = dropTarget.querySelectorAll('.toggle-block__selector').length > 0
               || dropTarget.getAttribute('foreignKey') !== null;
 
-            // If is a toggle we have to add the attributes to make it a part of the toggle
-            if (isTargetAToggle) {
-              const foreignKey = dropTarget.getAttribute('foreignKey') !== null
-                ? dropTarget.getAttribute('foreignKey')
-                : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
-
-              const newToggleIndex = this.getIndex(this.holderDragged);
-              this.setAttributesToNewBlock(newToggleIndex, foreignKey);
-            }
-
             setTimeout(() => {
               // Verify if the item droped is the toggle
               if (this.nameDragged === 'toggle') {
                 // Verify if the toggle dropped is the same of this eventListener
-                const isCurrentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`) !== null;
+                const currentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`);
+                const isCurrentToggleDropped = currentToggleDropped !== null;
+
                 if (isCurrentToggleDropped) {
-                  this.moveChildren(endBlock);
+                  // Check if the toggle dropped was not droppen in his children
+                  if (currentToggleDropped.getAttribute('id') !== dropTarget.getAttribute('foreignKey')) {
+                    // If is a toggle we have to add the attributes to make it a part of the toggle
+                    if (isTargetAToggle) {
+                      const foreignKey = dropTarget.getAttribute('foreignKey') !== null
+                        ? dropTarget.getAttribute('foreignKey')
+                        : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
+
+                      const newToggleIndex = this.getIndex(this.holderDragged);
+                      this.setAttributesToNewBlock(newToggleIndex, foreignKey);
+                    }
+
+                    this.moveChildren(endBlock);
+                  } else {
+                    // If we are dropping in the toggle children,
+                    // we have to move the toggle in the original position
+                    if (this.startBlock === endBlock) {
+                      this.api.blocks.move(this.startBlock + 1, endBlock);
+                    } else {
+                      this.api.blocks.move(this.startBlock, endBlock);
+                    }
+
+                    // And remove the attributes
+                    if (!isTargetAToggle) {
+                      const newToggleIndex = this.getIndex(this.holderDragged);
+                      this.removeAttributesFromNewBlock(newToggleIndex);
+                    }
+                  }
                 }
               }
 
