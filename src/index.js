@@ -833,6 +833,35 @@ export default class ToggleBlock {
 
   getIndex = (target) => Array.from(target.parentNode.children).indexOf(target);
 
+  isChild = (parentID, targetFK) => {
+    if (!parentID || !targetFK) return false;
+    if (parentID === targetFK) return true;
+
+    let children = document.querySelectorAll(`div[foreignKey="${parentID}"]`);
+    children.forEach((child) => {
+      let id;
+
+      // If this child is a toggle we have to move his children too
+      const element = child.querySelector('.toggle-block__selector');
+      const isToggle = !!element;
+      if (isToggle) {
+        id = element.getAttribute('id')
+      } else {
+        id = child.getAttribute('foreignKey');
+      }
+
+      if (parentID !== id) {
+        let result = this.isChild(id, targetFK);
+
+        if (result) {
+          return true;
+        }
+      }
+    });
+
+    return false;
+  }
+
   /**
    * Adds drop listener to move the childs item
    * when the drag and drop action is executed.
@@ -879,8 +908,8 @@ export default class ToggleBlock {
                 const isCurrentToggleDropped = currentToggleDropped !== null;
 
                 if (isCurrentToggleDropped) {
-                  // Check if the toggle dropped was not droppen in his children
-                  if (currentToggleDropped.getAttribute('id') !== dropTarget.getAttribute('foreignKey')) {
+                  // Check if the toggle dropped was not droppen in its children
+                  if (!this.isChild(currentToggleDropped.getAttribute('id'), dropTarget.getAttribute('foreignKey'))) {
                     // If is a toggle we have to add the attributes to make it a part of the toggle
                     if (isTargetAToggle) {
                       const foreignKey = dropTarget.getAttribute('foreignKey') !== null
