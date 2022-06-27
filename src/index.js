@@ -833,34 +833,23 @@ export default class ToggleBlock {
 
   getIndex = (target) => Array.from(target.parentNode.children).indexOf(target);
 
+  /**
+   * Checks if target is a child of a toggle
+   * @param {string} parentID id of the parent element
+   * @param {string} targetFK foreign key of the target element
+   * @returns {boolean}
+   */
   isChild = (parentID, targetFK) => {
-    if (!parentID || !targetFK) return false;
-    if (parentID === targetFK) return true;
+    if (!parentID || !targetFK) return false; // No parent or no target
+    if (parentID === targetFK) return true; // Direct child of the toggle
 
-    let children = document.querySelectorAll(`div[foreignKey="${parentID}"]`);
-    children.forEach((child) => {
-      let id;
-
-      // If this child is a toggle we have to move his children too
-      const element = child.querySelector('.toggle-block__selector');
-      const isToggle = !!element;
-      if (isToggle) {
-        id = element.getAttribute('id')
-      } else {
-        id = child.getAttribute('foreignKey');
-      }
-
-      if (parentID !== id) {
-        let result = this.isChild(id, targetFK);
-
-        if (result) {
-          return true;
-        }
-      }
-    });
-
-    return false;
-  }
+    return [...document.querySelectorAll(`div[foreignKey="${parentID}"]`)]
+      .some((child) => {
+        const toggle = child.querySelector('.toggle-block__selector');
+        if (!toggle) return false;
+        return this.isChild(toggle.getAttribute('id'), targetFK);
+      });
+  };
 
   /**
    * Adds drop listener to move the childs item
