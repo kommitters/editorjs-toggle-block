@@ -894,16 +894,14 @@ export default class ToggleBlock {
               if (this.nameDragged === 'toggle') {
                 // Verify if the toggle dropped is the same of this eventListener
                 const currentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`);
-                const isCurrentToggleDropped = currentToggleDropped !== null;
 
-                if (isCurrentToggleDropped) {
+                if (currentToggleDropped) {
                   // Check if the toggle dropped was not droppen in its children
                   if (!this.isChild(currentToggleDropped.getAttribute('id'), dropTarget.getAttribute('foreignKey'))) {
                     // If is a toggle we have to add the attributes to make it a part of the toggle
                     if (isTargetAToggle) {
-                      const foreignKey = dropTarget.getAttribute('foreignKey') !== null
-                        ? dropTarget.getAttribute('foreignKey')
-                        : dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
+                      const foreignKey = dropTarget.getAttribute('foreignKey')
+                        ?? dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
 
                       const newToggleIndex = this.getIndex(this.holderDragged);
                       this.setAttributesToNewBlock(newToggleIndex, foreignKey);
