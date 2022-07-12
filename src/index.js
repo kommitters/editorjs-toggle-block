@@ -51,6 +51,7 @@ export default class ToggleBlock {
    * readOnly - read-only mode status
    */
   constructor({ data, api, readOnly }) {
+    this.test = 0;
     this.data = {
       text: data.text || '',
       status: data.status || 'open',
