@@ -57,5 +57,8 @@
       "^.+\\.jsx?$": "babel-jest",
       "^.+\\.(css|svg)$": "<rootDir>/test/config/assetsTransform.js"
     }
+  },
+  "dependencies": {
+    "uuid": "^8.3.2"
   }
 }
