@@ -2,6 +2,7 @@ name: Publish to npm
 on:
   release:
     types: [created]
+
 permissions: # added using https://github.com/step-security/secure-workflows
   contents: read
 
@@ -12,7 +13,11 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
         with:
-          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            github.com:443
+            registry.npmjs.org:443
 
       - uses: actions/checkout@d0651293c4a5a52e711f25b41b05b2212f385d28
       # Setup .npmrc file to publish to npm
