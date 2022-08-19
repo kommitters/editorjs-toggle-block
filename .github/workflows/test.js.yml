@@ -10,6 +10,9 @@ on:
       - v*.[0-9]
   pull_request:
 
+permissions: # added using https://github.com/step-security/secure-workflows
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,9 +23,21 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            api.github.com:443
+            artifactcache.actions.githubusercontent.com:443
+            github.com:443
+            kv4gacprodeus2file3.blob.core.windows.net:443
+            nodejs.org:443
+            registry.npmjs.org:443
+      - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
