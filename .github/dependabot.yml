@@ -2,7 +2,6 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    target-branch: "v0.2"
     schedule:
       interval: "weekly"
     commit-message:
@@ -11,7 +10,6 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    target-branch: "v0.2"
     schedule:
       interval: "weekly"
     commit-message:
