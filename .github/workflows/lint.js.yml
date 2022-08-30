@@ -35,7 +35,7 @@ jobs:
             github.com:443
             nodejs.org:443
             registry.npmjs.org:443
-      - uses: actions/checkout@d171c3b028d844f2bf14e9fdec0c58114451e4bf
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561
         with:
