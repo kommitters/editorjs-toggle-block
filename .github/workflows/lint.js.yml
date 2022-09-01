@@ -31,7 +31,7 @@ jobs:
           allowed-endpoints: >
             api.github.com:443
             artifactcache.actions.githubusercontent.com:443
-            *.blob.core.windows.net:443
+            kv4gacprodeus2file3.blob.core.windows.net:443
             github.com:443
             nodejs.org:443
             registry.npmjs.org:443
