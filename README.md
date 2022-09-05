@@ -1,4 +1,6 @@
 # EditorJS Toggle Block
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6454/badge)](https://bestpractices.coreinfrastructure.org/projects/6454)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/kommitters/editorjs-toggle-block/badge)](https://api.securityscorecards.dev/projects/github.com/kommitters/editorjs-toggle-block)
 
 Toggle block tool for [Editor.js](https://editorjs.io/)
 
@@ -16,6 +18,16 @@ Include module at your application
 
 ```js
 import ToggleBlock from 'editorjs-toggle-block';
+```
+
+### Load from CDN
+
+You can load a specific version of the package from [jsDelivr CDN](https://www.jsdelivr.com/package/npm/editorjs-toggle-block).
+
+Require this script on a page with Editor.js.
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/editorjs-toggle-block"></script>
 ```
 
 ## Usage

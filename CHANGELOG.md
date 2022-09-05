@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.6 (05.09.2022)
+
+* Remediate token permission, missing harden runner, and unpinned dependencies security issues in Github Actions.
+* Update dependencies.
+* Add CodeQL analysis workflow.
+* Add OpenSSF Best Practices & OpenSSF Scorecard badges in README.
+
 ## 0.2.5 (09.08.2022)
 
 * Add scorecards actions
