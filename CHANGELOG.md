@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.7 (05.09.2022)
+
+* Remove harden runner from scorecard workflow.
+
 ## 0.2.6 (05.09.2022)
 
 * Remediate token permission, missing harden runner, and unpinned dependencies security issues in Github Actions.
