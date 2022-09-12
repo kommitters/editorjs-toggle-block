@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.8 (12.09.2022)
+
+* Update scorecard-action to v2.0.2 which fixes [a bug related to score -1](https://github.com/ossf/scorecard-action/issues/895).
+* Add CDN version documentation.
+
 ## 0.2.7 (05.09.2022)
 
 * Remove harden runner from scorecard workflow.
