@@ -51,7 +51,9 @@ export default class ToggleBlock {
    * api - Editor.js API
    * readOnly - read-only mode status
    */
-  constructor({ data, api, readOnly }) {
+  constructor({
+    data, api, readOnly, config,
+  }) {
     this.data = {
       text: data.text || '',
       status: data.status || 'open',
@@ -78,6 +80,8 @@ export default class ToggleBlock {
     this.move = move;
     this.wrapper = undefined;
     this.readOnly = readOnly || false;
+    this.placeholder = config?.placeholder ?? 'Toggle';
+    this.defaultContent = config?.defaultContent ?? 'Empty toggle. Click or drop blocks inside.';
     this.addListeners();
     this.addSupportForUndoAndRedoActions();
     this.addSupportForDragAndDropActions();
@@ -257,7 +261,7 @@ export default class ToggleBlock {
 
       // Establishes the placeholder for the toggle root when it's empty
       input.addEventListener('keyup', this.setPlaceHolder.bind(this));
-      input.setAttribute('placeholder', 'Toggle');
+      input.setAttribute('placeholder', this.placeholder);
 
       // Calculates the number of toggle items
       input.addEventListener('focus', this.setDefaultContent.bind(this));
@@ -270,7 +274,7 @@ export default class ToggleBlock {
     }
 
     defaultContent.classList.add('toggle-block__content-default', 'toggle-block__hidden');
-    defaultContent.innerHTML = 'Empty toggle. Click or drop blocks inside.';
+    defaultContent.innerHTML = this.defaultContent;
 
     this.wrapper.appendChild(icon);
     this.wrapper.appendChild(input);
