@@ -380,4 +380,50 @@ describe('ToggleBlock', () => {
       });
     });
   });
+
+  describe('validates the config', () => {
+    let myToggleBlock;
+
+    it('when the config is not provided', () => {
+      const DEFAULT_CONFIG = {
+        placeholder: 'Toggle',
+        defaultContent: 'Empty toggle. Click or drop blocks inside.',
+      };
+
+      myToggleBlock = new ToggleBlock({ data, api: editor });
+      myToggleBlock.render();
+
+      const { placeholder, defaultContent, wrapper } = myToggleBlock;
+
+      const placeholderFromQuery = wrapper.querySelector('.toggle-block__input').getAttribute('placeholder');
+      const defaultContentFromQuery = wrapper.querySelector('.toggle-block__content-default.toggle-block__hidden').textContent;
+
+      expect(placeholder).toBe(DEFAULT_CONFIG.placeholder);
+      expect(defaultContent).toBe(DEFAULT_CONFIG.defaultContent);
+
+      expect(placeholderFromQuery).toBe(DEFAULT_CONFIG.placeholder);
+      expect(defaultContentFromQuery).toBe(DEFAULT_CONFIG.defaultContent);
+    });
+
+    it('when the config is provided', () => {
+      const config = {
+        placeholder: 'My placeholder',
+        defaultContent: 'My default content',
+      };
+
+      myToggleBlock = new ToggleBlock({ data, api: editor, config });
+      myToggleBlock.render();
+
+      const { placeholder, defaultContent, wrapper } = myToggleBlock;
+
+      const placeholderFromQuery = wrapper.querySelector('.toggle-block__input').getAttribute('placeholder');
+      const defaultContentFromQuery = wrapper.querySelector('.toggle-block__content-default.toggle-block__hidden').textContent;
+
+      expect(placeholder).toBe(config.placeholder);
+      expect(defaultContent).toBe(config.defaultContent);
+
+      expect(placeholderFromQuery).toBe(config.placeholder);
+      expect(defaultContentFromQuery).toBe(config.defaultContent);
+    });
+  });
 });
