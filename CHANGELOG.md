@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 (14.09.2022)
+
+* Allow config for placeholder & defaultContent.
+
 ## 0.2.8 (12.09.2022)
 
 * Update scorecard-action to v2.0.2 which fixes [a bug related to score -1](https://github.com/ossf/scorecard-action/issues/895).
