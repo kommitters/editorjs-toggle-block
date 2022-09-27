@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 (27.09.2022)
+
+* Fix freeze bug when render children.
+
 ## 0.3.0 (14.09.2022)
 
 * Allow config for placeholder & defaultContent.
