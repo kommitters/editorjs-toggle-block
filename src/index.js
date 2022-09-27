@@ -462,16 +462,17 @@ export default class ToggleBlock {
     } else {
       const toggle = this.wrapper.children[1];
       let currentBlock = {};
+      let index = this.api.blocks.getCurrentBlockIndex();
 
       while (currentBlock[1] !== toggle) {
-        toggleRoot = this.api.blocks.getCurrentBlockIndex();
+        toggleRoot = index;
         const block = this.api.blocks.getBlockByIndex(toggleRoot);
         const { holder } = block;
         const blockCover = holder.firstChild;
         const blockContent = blockCover.firstChild;
         currentBlock = blockContent.children;
 
-        this.api.caret.setToNextBlock('end', 0);
+        index -= 1;
       }
     }
 
