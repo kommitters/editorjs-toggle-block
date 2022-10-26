@@ -1,4 +1,5 @@
 # EditorJS Toggle Block
+[![Coverage Status](https://coveralls.io/repos/github/kommitters/editorjs-toggle-block/badge.svg)](https://coveralls.io/github/kommitters/editorjs-toggle-block)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/6454/badge)](https://bestpractices.coreinfrastructure.org/projects/6454)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/kommitters/editorjs-toggle-block/badge)](https://api.securityscorecards.dev/projects/github.com/kommitters/editorjs-toggle-block)
 
