@@ -2,7 +2,7 @@
 
 ## 0.3.2 (26.10.2022)
 
-* Added Coverage Report to Coveralls.
+* Added Coverage Report with Coveralls.
 
 ## 0.3.1 (27.09.2022)
 
