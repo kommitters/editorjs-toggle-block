@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4 (09.11.2022)
+
+* Bump ossf/scorecard-action to v2.0.6.
+
 ## 0.3.3 (09.11.2022)
 
 * Bump loader-utils from 1.4.0 to 1.4.1.
