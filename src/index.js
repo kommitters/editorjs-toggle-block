@@ -88,6 +88,24 @@ export default class ToggleBlock {
   }
 
   /**
+   * Returns true if the div element is a toggle child, otherwise, returns false
+   * @param {HTMLDivElement} holder
+   * @returns {boolean}
+   */
+  isAToggleItem(holder) {
+    return holder.classList.contains('toggle-block__item');
+  }
+
+  /**
+   * Returns true if the div element is a toggle root, otherwise, returns false
+   * @param {HTMLDivElement} holder
+   * @returns {boolean}
+   */
+  isAToggleRoot(holder) {
+    return holder.classList.contains('toggle-block__selector') || Boolean(holder.querySelector('.toggle-block__selector'));
+  }
+
+  /**
    * First it gets the toggle index.
    *
    * After checks the toggle status, if this is 'closed' then open it.
@@ -170,8 +188,8 @@ export default class ToggleBlock {
     if (e.code === 'Enter') {
       this.createParagraphFromIt();
     } else {
-      const indexBlock = this.api.blocks.getCurrentBlockIndex();
-      const nestedBlock = this.api.blocks.getBlockByIndex(indexBlock);
+      const indexBlock = this.getCurrentBlockIndex();
+      const nestedBlock = this.getBlockByIndex(indexBlock);
       const { holder } = nestedBlock;
 
       if (e.code === 'Tab' && e.shiftKey) {
@@ -352,38 +370,51 @@ export default class ToggleBlock {
   }
 
   /**
+  * Returns the toggle's root index, given the index of one of its children
+  *
+  * @param {number} entryIndex - block index
+  * @param {String} fk - The block's foreign key
+  * @returns {number} The Toggle's root index
+  */
+  findToogleRootIndex(entryIndex, fk) {
+    const block = this.getBlockByIndex(entryIndex);
+    const { holder } = block;
+
+    if (this.isAToggleRoot(holder)) {
+      const id = holder.querySelector('.toggle-block__selector').getAttribute('id');
+      if (fk === id) {
+        return entryIndex;
+      }
+    }
+    if (entryIndex - 1 >= 0) {
+      return this.findToogleRootIndex(entryIndex - 1, fk);
+    }
+    return -1;
+  }
+
+  /**
    * Extracts a nested block from a toggle
    * with 'shift + tab' combination
    *
-   * @param {HTMLDivElement} entryIndex - block index
+   * @param {number} entryIndex - Block's index that will be extracted
    */
   extractBlock(entryIndex) {
-    const toggle = this.wrapper.children[1];
+    const block = this.getBlockByIndex(entryIndex);
+    const { holder } = block;
 
-    let currentBlock = {};
-    let index;
+    if (this.isAToggleItem(holder)) {
+      const fk = holder.getAttribute('foreignKey');
+      const parentIndex = this.findToogleRootIndex(entryIndex, fk);
+      if (parentIndex >= 0) {
+        const items = this.getDecendentsNumber(fk);
+        const destiny = parentIndex + items;
 
-    while (currentBlock[1] !== toggle) {
-      this.api.caret.setToPreviousBlock('end', 0);
-      index = this.api.blocks.getCurrentBlockIndex();
+        if (items > 1) { this.api.blocks.move(destiny, entryIndex); }
 
-      const block = this.api.blocks.getBlockByIndex(index);
-      const { holder } = block;
-      const blockCover = holder.firstChild;
-      const blockContent = blockCover.firstChild;
-      currentBlock = blockContent.children;
+        setTimeout(() => this.removeAttributesFromNewBlock(destiny), 200);
+      }
     }
-
-    const items = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
-    const destiny = index + items.length;
-
     this.api.caret.setToBlock(entryIndex);
-
-    if (items.length > 1) {
-      this.api.blocks.move(destiny);
-    }
-
-    setTimeout(() => this.removeAttributesFromNewBlock(destiny), 200);
     this.api.toolbar.close();
   }
 
@@ -700,7 +731,7 @@ export default class ToggleBlock {
   }
 
   /**
-   * Move down the whole current toggle to the next corresponding position
+   * Move up the whole current toggle to the next corresponding position
    * @param {number} toggleInitialIndex // index of the root of the current toggle
    * @param {number} toggleEndIndex // index of the last child of the current toggle
    */
