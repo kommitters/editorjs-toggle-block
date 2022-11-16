@@ -1,26 +1,55 @@
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Sets the HTML structure to support EditorJS.
+
+ * Result:
+ * ```
+ * <div id="editorjs">
+ *   <div class="codex-editor">
+ *     <div class="codex-editor__redactor">
+ *     </div>
+ *   </div>
+ * </div>
+ * ```
+ */
+export function startDocument() {
+  document.body.innerHTML = '';
+  const editorRedactor = document.createElement('div');
+  editorRedactor.classList.add('codex-editor__redactor');
+
+  const codexEditor = document.createElement('div');
+  codexEditor.classList.add('codex-editor');
+  codexEditor.appendChild(editorRedactor);
+
+  const editorJS = document.createElement('div');
+  editorJS.setAttribute('id', 'editorjs');
+  editorJS.appendChild(codexEditor);
+
+  document.body.appendChild(editorJS);
+}
+
 export function getHiddenAttribute(redactor) {
-  const children = redactor.querySelectorAll('div[hidden="true"]');
+  const children = redactor.querySelectorAll('div[hidden=""]');
   const defaultContent = redactor.querySelectorAll('div.toggle-block__hidden');
   return (children.length + defaultContent.length) - 1;
 }
 
 export function createNestedBlock(toggleBlock, data) {
   const newBlock = document.createElement('div');
-  newBlock.classList.add('ce-block');
+  newBlock.classList.add('ce-block', 'toggle-block__item');
   newBlock.setAttribute('foreignKey', toggleBlock.wrapper.id);
   newBlock.setAttribute('id', uuidv4());
 
   if (toggleBlock.data.status === 'closed') {
-    newBlock.setAttribute('hidden', true);
+    newBlock.hidden = true;
   }
 
   const content = document.createElement('div');
   content.classList.add('ce-block__content');
 
   const paragraph = document.createElement('div');
-  paragraph.classList.add('ce-paragraph', 'cdx-block', 'toggle-block__item');
+  paragraph.classList.add('ce-paragraph', 'cdx-block');
   paragraph.contentEditable = true;
   paragraph.textContent = data.text;
 
@@ -30,18 +59,45 @@ export function createNestedBlock(toggleBlock, data) {
   return newBlock;
 }
 
+export function createToggleRoot(toggleBlock) {
+  const toggleRoot = toggleBlock.render();
+
+  const content = document.createElement('div');
+  content.classList.add('ce-block__content');
+
+  content.appendChild(toggleRoot);
+
+  const parentBlock = document.createElement('div');
+  parentBlock.classList.add('ce-block');
+
+  parentBlock.setAttribute('status', toggleBlock.data.status);
+
+  parentBlock.appendChild(content);
+
+  return parentBlock;
+}
+
 export function generateFullToggle(toggleBlock, data) {
   const answer = [];
   let newBlock;
+  const parentBlock = createToggleRoot(toggleBlock);
 
-  answer.push(toggleBlock.render());
+  answer.push(parentBlock);
 
   for (let i = 1; i < data.length; i += 1) {
     newBlock = createNestedBlock(toggleBlock, data[i].data);
+    toggleBlock.itemsId.push(`12${i}id`);
     answer.push(newBlock);
   }
 
   return answer;
+}
+
+export function changeToggleStatus(toggleBlock, redactor, status) {
+  toggleBlock.data.status = status;
+  const [toggleRoot, ...toggleBlockItems] = Array.from(redactor.children);
+  toggleRoot.setAttribute('status', status);
+  toggleBlockItems.forEach((item) => { item.hidden = status === 'closed'; });
 }
 
 export function destroyFullToggle(redactor, toggleIndex, blocks) {
@@ -86,13 +142,12 @@ export function createToggle(e, editor, toggleBlock) {
   if (e.key === 'Space') {
     const blockContainer = document.activeElement;
     const content = blockContainer.textContent;
-    const { length } = content;
 
-    if (content[30] === '>' && (length === 50)) {
-      const invocatorBlock = editor.blocks.getCurrentBlockIndex();
-      toggleBlock.render();
+    if (content.includes('>')) {
+      const invocatorBlock = editor.blocks.getCurrentBlockIndex(0);
+      const toggleRoot = createToggleRoot(toggleBlock);
 
-      editor.blocks.insert(toggleBlock.wrapper);
+      editor.blocks.insert(toggleRoot);
       editor.blocks.delete(invocatorBlock);
     }
   }
@@ -103,10 +158,13 @@ export function getEditorElements() {
   const mainContainer = body.children[0];
   const editorContainer = mainContainer.children[0];
   const redactor = editorContainer.children[0];
-  const toggle = redactor.children[0];
+  const ceBlock = redactor.children[0];
+  const ceContainer = ceBlock.children[0];
+  const toggle = ceContainer.children[0];
+
   const classes = toggle.classList;
 
-  return [redactor, classes];
+  return classes;
 }
 
 function isPartOfAToggle(block) {

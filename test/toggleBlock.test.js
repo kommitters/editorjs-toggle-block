@@ -5,21 +5,16 @@ import data from './fixtures/toolData';
 import {
   getHiddenAttribute, generateFullToggle, createNestedBlock, destroyFullToggle,
   extractionBlock, createDefaultBlock, createToggle, getEditorElements, nestBlock,
+  createToggleRoot, changeToggleStatus, startDocument,
 } from './testHelpers';
 
 describe('ToggleBlock', () => {
   let toggleBlock;
+  let redactor;
 
   beforeEach(() => {
-    document.body.innerHTML = `
-    <div id="editorjs">
-      <div class="codex-editor">
-        <div class="codex-editor__redactor">
-        </div>  
-      </div>
-    </div>
-    `;
-
+    startDocument();
+    redactor = document.querySelector('div.codex-editor__redactor');
     toggleBlock = createToggleBlock(data[0]);
     toggleBlock.data.status = 'closed';
     toggleBlock.data.items = 3;
@@ -47,184 +42,209 @@ describe('ToggleBlock', () => {
     });
   });
 
-  describe('validates the render method', () => {
-    let redactor;
-    let hiddenAttributes;
-    let toggle;
-
+  describe('When the Toggle has three paragraphs', () => {
     beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-      hiddenAttributes = 0;
+      const blocks = generateFullToggle(toggleBlock, data);
+      blocks.forEach((block) => {
+        redactor.appendChild(block);
+      });
     });
 
-    it('when a toggle status is closed', () => {
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
+    describe('validates the render method', () => {
+      let hiddenAttributes;
 
-      const children = redactor.querySelectorAll(`div[foreignKey="${toggleBlock.wrapper.id}"]`).length;
+      beforeEach(() => {
+        hiddenAttributes = 0;
+      });
 
-      hiddenAttributes = getHiddenAttribute(redactor, toggleBlock);
+      it('when Toggle status is closed', () => {
+        const children = redactor.querySelectorAll(`div[foreignKey="${toggleBlock.wrapper.id}"]`).length;
 
-      expect(toggleBlock.data.items).toEqual(children);
-      expect(hiddenAttributes).toEqual(children);
+        hiddenAttributes = getHiddenAttribute(redactor, toggleBlock);
+
+        expect(toggleBlock.data.items).toEqual(children);
+        expect(hiddenAttributes).toEqual(children);
+      });
+
+      it('when Toggle status is open', () => {
+        changeToggleStatus(toggleBlock, redactor, 'open');
+
+        expect(toggleBlock.data.status).toEqual('open');
+        expect(toggleBlock.data.items.length).not.toEqual(0);
+        expect(hiddenAttributes).toEqual(0);
+      });
     });
 
-    it('when a toggle status is open', () => {
-      toggleBlock.data.status = 'open';
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-      hiddenAttributes = getHiddenAttribute(redactor, toggleBlock);
+    describe('validates paragraph deletion from itself', () => {
+      it('when the current paragraph is the first', () => {
+        const currentParagraph = redactor.children[1];
+        redactor.removeChild(currentParagraph);
 
-      expect(toggleBlock.data.status).toEqual('open');
-      expect(toggleBlock.data.items.length).not.toEqual(0);
-      expect(hiddenAttributes).toEqual(0);
+        expect(currentParagraph).not.toEqual(redactor.children[1]);
+      });
+
+      it('when the current paragraph is the last', () => {
+        const currentParagraph = redactor.lastChild;
+        redactor.removeChild(currentParagraph);
+
+        expect(currentParagraph).not.toEqual(redactor.lastChild);
+      });
+    });
+
+    describe('validates paragraph insertion from another', () => {
+      it('when the current paragraph is the first', () => {
+        const currentParagraph = redactor.children[1];
+        const next = currentParagraph.nextSibling;
+        const paragraph = createNestedBlock(toggleBlock, { text: 'Inserted paragraph' });
+
+        redactor.insertBefore(paragraph, next);
+
+        expect(next).not.toEqual(redactor.children[2]);
+        expect(currentParagraph.nextSibling.textContent).toEqual('Inserted paragraph');
+      });
+
+      it('when the current paragraph is the last', () => {
+        const lastParagraph = redactor.lastChild;
+        const last = lastParagraph.nextSibling;
+        const paragraph = createNestedBlock(toggleBlock, { text: 'Last inserted paragraph' });
+
+        redactor.appendChild(paragraph);
+
+        expect(lastParagraph).not.toEqual(redactor.lastChild);
+        expect(last).toBe(null);
+        expect(redactor.lastChild.textContent).toEqual('Last inserted paragraph');
+      });
+    });
+
+    describe('validates paragraph insertion from the toggle root', () => {
+      it('inserts the paragraph to the Toggle', () => {
+        const firstChild = redactor.children[1];
+        const paragraph = createNestedBlock(toggleBlock, { text: 'New paragraph' });
+
+        redactor.insertBefore(paragraph, firstChild);
+
+        expect(firstChild).not.toEqual(redactor.children[1]);
+        expect(redactor.children[1].textContent).toEqual('New paragraph');
+      });
+    });
+
+    describe('isAToggleItem', () => {
+      it('when the block belongs to a toggle', () => {
+        const { id } = toggleBlock.wrapper;
+        const children = redactor.querySelectorAll(`div[foreignKey="${id}"]`);
+        children.forEach((child) => {
+          expect(toggleBlock.isAToggleItem(child)).toBe(true);
+        });
+      });
+
+      it('when then block does not belong to a toggle', () => {
+        const block = createDefaultBlock({ text: 'Outside Toggle' });
+        expect(toggleBlock.isAToggleItem(block)).toBe(false);
+      });
+    });
+
+    describe('isAToogleRoot', () => {
+      it('when the block is a toggle root', () => {
+        const { wrapper } = toggleBlock;
+        expect(toggleBlock.isAToggleRoot(wrapper)).toBe(true);
+      });
+
+      it('when the block is not a toggle root', () => {
+        const { id } = toggleBlock.wrapper;
+        const children = redactor.querySelectorAll(`div[foreignKey="${id}"]`);
+        children.forEach((child) => {
+          expect(toggleBlock.isAToggleRoot(child)).toBe(false);
+        });
+      });
+    });
+
+    describe('findToogleRootIndex', () => {
+      it('returns the toggle root index', () => {
+        const { id } = toggleBlock.wrapper;
+        expect(toggleBlock.findToogleRootIndex(2, id)).toBe(0);
+      });
+    });
+
+    describe('extractBlock', () => {
+      it('extracts a child from the toggle', () => {
+        const { id } = toggleBlock.wrapper;
+        const children = redactor.querySelectorAll(`div[foreignKey="${id}"]`).length;
+        toggleBlock.extractBlock(1);
+        const currentChildren = redactor.querySelectorAll(`div[foreignKey="${id}"]`).length;
+        setTimeout(() => {
+          expect(currentChildren).toBe(children - 1);
+        }, 200);
+      });
+    });
+
+    describe('validates complete toggle removal', () => {
+      it('when the toggle has the first position in the document', () => {
+        const children = redactor.children.length - 1;
+        destroyFullToggle(redactor, 0, children);
+        expect(redactor.children.length).toBe(0);
+      });
+
+      it('when the toggle is not the first element in the document', () => {
+        // Insert new toggle in the document
+        const newToggle = generateFullToggle(toggleBlock, data);
+        newToggle.forEach((block) => redactor.appendChild(block));
+        const children = newToggle.length - 1;
+        destroyFullToggle(redactor, 4, children);
+        expect(redactor.children.length).toBe(4);
+      });
+    });
+
+    describe('extraction block', () => {
+      it('Extract the first block into the toggle', () => {
+        const children = document.querySelectorAll(`div[foreignKey="${toggleBlock.wrapper.id}"]`);
+        extractionBlock(toggleBlock, redactor, 1);
+
+        expect(redactor.children.length).toBe(4);
+        expect(children.length).toBe(3);
+      });
+    });
+
+    describe('validates the getDecendentsNumber method', () => {
+      it('returns the number of children', () => {
+        toggleBlock.render();
+        const { id } = toggleBlock.wrapper;
+        const numberOfChildren = toggleBlock.getDecendentsNumber(id);
+        expect(numberOfChildren).toBe(toggleBlock.data.items);
+      });
+    });
+
+    describe('validates the highlightToggleItems method', () => {
+      it("Adds the ce-block--selected class to the toggle's children", () => {
+        toggleBlock.render();
+        const { id } = toggleBlock.wrapper;
+        toggleBlock.highlightToggleItems(id);
+        const children = redactor.querySelectorAll(`div[foreignKey="${id}"]`);
+        children.forEach((child) => {
+          expect(child.classList.contains('ce-block--selected')).toBe(true);
+        });
+      });
     });
   });
 
-  describe('validates paragraph deletion from itself', () => {
-    let redactor;
-    let toggle;
+  describe('When the toggle is empty', () => {
+    describe('validates paragraph insertion from the toggle root', () => {
+      beforeEach(() => {
+        toggleBlock.data.items = 0;
+        const block = createToggleRoot(toggleBlock);
+        redactor.appendChild(block);
+      });
 
-    beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-    });
+      it('inserts the paragraph to the Toggle', () => {
+        const paragraph = createNestedBlock(toggleBlock, { text: 'Last inserted paragraph' });
+        redactor.appendChild(paragraph);
 
-    it('when the current paragraph is the first', () => {
-      const currentParagraph = redactor.children[1];
-      redactor.removeChild(currentParagraph);
-
-      expect(currentParagraph).not.toEqual(redactor.children[1]);
-    });
-
-    it('when the current paragraph is the last', () => {
-      const currentParagraph = redactor.lastChild;
-      redactor.removeChild(currentParagraph);
-
-      expect(currentParagraph).not.toEqual(redactor.lastChild);
+        expect(redactor.children[1]).toEqual(redactor.lastChild);
+        expect(redactor.lastChild.textContent).toEqual('Last inserted paragraph');
+      });
     });
   });
 
-  describe('validates paragraph insertion from another', () => {
-    let redactor;
-    let toggle;
-
-    beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-    });
-
-    it('when the current paragraph is the first', () => {
-      const currentParagraph = redactor.children[1];
-      const next = currentParagraph.nextSibling;
-      const paragraph = createNestedBlock(toggleBlock, { text: 'Inserted paragraph' });
-
-      redactor.insertBefore(paragraph, next);
-
-      expect(next).not.toEqual(redactor.children[2]);
-      expect(currentParagraph.nextSibling.textContent).toEqual('Inserted paragraph');
-    });
-
-    it('when the current paragraph is the last', () => {
-      const lastParagraph = redactor.lastChild;
-      const last = lastParagraph.nextSibling;
-      const paragraph = createNestedBlock(toggleBlock, { text: 'Last inserted paragraph' });
-
-      redactor.appendChild(paragraph);
-
-      expect(lastParagraph).not.toEqual(redactor.lastChild);
-      expect(last).toBe(null);
-      expect(redactor.lastChild.textContent).toEqual('Last inserted paragraph');
-    });
-  });
-
-  describe('validates paragraph insertion from the toggle root', () => {
-    let redactor;
-    let toggle;
-
-    beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-    });
-
-    it('when the toggle has other paragraphs', () => {
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-
-      const firstChild = redactor.children[1];
-      const paragraph = createNestedBlock(toggleBlock, { text: 'New paragraph' });
-
-      redactor.insertBefore(paragraph, firstChild);
-
-      expect(firstChild).not.toEqual(redactor.children[1]);
-      expect(redactor.children[1].textContent).toEqual('New paragraph');
-    });
-
-    it('when the toggle is empty', () => {
-      toggleBlock.data.items = 0;
-      redactor.appendChild(toggleBlock.render());
-
-      const paragraph = createNestedBlock(toggleBlock, { text: 'Last inserted paragraph' });
-
-      redactor.appendChild(paragraph);
-
-      expect(redactor.children[1]).toEqual(redactor.lastChild);
-      expect(redactor.lastChild.textContent).toEqual('Last inserted paragraph');
-    });
-  });
-
-  describe('validates complete toggle removal', () => {
-    let redactor;
-    let toggle;
-
-    beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-    });
-
-    it('when the toggle has the first position in the document', () => {
-      const children = toggle.length - 1;
-
-      destroyFullToggle(redactor, 0, children);
-
-      expect(redactor.children.length).toBe(0);
-    });
-
-    it('when the toggle is not the first element in the document', () => {
-      // Insert new toggle in the document
-      const newToggle = generateFullToggle(toggleBlock, data);
-      newToggle.forEach((block) => redactor.appendChild(block));
-
-      const children = newToggle.length - 1;
-
-      destroyFullToggle(redactor, 4, children);
-
-      expect(redactor.children.length).toBe(4);
-    });
-  });
-
-  describe('extraction block', () => {
-    let redactor;
-    let toggle;
-
-    beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-    });
-
-    it('Extract the first block into the toggle', () => {
-      const children = document.querySelectorAll(`div[foreignKey="${toggleBlock.wrapper.id}"]`);
-      extractionBlock(toggleBlock, redactor, 1);
-
-      expect(redactor.children.length).toBe(4);
-      expect(children.length).toBe(3);
-    });
-  });
-
-  describe('validates read-only mode', () => {
+  describe('When Toggle is read-only mode', () => {
     let toggleBlockReadyOnly;
 
     it('when is enable', () => {
@@ -267,7 +287,7 @@ describe('ToggleBlock', () => {
 
       block.dispatchEvent(keyboardEvent);
 
-      const [redactor, classes] = getEditorElements();
+      const classes = getEditorElements();
 
       expect(classes[0]).toBe('toggle-block__selector');
       expect(redactor.children.length).toBe(1);
@@ -283,7 +303,7 @@ describe('ToggleBlock', () => {
 
       block.dispatchEvent(keyboardEvent);
 
-      const [redactor, classes] = getEditorElements();
+      const classes = getEditorElements();
 
       expect(classes[0]).not.toBe('toggle-block__selector');
       expect(redactor.children.length).toBe(1);
@@ -339,45 +359,6 @@ describe('ToggleBlock', () => {
 
       expect(classes.includes('toggle-block__item')).toBe(false);
       expect(foreignId).toBeNull();
-    });
-  });
-
-  describe('validates the getDecendentsNumber method', () => {
-    let toggle;
-    let redactor;
-
-    beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-    });
-
-    it('returns the number of children', () => {
-      toggleBlock.render();
-      const { id } = toggleBlock.wrapper;
-      const numberOfChildren = toggleBlock.getDecendentsNumber(id);
-      expect(numberOfChildren).toBe(toggleBlock.data.items);
-    });
-  });
-
-  describe('validates the highlightToggleItems method', () => {
-    let toggle;
-    let redactor;
-
-    beforeEach(() => {
-      redactor = document.querySelector('div.codex-editor__redactor');
-      toggle = generateFullToggle(toggleBlock, data);
-      toggle.forEach((block) => redactor.appendChild(block));
-    });
-
-    it("Adds the ce-block--selected class to the toggle's children", () => {
-      toggleBlock.render();
-      const { id } = toggleBlock.wrapper;
-      toggleBlock.highlightToggleItems(id);
-      const children = redactor.querySelectorAll(`div[foreignKey="${id}"]`);
-      children.forEach((child) => {
-        expect(child.classList.contains('ce-block--selected')).toBe(true);
-      });
     });
   });
 
