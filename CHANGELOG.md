@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.5 (16.11.2022)
+
+* Fix infinite loop with non-editable block inside toggle.
+
 ## 0.3.4 (09.11.2022)
 
 * Bump ossf/scorecard-action to v2.0.6.
