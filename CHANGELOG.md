@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.6 (07.12.2022)
+
+* Bump loader-utils from 1.4.1 to 1.4.2
+
 ## 0.3.5 (16.11.2022)
 
 * Fix infinite loop with non-editable block inside toggle.
