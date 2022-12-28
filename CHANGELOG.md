@@ -3,6 +3,7 @@
 ## 0.3.7 (28.12.2022)
 
 * Add Renovate as dependency update tool.
+* Update CodeQL workflow.
 
 ## 0.3.6 (07.12.2022)
 
