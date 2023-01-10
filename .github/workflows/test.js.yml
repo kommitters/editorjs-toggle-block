@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+        uses: step-security/harden-runner@8a1ef77ccd7a6d18b009c8cd833b00f49386b657
         with:
           egress-policy: block
           disable-telemetry: true
@@ -34,9 +34,9 @@ jobs:
             github.com:443
             nodejs.org:443
             registry.npmjs.org:443
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
+        uses: actions/setup-node@9227cda3f057273998ba2241d51a075b0598bbe5
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
