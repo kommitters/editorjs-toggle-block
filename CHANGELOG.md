@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.8 (13.01.2023)
+
+* Update all dependencies.
+* Block egress traffic in GitHub Actions.
+* Add stability badge in README.
+* Delete `yarn.lock` file to keep a single package manager.
+
 ## 0.3.7 (28.12.2022)
 
 * Add Renovate as dependency update tool.
