@@ -26,12 +26,10 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5 # v2.0.0
         with:
+          disable-sudo: true
           egress-policy: block
-          disable-telemetry: true
           allowed-endpoints: >
             api.github.com:443
-            artifactcache.actions.githubusercontent.com:443
-            kv4gacprodeus2file3.blob.core.windows.net:443
             github.com:443
             nodejs.org:443
             registry.npmjs.org:443
