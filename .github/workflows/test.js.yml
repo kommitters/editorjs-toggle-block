@@ -24,19 +24,19 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+        uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5 # v2.0.0
         with:
+          disable-sudo: true
           egress-policy: block
-          disable-telemetry: true
           allowed-endpoints: >
             api.github.com:443
             coveralls.io:443
             github.com:443
             nodejs.org:443
             registry.npmjs.org:443
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -52,6 +52,13 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5 # v2.0.0
+      with:
+        disable-sudo: true
+        egress-policy: block
+        allowed-endpoints: >
+          coveralls.io:443
     - name: Coveralls Finished
       uses: coverallsapp/github-action@3284643be2c47fb6432518ecec17f1255e8a06a6
       with:
