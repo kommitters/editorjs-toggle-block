@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5 # v2.0.0
+        uses: step-security/harden-runner@c8454efe5d0bdefd25384362fe217428ca277d57 # v2.2.0
         with:
           disable-sudo: true
           egress-policy: block
@@ -43,7 +43,7 @@ jobs:
       - run: npm ci
       - run: npm test -- --coverage
       - name: Coveralls Parallel
-        uses: coverallsapp/github-action@3284643be2c47fb6432518ecec17f1255e8a06a6
+        uses: coverallsapp/github-action@f56d776313fa41adc46ce8b1013b4487a0e525ba
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: node-${{ matrix.node-version }}
@@ -53,14 +53,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5 # v2.0.0
+      uses: step-security/harden-runner@c8454efe5d0bdefd25384362fe217428ca277d57 # v2.2.0
       with:
         disable-sudo: true
         egress-policy: block
         allowed-endpoints: >
           coveralls.io:443
     - name: Coveralls Finished
-      uses: coverallsapp/github-action@3284643be2c47fb6432518ecec17f1255e8a06a6
+      uses: coverallsapp/github-action@f56d776313fa41adc46ce8b1013b4487a0e525ba
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         parallel-finished: true
