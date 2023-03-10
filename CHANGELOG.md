@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.9 (10.03.2023)
+
+* Update all dependencies.
+* Fix bug when plugin is used via CDN. Now accesible through `ToggleBlock`.
+
 ## 0.3.8 (13.01.2023)
 
 * Update all dependencies.
