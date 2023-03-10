@@ -27,7 +27,7 @@ module.exports = {
     path: path.join(__dirname, '/dist'),
     publicPath: '/',
     filename: 'bundle.js',
-    library: 'Toggle',
+    library: 'ToggleBlock',
     libraryTarget: 'umd',
     libraryExport: 'default',
   },
