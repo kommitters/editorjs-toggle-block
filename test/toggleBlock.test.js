@@ -417,15 +417,20 @@ describe('ToggleBlock', () => {
     });
 
     it('resets the duplicated ids from a toggle with 3 paragraphs', () => {
-      redactor.innerHTML += redactor.innerHTML;
-      const lastCopiedBlock = redactor.lastChild;
-      const { children } = redactor;
-      const index = children.length - 1;
-      resetIdToCopiedBlock(redactor, lastCopiedBlock, index, 3);
+      const { children: originalChildren } = redactor;
+      const childrenNumber = originalChildren.length;
 
-      for (let i = 0; i < children.length - 4; i += 1) {
-        const originalBlock = children[i];
-        const copiedBlock = children[i + 4];
+      redactor.innerHTML += redactor.innerHTML;
+
+      const { children: modifiedChildren } = redactor;
+      const lastCopiedBlock = redactor.lastChild;
+      const index = modifiedChildren.length;
+
+      resetIdToCopiedBlock(redactor, lastCopiedBlock, index, childrenNumber);
+
+      for (let i = 0, j = index - childrenNumber; i < childrenNumber; i += 1, j += 1) {
+        const originalBlock = originalChildren[i];
+        const copiedBlock = modifiedChildren[j];
 
         if (i === 0) {
           const externalCover = [originalBlock.firstChild, copiedBlock.firstChild];

@@ -194,16 +194,16 @@ export function nestBlock(e) {
   }
 }
 
-export function resetIdToCopiedBlock(redactor, lastCopiedBlock, index, children) {
+export function resetIdToCopiedBlock(redactor, lastCopiedBlock, index, childrenNumber) {
   const foreignKey = lastCopiedBlock.getAttribute('foreignKey');
   const toggleRoot = document.querySelectorAll(`#${foreignKey}`);
 
   if (toggleRoot.length > 1) {
-    const parentBlock = index - children;
+    const parentBlock = index - childrenNumber;
     const id = uuidv4();
     const blocks = redactor.children;
 
-    for (let i = parentBlock; i <= index; i += 1) {
+    for (let i = parentBlock; i < index; i += 1) {
       const currentBlock = blocks[i];
       if (i === parentBlock) {
         const externalCover = currentBlock.firstChild;

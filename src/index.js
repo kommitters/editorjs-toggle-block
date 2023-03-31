@@ -1128,11 +1128,9 @@ export default class ToggleBlock {
   resetIdToCopiedBlock() {
     if (this.wrapper !== undefined) {
       const index = this.api.blocks.getCurrentBlockIndex();
-      const block = this.api.blocks.getBlockByIndex(index);
-      const { holder } = block;
-      const currentBlockValidation = this.isPartOfAToggle(holder);
+      const { holder } = this.api.blocks.getBlockByIndex(index);
 
-      if (currentBlockValidation) {
+      if (this.isPartOfAToggle(holder)) {
         const foreignKey = holder.getAttribute('foreignKey');
         const toggleRoot = document.querySelectorAll(`#${foreignKey}`);
 
@@ -1142,13 +1140,13 @@ export default class ToggleBlock {
 
           for (let i = parentBlock; i <= index; i += 1) {
             const currentBlock = this.api.blocks.getBlockByIndex(i);
-            const { holder: theHolder } = currentBlock;
+            const { holder: currentBlockHolder } = currentBlock;
             if (i === parentBlock) {
-              const externalCover = theHolder.firstChild;
+              const externalCover = currentBlockHolder.firstChild;
               const toggleCover = externalCover.firstChild;
               toggleCover.setAttribute('id', `fk-${id}`);
             } else {
-              theHolder.setAttribute('foreignKey', `fk-${id}`);
+              currentBlockHolder.setAttribute('foreignKey', `fk-${id}`);
             }
           }
         }
