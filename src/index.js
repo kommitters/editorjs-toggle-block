@@ -85,6 +85,7 @@ export default class ToggleBlock {
     this.addListeners();
     this.addSupportForUndoAndRedoActions();
     this.addSupportForDragAndDropActions();
+    this.addSupportForCopyAndPasteAction();
   }
 
   /**
@@ -1095,5 +1096,61 @@ export default class ToggleBlock {
     const answer = classes.includes('toggle-block__item') || (classes.includes('toggle-block__input') || classes.includes('toggle-block__selector'));
 
     return answer;
+  }
+
+  /**
+   * Adds mutation observer to reset the toggle ids
+   * when a toggle is copied and pasted.
+   */
+  addSupportForCopyAndPasteAction() {
+    if (!this.readOnly) {
+      const target = document.querySelector('div.codex-editor__redactor');
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            setTimeout(this.resetIdToCopiedBlock.bind(this, mutation));
+          }
+        });
+      });
+
+      const config = { attributes: true, childList: true, characterData: true };
+
+      observer.observe(target, config);
+    }
+  }
+
+  /**
+   * Reset the toggle ids to ensure toggles with unique id.
+   */
+  resetIdToCopiedBlock() {
+    if (this.wrapper !== undefined) {
+      const index = this.api.blocks.getCurrentBlockIndex();
+      const block = this.api.blocks.getBlockByIndex(index);
+      const { holder } = block;
+      const currentBlockValidation = this.isPartOfAToggle(holder);
+
+      if (currentBlockValidation) {
+        const foreignKey = holder.getAttribute('foreignKey');
+        const toggleRoot = document.querySelectorAll(`#${foreignKey}`);
+
+        if (toggleRoot.length > 1) {
+          const parentBlock = this.findToogleRootIndex(index, foreignKey);
+          const id = uuidv4();
+
+          for (let i = parentBlock; i <= index; i += 1) {
+            const currentBlock = this.api.blocks.getBlockByIndex(i);
+            const { holder: theHolder } = currentBlock;
+            if (i === parentBlock) {
+              const externalCover = theHolder.firstChild;
+              const toggleCover = externalCover.firstChild;
+              toggleCover.setAttribute('id', `fk-${id}`);
+            } else {
+              theHolder.setAttribute('foreignKey', `fk-${id}`);
+            }
+          }
+        }
+      }
+    }
   }
 }
