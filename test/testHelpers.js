@@ -193,3 +193,25 @@ export function nestBlock(e) {
     }
   }
 }
+
+export function resetIdToCopiedBlock(redactor, lastCopiedBlock, index, children) {
+  const foreignKey = lastCopiedBlock.getAttribute('foreignKey');
+  const toggleRoot = document.querySelectorAll(`#${foreignKey}`);
+
+  if (toggleRoot.length > 1) {
+    const parentBlock = index - children;
+    const id = uuidv4();
+    const blocks = redactor.children;
+
+    for (let i = parentBlock; i <= index; i += 1) {
+      const currentBlock = blocks[i];
+      if (i === parentBlock) {
+        const externalCover = currentBlock.firstChild;
+        const toggleCover = externalCover.firstChild;
+        toggleCover.setAttribute('id', `fk-${id}`);
+      } else {
+        currentBlock.setAttribute('foreignKey', `fk-${id}`);
+      }
+    }
+  }
+}
