@@ -428,9 +428,9 @@ describe('ToggleBlock', () => {
 
       resetIdToCopiedBlock(redactor, lastCopiedBlock, index, childrenNumber);
 
-      for (let i = 0, j = index - childrenNumber; i < childrenNumber; i += 1, j += 1) {
+      for (let i = 0; i < childrenNumber; i += 1) {
         const originalBlock = originalChildren[i];
-        const copiedBlock = modifiedChildren[j];
+        const copiedBlock = modifiedChildren[i + childrenNumber];
 
         if (i === 0) {
           const externalCover = [originalBlock.firstChild, copiedBlock.firstChild];
