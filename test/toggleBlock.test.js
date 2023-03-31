@@ -5,7 +5,7 @@ import data from './fixtures/toolData';
 import {
   getHiddenAttribute, generateFullToggle, createNestedBlock, destroyFullToggle,
   extractionBlock, createDefaultBlock, createToggle, getEditorElements, nestBlock,
-  createToggleRoot, changeToggleStatus, startDocument,
+  createToggleRoot, changeToggleStatus, startDocument, resetIdToCopiedBlock,
 } from './testHelpers';
 
 describe('ToggleBlock', () => {
@@ -405,6 +405,44 @@ describe('ToggleBlock', () => {
 
       expect(placeholderFromQuery).toBe(config.placeholder);
       expect(defaultContentFromQuery).toBe(config.defaultContent);
+    });
+  });
+
+  describe('When a toggle and its nested blocks are copied and pasted', () => {
+    beforeEach(() => {
+      const blocks = generateFullToggle(toggleBlock, data);
+      blocks.forEach((block) => {
+        redactor.appendChild(block);
+      });
+    });
+
+    it('resets the duplicated ids from a toggle with 3 paragraphs', () => {
+      const { children: originalChildren } = redactor;
+      const childrenNumber = originalChildren.length;
+
+      redactor.innerHTML += redactor.innerHTML;
+
+      const { children: modifiedChildren } = redactor;
+      const lastCopiedBlock = redactor.lastChild;
+      const index = modifiedChildren.length;
+
+      resetIdToCopiedBlock(redactor, lastCopiedBlock, index, childrenNumber);
+
+      for (let i = 0; i < childrenNumber; i += 1) {
+        const originalBlock = originalChildren[i];
+        const copiedBlock = modifiedChildren[i + childrenNumber];
+
+        if (i === 0) {
+          const externalCover = [originalBlock.firstChild, copiedBlock.firstChild];
+          const toggleCover = [externalCover[0].firstChild, externalCover[1].firstChild];
+
+          expect(toggleCover[0].getAttribute('id')).not.toEqual(toggleCover[1].getAttribute('id'));
+        } else {
+          expect(originalBlock.getAttribute('foreignKey')).not.toEqual(copiedBlock.getAttribute('foreignKey'));
+        }
+
+        expect(originalBlock.textContent).toEqual(copiedBlock.textContent);
+      }
     });
   });
 });
