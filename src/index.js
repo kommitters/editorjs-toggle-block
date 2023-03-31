@@ -85,6 +85,7 @@ export default class ToggleBlock {
     this.addListeners();
     this.addSupportForUndoAndRedoActions();
     this.addSupportForDragAndDropActions();
+    this.addSupportForCopyAndPasteAction();
   }
 
   /**
@@ -595,9 +596,11 @@ export default class ToggleBlock {
    * @returns {ToggleBlockData} - saved data
    */
   save(blockContent) {
+    const id = blockContent.getAttribute('id');
     const { children } = blockContent;
     const caption = children[1].innerHTML;
-    const blocks = document.querySelectorAll(`div[foreignKey="${this.wrapper.id}"]`);
+    const blocks = document.querySelectorAll(`div[foreignKey="${id}"]`);
+    this.data.fk = id;
 
     return Object.assign(this.data, {
       text: caption,
@@ -1095,5 +1098,59 @@ export default class ToggleBlock {
     const answer = classes.includes('toggle-block__item') || (classes.includes('toggle-block__input') || classes.includes('toggle-block__selector'));
 
     return answer;
+  }
+
+  /**
+   * Adds mutation observer to reset the toggle ids
+   * when a toggle is copied and pasted.
+   */
+  addSupportForCopyAndPasteAction() {
+    if (!this.readOnly) {
+      const target = document.querySelector('div.codex-editor__redactor');
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            setTimeout(this.resetIdToCopiedBlock.bind(this, mutation));
+          }
+        });
+      });
+
+      const config = { attributes: true, childList: true, characterData: true };
+
+      observer.observe(target, config);
+    }
+  }
+
+  /**
+   * Reset the toggle ids to ensure toggles with unique id.
+   */
+  resetIdToCopiedBlock() {
+    if (this.wrapper !== undefined) {
+      const index = this.api.blocks.getCurrentBlockIndex();
+      const { holder } = this.api.blocks.getBlockByIndex(index);
+
+      if (this.isPartOfAToggle(holder)) {
+        const foreignKey = holder.getAttribute('foreignKey');
+        const toggleRoot = document.querySelectorAll(`#${foreignKey}`);
+
+        if (toggleRoot.length > 1) {
+          const parentBlock = this.findToogleRootIndex(index, foreignKey);
+          const id = uuidv4();
+
+          for (let i = parentBlock; i <= index; i += 1) {
+            const currentBlock = this.api.blocks.getBlockByIndex(i);
+            const { holder: currentBlockHolder } = currentBlock;
+            if (i === parentBlock) {
+              const externalCover = currentBlockHolder.firstChild;
+              const toggleCover = externalCover.firstChild;
+              toggleCover.setAttribute('id', `fk-${id}`);
+            } else {
+              currentBlockHolder.setAttribute('foreignKey', `fk-${id}`);
+            }
+          }
+        }
+      }
+    }
   }
 }
