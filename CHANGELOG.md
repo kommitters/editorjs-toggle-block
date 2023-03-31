@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.10 (31.03.2023)
+
+* Update dependency webpack to v5.76.0 [SECURITY].
+* Fix bug that shared id and foreign key when copy-and-paste a toggle.
+
 ## 0.3.9 (10.03.2023)
 
 * Update all dependencies.
