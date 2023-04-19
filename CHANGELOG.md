@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.11 (19.04.2023)
+
+* Add `.npmignore` file to reduce package size.
+
 ## 0.3.10 (31.03.2023)
 
 * Update dependency webpack to v5.76.0 [SECURITY].
