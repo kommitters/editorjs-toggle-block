@@ -204,11 +204,11 @@ describe('ToggleBlock', () => {
       });
     });
 
-    describe('validates the getDecendentsNumber method', () => {
+    describe('validates the getDescendantsNumber method', () => {
       it('returns the number of children', () => {
         toggleBlock.render();
         const { id } = toggleBlock.wrapper;
-        const numberOfChildren = toggleBlock.getDecendentsNumber(id);
+        const numberOfChildren = toggleBlock.getDescendantsNumber(id);
         expect(numberOfChildren).toBe(toggleBlock.data.items);
       });
     });
