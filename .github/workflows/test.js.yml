@@ -60,6 +60,7 @@ jobs:
         egress-policy: block
         allowed-endpoints: >
           coveralls.io:443
+          github.com:443
           objects.githubusercontent.com:443
     - name: Coveralls Finished
       uses: coverallsapp/github-action@95b1a2355bd0e526ad2fd62da9fd386ad4c98474
