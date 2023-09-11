@@ -504,7 +504,7 @@ export default class ToggleBlock {
         const blockContent = blockCover.firstChild;
         currentBlock = blockContent.children;
 
-        index -= 1;
+        index += 1;
       }
     }
 
