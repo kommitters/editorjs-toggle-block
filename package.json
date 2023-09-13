@@ -1,7 +1,7 @@
 {
   "name": "editorjs-toggle-block",
   "version": "0.3.11",
-  "description": "Toogle block tool for Editor.js",
+  "description": "Toggle block tool for Editor.js",
   "main": "./dist/bundle.js",
   "scripts": {
     "build": "webpack --mode production",
