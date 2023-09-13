@@ -377,7 +377,7 @@ export default class ToggleBlock {
   * @param {String} fk - The block's foreign key
   * @returns {number} The Toggle's root index
   */
-  findToogleRootIndex(entryIndex, fk) {
+  findToggleRootIndex(entryIndex, fk) {
     const block = this.getBlockByIndex(entryIndex);
     const { holder } = block;
 
@@ -388,7 +388,7 @@ export default class ToggleBlock {
       }
     }
     if (entryIndex - 1 >= 0) {
-      return this.findToogleRootIndex(entryIndex - 1, fk);
+      return this.findToggleRootIndex(entryIndex - 1, fk);
     }
     return -1;
   }
@@ -405,7 +405,7 @@ export default class ToggleBlock {
 
     if (this.isAToggleItem(holder)) {
       const fk = holder.getAttribute('foreignKey');
-      const parentIndex = this.findToogleRootIndex(entryIndex, fk);
+      const parentIndex = this.findToggleRootIndex(entryIndex, fk);
       if (parentIndex >= 0) {
         const items = this.getDescendantsNumber(fk);
         const destiny = parentIndex + items;
@@ -700,7 +700,7 @@ export default class ToggleBlock {
       const blocks = this.getBlocksCount();
       const toggleEndIndex = toggleInitialIndex + descendants;
 
-      // Move back the root of the Toogle to its initial position
+      // Move back the root of the Toggle to its initial position
       this.move(toggleInitialIndex, currentToggleIndex);
 
       if (toggleInitialIndex >= 0 && toggleEndIndex <= (blocks - 1)) {
@@ -930,13 +930,13 @@ export default class ToggleBlock {
               || dropTarget.getAttribute('foreignKey') !== null;
 
             setTimeout(() => {
-              // Verify if the item droped is the toggle
+              // Verify if the item dropped is the toggle
               if (this.nameDragged === 'toggle') {
                 // Verify if the toggle dropped is the same of this eventListener
                 const currentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`);
 
                 if (currentToggleDropped) {
-                  // Check if the toggle dropped was not droppen in its children
+                  // Check if the toggle dropped was not dropped in its children
                   if (!this.isChild(currentToggleDropped.getAttribute('id'), dropTarget.getAttribute('foreignKey'))) {
                     // If is a toggle we have to add the attributes to make it a part of the toggle
                     if (isTargetAToggle) {
@@ -1135,7 +1135,7 @@ export default class ToggleBlock {
         const toggleRoot = document.querySelectorAll(`#${foreignKey}`);
 
         if (toggleRoot.length > 1) {
-          const parentBlock = this.findToogleRootIndex(index, foreignKey);
+          const parentBlock = this.findToggleRootIndex(index, foreignKey);
           const id = uuidv4();
 
           for (let i = parentBlock; i <= index; i += 1) {
