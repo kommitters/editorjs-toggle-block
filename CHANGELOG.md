@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.12 (14.09.2023)
+
+* Fix typos in code.
+* [Fix bug when loading initial data](https://github.com/kommitters/editorjs-toggle-block/issues/206).
+* [Update all dependencies](https://github.com/kommitters/editorjs-toggle-block/pull/202).
+* [Bump word-wrap from 1.2.3 to 1.2.4](https://github.com/kommitters/editorjs-toggle-block/pull/205).
+* [Bump tough-cookie from 4.1.2 to 4.1.3](https://github.com/kommitters/editorjs-toggle-block/pull/204).
+
 ## 0.3.11 (19.04.2023)
 
 * Add `.npmignore` file to reduce package size.
