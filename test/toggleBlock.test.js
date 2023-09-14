@@ -143,7 +143,7 @@ describe('ToggleBlock', () => {
       });
     });
 
-    describe('isAToogleRoot', () => {
+    describe('isAToggleRoot', () => {
       it('when the block is a toggle root', () => {
         const { wrapper } = toggleBlock;
         expect(toggleBlock.isAToggleRoot(wrapper)).toBe(true);
@@ -158,10 +158,10 @@ describe('ToggleBlock', () => {
       });
     });
 
-    describe('findToogleRootIndex', () => {
+    describe('findToggleRootIndex', () => {
       it('returns the toggle root index', () => {
         const { id } = toggleBlock.wrapper;
-        expect(toggleBlock.findToogleRootIndex(2, id)).toBe(0);
+        expect(toggleBlock.findToggleRootIndex(2, id)).toBe(0);
       });
     });
 
@@ -204,11 +204,11 @@ describe('ToggleBlock', () => {
       });
     });
 
-    describe('validates the getDecendentsNumber method', () => {
+    describe('validates the getDescendantsNumber method', () => {
       it('returns the number of children', () => {
         toggleBlock.render();
         const { id } = toggleBlock.wrapper;
-        const numberOfChildren = toggleBlock.getDecendentsNumber(id);
+        const numberOfChildren = toggleBlock.getDescendantsNumber(id);
         expect(numberOfChildren).toBe(toggleBlock.data.items);
       });
     });

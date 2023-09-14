@@ -377,7 +377,7 @@ export default class ToggleBlock {
   * @param {String} fk - The block's foreign key
   * @returns {number} The Toggle's root index
   */
-  findToogleRootIndex(entryIndex, fk) {
+  findToggleRootIndex(entryIndex, fk) {
     const block = this.getBlockByIndex(entryIndex);
     const { holder } = block;
 
@@ -388,7 +388,7 @@ export default class ToggleBlock {
       }
     }
     if (entryIndex - 1 >= 0) {
-      return this.findToogleRootIndex(entryIndex - 1, fk);
+      return this.findToggleRootIndex(entryIndex - 1, fk);
     }
     return -1;
   }
@@ -405,9 +405,9 @@ export default class ToggleBlock {
 
     if (this.isAToggleItem(holder)) {
       const fk = holder.getAttribute('foreignKey');
-      const parentIndex = this.findToogleRootIndex(entryIndex, fk);
+      const parentIndex = this.findToggleRootIndex(entryIndex, fk);
       if (parentIndex >= 0) {
-        const items = this.getDecendentsNumber(fk);
+        const items = this.getDescendantsNumber(fk);
         const destiny = parentIndex + items;
 
         if (items > 1) { this.api.blocks.move(destiny, entryIndex); }
@@ -495,6 +495,7 @@ export default class ToggleBlock {
       const toggle = this.wrapper.children[1];
       let currentBlock = {};
       let index = this.api.blocks.getCurrentBlockIndex();
+      const delta = (index === blocksInEditor - 1) ? -1 : 1;
 
       while (currentBlock[1] !== toggle) {
         toggleRoot = index;
@@ -504,7 +505,7 @@ export default class ToggleBlock {
         const blockContent = blockCover.firstChild;
         currentBlock = blockContent.children;
 
-        index -= 1;
+        index += delta;
       }
     }
 
@@ -612,14 +613,14 @@ export default class ToggleBlock {
    * Return the number of blocks inside the root Toggle
    * @param {string} fk - The id of the root Toggle
    */
-  getDecendentsNumber(fk) {
+  getDescendantsNumber(fk) {
     let counter = 0;
     const listChildren = document.querySelectorAll(`div[foreignKey="${fk}"]`);
     listChildren.forEach((child) => {
       // Evaluate if the child is a toggle
       if (child.hasAttribute('status')) {
         const childId = child.querySelector('.toggle-block__selector').getAttribute('id');
-        counter += this.getDecendentsNumber(childId);
+        counter += this.getDescendantsNumber(childId);
       }
       counter += 1;
     });
@@ -696,11 +697,11 @@ export default class ToggleBlock {
     if (!this.readOnly) {
       this.close();
       const currentToggleIndex = this.getCurrentBlockIndex();
-      const decendents = this.getDecendentsNumber(this.wrapper.id);
+      const descendants = this.getDescendantsNumber(this.wrapper.id);
       const blocks = this.getBlocksCount();
-      const toggleEndIndex = toggleInitialIndex + decendents;
+      const toggleEndIndex = toggleInitialIndex + descendants;
 
-      // Move back the root of the Toogle to its initial position
+      // Move back the root of the Toggle to its initial position
       this.move(toggleInitialIndex, currentToggleIndex);
 
       if (toggleInitialIndex >= 0 && toggleEndIndex <= (blocks - 1)) {
@@ -728,8 +729,8 @@ export default class ToggleBlock {
     // Evaluate if the block is a toggle to move its children
     if (blockAfterToggle.name === 'toggle') {
       const id = holder.querySelector('.toggle-block__selector').getAttribute('id');
-      const children = this.getDecendentsNumber(id);
-      this.moveDecendents(children, toggleInitialIndex + 1, blockAfterToggleIndex + 1, 0);
+      const children = this.getDescendantsNumber(id);
+      this.moveDescendants(children, toggleInitialIndex + 1, blockAfterToggleIndex + 1, 0);
     }
   }
 
@@ -754,9 +755,9 @@ export default class ToggleBlock {
         const parentBlockIdx = this.findIndexOfParentBlock(currentToggleFk, fk, toggleInitialIndex);
         const parentBlock = this.getBlockByIndex(parentBlockIdx).holder;
         const id = parentBlock.querySelector('.toggle-block__selector').getAttribute('id');
-        const children = this.getDecendentsNumber(id);
+        const children = this.getDescendantsNumber(id);
         this.move(toggleEndIndex, parentBlockIdx);
-        this.moveDecendents(children, toggleEndIndex, parentBlockIdx, 1);
+        this.moveDescendants(children, toggleEndIndex, parentBlockIdx, 1);
         return;
       }
     }
@@ -774,7 +775,7 @@ export default class ToggleBlock {
    * @returns
    */
   findIndexOfParentBlock(currentToggleFk, blockFk, toggleInitialIndex) {
-    const NestedToggleChildren = this.getDecendentsNumber(blockFk);
+    const NestedToggleChildren = this.getDescendantsNumber(blockFk);
     const parentBlockIndex = toggleInitialIndex - (NestedToggleChildren + 1);
     const parentBlock = this.getBlockByIndex(parentBlockIndex).holder;
     if (parentBlock.hasAttribute('foreignKey')) {
@@ -799,7 +800,7 @@ export default class ToggleBlock {
    * @param {number} parentInitialIndex // index to calculate where the children are
    * @param {number} direction // 0: to move from top to bottom || 1: to move from bottom to the top
    */
-  moveDecendents(children, finalIndex, parentInitialIndex, direction) {
+  moveDescendants(children, finalIndex, parentInitialIndex, direction) {
     let childrenCurrentPosition = parentInitialIndex;
     let childrenFinalPosition = finalIndex;
     while (children) {
@@ -930,13 +931,13 @@ export default class ToggleBlock {
               || dropTarget.getAttribute('foreignKey') !== null;
 
             setTimeout(() => {
-              // Verify if the item droped is the toggle
+              // Verify if the item dropped is the toggle
               if (this.nameDragged === 'toggle') {
                 // Verify if the toggle dropped is the same of this eventListener
                 const currentToggleDropped = this.holderDragged.querySelector(`#${this.wrapper.id}`);
 
                 if (currentToggleDropped) {
-                  // Check if the toggle dropped was not droppen in its children
+                  // Check if the toggle dropped was not dropped in its children
                   if (!this.isChild(currentToggleDropped.getAttribute('id'), dropTarget.getAttribute('foreignKey'))) {
                     // If is a toggle we have to add the attributes to make it a part of the toggle
                     if (isTargetAToggle) {
@@ -1135,7 +1136,7 @@ export default class ToggleBlock {
         const toggleRoot = document.querySelectorAll(`#${foreignKey}`);
 
         if (toggleRoot.length > 1) {
-          const parentBlock = this.findToogleRootIndex(index, foreignKey);
+          const parentBlock = this.findToggleRootIndex(index, foreignKey);
           const id = uuidv4();
 
           for (let i = parentBlock; i <= index; i += 1) {
