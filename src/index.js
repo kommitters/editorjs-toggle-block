@@ -958,10 +958,8 @@ export default class ToggleBlock {
                     }
                   }
                 }
-              }
-
-              // Add the drooped item as an element of the toggle
-              if (this.nameDragged && this.nameDragged !== 'toggle') {
+              } else if (this.nameDragged) {
+                // Add the drooped item as an element of the toggle
                 this.assignToggleItemAttributes(isTargetAToggle, dropTarget);
               }
 
