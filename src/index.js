@@ -940,14 +940,7 @@ export default class ToggleBlock {
                   // Check if the toggle dropped was not dropped in its children
                   if (!this.isChild(currentToggleDropped.getAttribute('id'), dropTarget.getAttribute('foreignKey'))) {
                     // If is a toggle we have to add the attributes to make it a part of the toggle
-                    if (isTargetAToggle) {
-                      const foreignKey = dropTarget.getAttribute('foreignKey')
-                        ?? dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
-
-                      const newToggleIndex = this.getIndex(this.holderDragged);
-                      this.setAttributesToNewBlock(newToggleIndex, foreignKey);
-                    }
-
+                    this.assignToggleItemAttributes(isTargetAToggle, dropTarget);
                     this.moveChildren(endBlock);
                   } else {
                     // If we are dropping in the toggle children,
@@ -967,6 +960,11 @@ export default class ToggleBlock {
                 }
               }
 
+              // Add the drooped item as an element of the toggle
+              if (this.nameDragged && this.nameDragged !== 'toggle') {
+                this.assignToggleItemAttributes(isTargetAToggle, dropTarget);
+              }
+
               // If we are dropping out of a toggle we have to remove the attributes
               if (!isTargetAToggle) {
                 const newToggleIndex = this.getIndex(this.holderDragged);
@@ -976,6 +974,16 @@ export default class ToggleBlock {
           }
         }
       });
+    }
+  }
+
+  assignToggleItemAttributes(isTargetAToggle, dropTarget) {
+    if (isTargetAToggle) {
+      const foreignKey = dropTarget.getAttribute('foreignKey')
+        ?? dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
+
+      const newToggleIndex = this.getIndex(this.holderDragged);
+      this.setAttributesToNewBlock(newToggleIndex, foreignKey);
     }
   }
 
