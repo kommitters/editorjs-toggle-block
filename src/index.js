@@ -836,15 +836,13 @@ export default class ToggleBlock {
       const redactor = document.activeElement;
       redactor.addEventListener('keyup', (e) => {
         const blockContainer = document.activeElement;
-        const currentBlock = this.api.blocks.getCurrentBlockIndex();
-
-        const blockCover = blockContainer.parentElement;
-        const block = blockCover.parentElement;
+        const currentBlock = this.getCurrentBlockIndex();
+        const { holder: currentBlockContainer } = this.getBlockByIndex(currentBlock);
 
         if (e.code === 'Space') {
           this.createToggleWithShortcut(blockContainer);
-        } else if (currentBlock > 0 && !(this.isPartOfAToggle(blockContainer) || this.isPartOfAToggle(block)) && e.code === 'Tab') {
-          this.nestBlock(blockContainer);
+        } else if (currentBlock > 0 && !this.isPartOfAToggle(currentBlockContainer) && e.code === 'Tab') {
+          this.nestBlock(currentBlockContainer);
         }
       });
     }
@@ -940,14 +938,7 @@ export default class ToggleBlock {
                   // Check if the toggle dropped was not dropped in its children
                   if (!this.isChild(currentToggleDropped.getAttribute('id'), dropTarget.getAttribute('foreignKey'))) {
                     // If is a toggle we have to add the attributes to make it a part of the toggle
-                    if (isTargetAToggle) {
-                      const foreignKey = dropTarget.getAttribute('foreignKey')
-                        ?? dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
-
-                      const newToggleIndex = this.getIndex(this.holderDragged);
-                      this.setAttributesToNewBlock(newToggleIndex, foreignKey);
-                    }
-
+                    this.assignToggleItemAttributes(isTargetAToggle, dropTarget);
                     this.moveChildren(endBlock);
                   } else {
                     // If we are dropping in the toggle children,
@@ -965,6 +956,9 @@ export default class ToggleBlock {
                     }
                   }
                 }
+              } else if (this.nameDragged) {
+                // Add the dropped item as an element of the toggle
+                this.assignToggleItemAttributes(isTargetAToggle, dropTarget);
               }
 
               // If we are dropping out of a toggle we have to remove the attributes
@@ -976,6 +970,16 @@ export default class ToggleBlock {
           }
         }
       });
+    }
+  }
+
+  assignToggleItemAttributes(isTargetAToggle, dropTarget) {
+    if (isTargetAToggle) {
+      const foreignKey = dropTarget.getAttribute('foreignKey')
+        ?? dropTarget.querySelector('.toggle-block__selector').getAttribute('id');
+
+      const newToggleIndex = this.getIndex(this.holderDragged);
+      this.setAttributesToNewBlock(newToggleIndex, foreignKey);
     }
   }
 
@@ -1049,10 +1053,7 @@ export default class ToggleBlock {
    * Nests a block inside a toggle through the 'Tab' key
    */
   nestBlock(blockContainer) {
-    const blockCover = blockContainer.parentElement;
-    const block = blockCover.parentElement;
-
-    const previousBlock = block.previousElementSibling;
+    const previousBlock = blockContainer.previousElementSibling;
     const previousCover = previousBlock.firstChild;
     const previousContainer = previousCover.firstChild;
 
@@ -1061,7 +1062,7 @@ export default class ToggleBlock {
       const toggleId = previousContainer.getAttribute('id');
       const foreignKey = foreignId || toggleId;
 
-      block.setAttribute('will-be-a-nested-block', true);
+      blockContainer.setAttribute('will-be-a-nested-block', true);
 
       const toggleRoot = document.getElementById(foreignKey);
       toggleRoot.children[1].focus();
