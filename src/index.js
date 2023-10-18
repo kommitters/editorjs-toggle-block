@@ -841,7 +841,7 @@ export default class ToggleBlock {
 
         if (e.code === 'Space') {
           this.createToggleWithShortcut(blockContainer);
-        } else if (currentBlock > 0 && !(this.isPartOfAToggle(currentBlockContainer)) && e.code === 'Tab') {
+        } else if (currentBlock > 0 && !this.isPartOfAToggle(currentBlockContainer) && e.code === 'Tab') {
           this.nestBlock(currentBlockContainer);
         }
       });
@@ -957,7 +957,7 @@ export default class ToggleBlock {
                   }
                 }
               } else if (this.nameDragged) {
-                // Add the drooped item as an element of the toggle
+                // Add the dropped item as an element of the toggle
                 this.assignToggleItemAttributes(isTargetAToggle, dropTarget);
               }
 
