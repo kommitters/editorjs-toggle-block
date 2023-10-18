@@ -187,7 +187,7 @@ export default class ToggleBlock {
    */
   setEventsToNestedBlock(e) {
     if (e.code === 'Enter') {
-      this.createParagraphFromIt();
+      setTimeout(() => this.createParagraphFromIt());
     } else {
       const indexBlock = this.getCurrentBlockIndex();
       const nestedBlock = this.getBlockByIndex(indexBlock);
