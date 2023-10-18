@@ -836,15 +836,13 @@ export default class ToggleBlock {
       const redactor = document.activeElement;
       redactor.addEventListener('keyup', (e) => {
         const blockContainer = document.activeElement;
-        const currentBlock = this.api.blocks.getCurrentBlockIndex();
-
-        const blockCover = blockContainer.parentElement;
-        const block = blockCover.parentElement;
+        const currentBlock = this.getCurrentBlockIndex();
+        const { holder: currentBlockContainer } = this.getBlockByIndex(currentBlock);
 
         if (e.code === 'Space') {
           this.createToggleWithShortcut(blockContainer);
-        } else if (currentBlock > 0 && !(this.isPartOfAToggle(blockContainer) || this.isPartOfAToggle(block)) && e.code === 'Tab') {
-          this.nestBlock(blockContainer);
+        } else if (currentBlock > 0 && !(this.isPartOfAToggle(currentBlockContainer)) && e.code === 'Tab') {
+          this.nestBlock(currentBlockContainer);
         }
       });
     }
@@ -1055,10 +1053,7 @@ export default class ToggleBlock {
    * Nests a block inside a toggle through the 'Tab' key
    */
   nestBlock(blockContainer) {
-    const blockCover = blockContainer.parentElement;
-    const block = blockCover.parentElement;
-
-    const previousBlock = block.previousElementSibling;
+    const previousBlock = blockContainer.previousElementSibling;
     const previousCover = previousBlock.firstChild;
     const previousContainer = previousCover.firstChild;
 
@@ -1067,7 +1062,7 @@ export default class ToggleBlock {
       const toggleId = previousContainer.getAttribute('id');
       const foreignKey = foreignId || toggleId;
 
-      block.setAttribute('will-be-a-nested-block', true);
+      blockContainer.setAttribute('will-be-a-nested-block', true);
 
       const toggleRoot = document.getElementById(foreignKey);
       toggleRoot.children[1].focus();
