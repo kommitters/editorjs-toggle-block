@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.13 (19.10.2023)
+
+* [Fix bugs in tab shortcut and in drag-and-drop behavior](https://github.com/kommitters/editorjs-toggle-block/issues/203).
+* [Fix the enter shortcut to add new items in the toggle block](https://github.com/kommitters/editorjs-toggle-block/pull/217).
+
 ## 0.3.12 (14.09.2023)
 
 * Fix typos in code.
