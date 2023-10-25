@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.14 (25.10.2023)
+
+- Fix bug [#176](https://github.com/kommitters/editorjs-toggle-block/issues/176) - Fix Settings popover broken from editor.js v2.26 and up.
+
 ## 0.3.13 (19.10.2023)
 
 * [Fix bugs in tab shortcut and in drag-and-drop behavior](https://github.com/kommitters/editorjs-toggle-block/issues/203).
