@@ -647,44 +647,60 @@ export default class ToggleBlock {
    * Adds events for the move up, move down and delete options in the toolbar
    */
   renderSettings() {
-    const settingsBar = document.getElementsByClassName('ce-settings--opened');
+    const settingsBar = document.getElementsByClassName('ce-settings');
     const optionsContainer = settingsBar[0];
-    const options = optionsContainer.lastChild;
-    const toggleIndex = this.api.blocks.getCurrentBlockIndex();
-
-    this.highlightToggleItems(this.wrapper.id);
 
     setTimeout(() => {
-      this.addEventsMoveButtons('ce-tune-move-down', 0, options, toggleIndex);
-      this.addEventsMoveButtons('ce-tune-move-up', 1, options, toggleIndex);
+      const options = optionsContainer.lastChild;
+      const toggleIndex = this.api.blocks.getCurrentBlockIndex();
+      this.highlightToggleItems(this.wrapper.id);
 
-      const deleteButton = options.getElementsByClassName('ce-settings__button--delete')[0];
-      if (deleteButton) {
-        deleteButton.addEventListener('click', () => {
-          const classesList = deleteButton.classList;
-          const classes = Object.values(classesList);
+      const moveUpElement = options.querySelector('[data-item-name="move-up"]')
+        || options.getElementsByClassName('ce-tune-move-up')[0];
+      const moveDownElement = options.querySelector('[data-item-name="move-down"]')
+        || options.getElementsByClassName('ce-tune-move-down')[0];
+      const deleteElement = options.querySelector('[data-item-name="delete"]')
+        || options.getElementsByClassName('ce-settings__button--delete')[0];
 
-          if (classes.indexOf('clicked-to-destroy-toggle') === -1) {
-            deleteButton.classList.add('clicked-to-destroy-toggle');
-          } else {
-            this.removeFullToggle(toggleIndex);
-          }
-        });
-      }
+      this.addEventsMoveButtons(moveDownElement, 0, toggleIndex);
+      this.addEventsMoveButtons(moveUpElement, 1, toggleIndex);
+      this.addEventDeleteButton(deleteElement, toggleIndex);
+    });
+
+    return document.createElement('div');
+  }
+
+  /**
+   * Add listener to move button.
+   * @param {HTMLDivElement} moveElement
+   * @param {number} movement // 0: Move down || 1: Move up
+   * @param {number} toggleIndex
+   */
+  addEventsMoveButtons(moveElement, movement, toggleIndex) {
+    if (!moveElement) return;
+    moveElement.addEventListener('click', () => {
+      this.moveToggle(toggleIndex, movement);
     });
   }
 
-  addEventsMoveButtons(className, movement, options, toggleIndex) {
-    const list = options.getElementsByClassName(className);
-    if (!list.length) {
-      return;
-    }
-    const moveButton = list[0];
-    if (moveButton) {
-      moveButton.addEventListener('click', () => {
-        this.moveToggle(toggleIndex, movement);
-      });
-    }
+  /**
+   * Add listener to delete button.
+   * @param {HTMLDivElement} deleteElement
+   * @param {number} toggleIndex
+   */
+  addEventDeleteButton(deleteElement, toggleIndex) {
+    if (!deleteElement) return;
+
+    deleteElement.addEventListener('click', () => {
+      const classesList = deleteElement.classList;
+      const classes = Object.values(classesList);
+
+      if (classes.indexOf('clicked-to-destroy-toggle') === -1) {
+        deleteElement.classList.add('clicked-to-destroy-toggle');
+      } else {
+        this.removeFullToggle(toggleIndex);
+      }
+    });
   }
 
   /**
@@ -823,7 +839,7 @@ export default class ToggleBlock {
     const { length } = children;
 
     for (let i = toggleIndex; i < toggleIndex + length; i += 1) {
-      this.api.blocks.delete(toggleIndex);
+      setTimeout(() => this.api.blocks.delete(toggleIndex));
     }
   }
 
