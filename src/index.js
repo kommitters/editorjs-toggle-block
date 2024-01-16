@@ -922,6 +922,7 @@ export default class ToggleBlock {
       toggleBlock.setAttribute('status', this.data.status);
 
       const settingsButton = document.querySelector('.ce-toolbar__settings-btn');
+      if (!settingsButton) return;
       settingsButton.setAttribute('draggable', 'true');
       settingsButton.addEventListener('dragstart', () => {
         this.startBlock = this.api.blocks.getCurrentBlockIndex();
