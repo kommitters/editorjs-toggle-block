@@ -209,8 +209,9 @@ export default class ToggleBlock {
    * @param {string} id - block identifier
    */
   removeBlock(holder, id, cursorPosition) {
-    if (cursorPosition === 0) {
+    if (cursorPosition === 0 && holder) {
       const currentBlock = holder.nextSibling;
+      if (!currentBlock) return;
       const blockCover = currentBlock.firstChild;
       const blockContent = blockCover.firstChild;
       const oldContent = blockContent.innerHTML;
@@ -218,7 +219,9 @@ export default class ToggleBlock {
       const toggleCover = holder.firstChild;
       const toggleContent = toggleCover.firstChild;
 
-      toggleContent.children[1].innerHTML += oldContent;
+      if (toggleContent.children[1]) {
+        toggleContent.children[1].innerHTML += oldContent;
+      }
 
       const position = this.itemsId.indexOf(id);
       this.itemsId.splice(position, 1);
@@ -307,6 +310,7 @@ export default class ToggleBlock {
   setFocusToggleRootAtTheEnd() {
     const toggle = document.activeElement;
     const selection = window.getSelection();
+    if (!selection.toString().trim()) return;
     const range = document.createRange();
 
     selection.removeAllRanges();
