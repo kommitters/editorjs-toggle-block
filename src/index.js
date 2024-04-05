@@ -154,12 +154,11 @@ export default class ToggleBlock {
    * Gets the index of the new block, then assigns the required properties,
    * and finally sends the focus.
    */
-  setAttributesToNewBlock(entryIndex = null, foreignKey = this.wrapper.id) {
+  setAttributesToNewBlock(entryIndex = null, foreignKey = this.wrapper.id, block = null) {
     const index = entryIndex === null ? this.api.blocks.getCurrentBlockIndex() : entryIndex;
+    const newBlock = block || this.api.blocks.getBlockByIndex(index);
+
     const id = uuidv4();
-
-    const newBlock = this.api.blocks.getBlockByIndex(index);
-
     if (!this.itemsId.includes(newBlock.id)) {
       this.itemsId.splice(index - 1, 0, newBlock.id);
     }
@@ -210,21 +209,8 @@ export default class ToggleBlock {
    */
   removeBlock(holder, id, cursorPosition) {
     if (cursorPosition === 0) {
-      const currentBlock = holder.nextSibling;
-      const blockCover = currentBlock.firstChild;
-      const blockContent = blockCover.firstChild;
-      const oldContent = blockContent.innerHTML;
-
-      const toggleCover = holder.firstChild;
-      const toggleContent = toggleCover.firstChild;
-
-      toggleContent.children[1].innerHTML += oldContent;
-
       const position = this.itemsId.indexOf(id);
       this.itemsId.splice(position, 1);
-
-      const togglePosition = this.api.blocks.getCurrentBlockIndex();
-      this.api.blocks.delete(togglePosition + 1);
     }
   }
 
@@ -500,6 +486,7 @@ export default class ToggleBlock {
       while (currentBlock[1] !== toggle) {
         toggleRoot = index;
         const block = this.api.blocks.getBlockByIndex(toggleRoot);
+        if (!block) break;
         const { holder } = block;
         const blockCover = holder.firstChild;
         const blockContent = blockCover.firstChild;
@@ -1034,18 +1021,22 @@ export default class ToggleBlock {
       const block = this.api.blocks.getBlockByIndex(index);
       const { holder } = block;
       const currentBlockValidation = !this.isPartOfAToggle(holder);
-      const mutatedBlock = mutation.removedNodes[0];
+      const { length: toggleItemsCount } = this.itemsId;
+      const { length: existingToggleItemsCount } = document.querySelectorAll(`div[foreignKey="${this.data.fk}"]`);
 
       if (this.itemsId.includes(block.id) && currentBlockValidation) {
         this.setAttributesToNewBlock(index);
-      } else if (mutatedBlock && this.isPartOfAToggle(mutatedBlock) && currentBlockValidation) {
-        const blockCover = holder.firstChild;
-        const blockContainer = blockCover.firstChild;
-
-        if (!this.isPartOfAToggle(blockContainer)) {
-          this.setAttributesToNewBlock(index);
-          this.itemsId[index] = block.id;
-        }
+      } else if (
+        mutation.addedNodes[0]
+        && mutation?.previousSibling
+        && this.isPartOfAToggle(mutation.previousSibling)
+        && !this.isPartOfAToggle(mutation.addedNodes[0])
+        && toggleItemsCount > existingToggleItemsCount
+      ) {
+        const { id: addedBlockId } = mutation.addedNodes[0].dataset;
+        const addedBlock = this.api.blocks.getById(addedBlockId);
+        this.setAttributesToNewBlock(null, this.wrapper.id, addedBlock);
+        this.itemsId[index] = block.id;
       }
     }
   }
