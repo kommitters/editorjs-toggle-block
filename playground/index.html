@@ -10,7 +10,6 @@
       width: 800px;
       height: 600px;
     }
-
     textarea {
       border: none;
       outline: none;
@@ -30,7 +29,10 @@
       holder: 'editorjs',
       data: JSON.parse(cache) || {},
       tools: {
-        ToggleBlock
+        toggle: {
+          class: ToggleBlock,
+          inlineToolbar: true,
+        },
       },
       onChange() {
         editor.save().then(data => {
@@ -40,5 +42,4 @@
     });
   </script>
 </body>
-
 </html>

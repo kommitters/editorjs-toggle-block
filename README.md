@@ -62,6 +62,14 @@ const editor = EditorJS({
 $ npm run build:dev
 ```
 
+### Using the Playground
+
+To test the functionality of the plugin, you can use the provided playground:
+
+1. Navigate to the `playground` folder in the project directory.
+2. Open the `index.html` file in your web browser.
+3. Experiment the plugin's behavior.
+
 ### Production release
 
 1. Create a production bundle
