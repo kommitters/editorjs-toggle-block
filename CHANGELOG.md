@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.15 (09.04.2024)
+
+- Update dependencies and Github workflows. See [PR #213](https://github.com/kommitters/editorjs-toggle-block/pull/213)
+- Add playground to test the plugin functionality. See [PR #230](https://github.com/kommitters/editorjs-toggle-block/pull/230)
+- Solve security vulnerabilities and update the security policy. See [PR #232](https://github.com/kommitters/editorjs-toggle-block/pull/232)
+- Fix wrong added classes in editor.js blocks. See [Issue #227](https://github.com/kommitters/editorjs-toggle-block/issues/227)
+- Fix unexpected behavior with undo and redo support. See [PR #231](https://github.com/kommitters/editorjs-toggle-block/pull/231)
+- Fix error when deleting toggle items. See [PR #231](https://github.com/kommitters/editorjs-toggle-block/pull/231)
+
 ## 0.3.14 (25.10.2023)
 
 - Fix bug [#176](https://github.com/kommitters/editorjs-toggle-block/issues/176) - Fix Settings popover broken from editor.js v2.26 and up.
