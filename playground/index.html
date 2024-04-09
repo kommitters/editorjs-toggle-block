@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #editorjs {
+      width: 800px;
+      height: 600px;
+    }
+    textarea {
+      border: none;
+      outline: none;
+      resize: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="editorjs"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+  <script src="../dist/bundle.js"></script>
+  <script>
+    const cache = localStorage.getItem('outputdata');
+    const editor = new EditorJS({
+      holder: 'editorjs',
+      data: JSON.parse(cache) || {},
+      tools: {
+        toggle: {
+          class: ToggleBlock,
+          inlineToolbar: true,
+        },
+      },
+      onChange() {
+        editor.save().then(data => {
+          localStorage.setItem('outputdata', JSON.stringify(data));
+        })
+      }
+    });
+  </script>
+</body>
+</html>

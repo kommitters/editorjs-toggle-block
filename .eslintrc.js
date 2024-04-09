@@ -23,4 +23,5 @@ module.exports = {
     'no-underscore-dangle': ['error', { allowAfterThis: true }],
     'no-param-reassign': 0,
   },
+  ignorePatterns: ['dist/'],
 };
