@@ -170,7 +170,7 @@ export default class ToggleBlock {
     holder.setAttribute('foreignKey', foreignKey);
     holder.setAttribute('id', id);
 
-    holder.classList.add('toggle-block__item');
+    setTimeout(() => holder.classList.add('toggle-block__item'));
 
     if (!this.readOnly) {
       holder.onkeydown = this.setEventsToNestedBlock.bind(this);
@@ -1033,7 +1033,7 @@ export default class ToggleBlock {
         && !this.isPartOfAToggle(mutation.addedNodes[0])
         && toggleItemsCount > existingToggleItemsCount
       ) {
-        const { id: addedBlockId } = mutation.addedNodes[0].dataset;
+        const { id: addedBlockId } = mutation.addedNodes[0];
         const addedBlock = this.api.blocks.getById(addedBlockId);
         this.setAttributesToNewBlock(null, this.wrapper.id, addedBlock);
         this.itemsId[index] = block.id;
@@ -1104,9 +1104,13 @@ export default class ToggleBlock {
    */
   isPartOfAToggle(block) {
     const classes = Array.from(block.classList);
-    const answer = classes.includes('toggle-block__item') || (classes.includes('toggle-block__input') || classes.includes('toggle-block__selector'));
+    const classNamesToCheck = ['toggle-block__item', 'toggle-block__input', 'toggle-block__selector'];
+    const isToggleChild = classNamesToCheck.some(
+      (className) => block.getElementsByClassName(className).length !== 0,
+    );
+    const isToggle = classNamesToCheck.some((className) => classes.includes(className));
 
-    return answer;
+    return isToggle || isToggleChild;
   }
 
   /**
