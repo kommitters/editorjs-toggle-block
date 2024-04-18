@@ -59,6 +59,7 @@ export default class ToggleBlock {
       status: data.status || 'open',
       fk: data.fk || `fk-${uuidv4()}`,
       items: data.items || 0,
+      nested: false,
     };
     this.itemsId = [];
     this.api = api;
@@ -82,6 +83,8 @@ export default class ToggleBlock {
     this.readOnly = readOnly || false;
     this.placeholder = config?.placeholder ?? 'Toggle';
     this.defaultContent = config?.defaultContent ?? 'Empty toggle. Click or drop blocks inside.';
+    this.nestedMarginLeft = 39;
+    this.itemsMarginLeft = 39;
     this.addListeners();
     this.addSupportForUndoAndRedoActions();
     this.addSupportForDragAndDropActions();
@@ -157,6 +160,20 @@ export default class ToggleBlock {
   setAttributesToNewBlock(entryIndex = null, foreignKey = this.wrapper.id, block = null) {
     const index = entryIndex === null ? this.api.blocks.getCurrentBlockIndex() : entryIndex;
     const newBlock = block || this.api.blocks.getBlockByIndex(index);
+    const { holder: newHolder } = newBlock;
+
+    const setMarginLeft = () => {
+      if (this.data.nested) {
+        const styles = getComputedStyle(newHolder);
+        const { marginLeft } = styles;
+        this.itemsMarginLeft = this.data.items === 0
+          ? (parseFloat(marginLeft) + this.nestedMarginLeft) : this.itemsMarginLeft;
+
+        newHolder.style.marginLeft = `${this.itemsMarginLeft}px`;
+      }
+    };
+
+    setTimeout(setMarginLeft, 1);
 
     const id = uuidv4();
     if (!this.itemsId.includes(newBlock.id)) {
@@ -430,6 +447,23 @@ export default class ToggleBlock {
    */
   render() {
     this.createToggle();
+
+    const index = this.api.blocks.getCurrentBlockIndex();
+    const block = this.api.blocks.getBlockByIndex(index);
+    const { holder } = block;
+
+    if (this.isPartOfAToggle(holder)) {
+      const foreignKey = holder.getAttribute('foreignKey');
+      setTimeout(() => {
+        const nestedBlock = this.api.blocks.getBlockByIndex(index);
+        const { holder: nestedHolder } = nestedBlock;
+        const id = uuidv4();
+        nestedHolder.classList.add('toggle-block__item');
+        nestedHolder.setAttribute('foreignKey', foreignKey);
+        nestedHolder.setAttribute('id', id);
+        this.data.nested = true;
+      });
+    }
 
     // Renders the nested blocks after the toggle root is rendered
     setTimeout(() => this.renderItems());
