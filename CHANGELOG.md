@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.16 (24.04.2024)
+
+- Solving the support to add no-paragraph blocks. See [PR #235](https://github.com/kommitters/editorjs-toggle-block/pull/235)
+- Update stale issues policy in CONTRIBUTING.md. See [PR #237](https://github.com/kommitters/editorjs-toggle-block/pull/237) 
+
 ## 0.3.15 (09.04.2024)
 
 - Update dependencies and Github workflows. See [PR #213](https://github.com/kommitters/editorjs-toggle-block/pull/213)
