@@ -59,6 +59,7 @@ export default class ToggleBlock {
       status: data.status || 'open',
       fk: data.fk || `fk-${uuidv4()}`,
       items: data.items || 0,
+      nested: data.nested || false,
     };
     this.itemsId = [];
     this.api = api;
@@ -82,6 +83,8 @@ export default class ToggleBlock {
     this.readOnly = readOnly || false;
     this.placeholder = config?.placeholder ?? 'Toggle';
     this.defaultContent = config?.defaultContent ?? 'Empty toggle. Click or drop blocks inside.';
+    this.nestedMarginLeft = 39;
+    this.itemsMarginLeft = 39;
     this.addListeners();
     this.addSupportForUndoAndRedoActions();
     this.addSupportForDragAndDropActions();
@@ -157,6 +160,21 @@ export default class ToggleBlock {
   setAttributesToNewBlock(entryIndex = null, foreignKey = this.wrapper.id, block = null) {
     const index = entryIndex === null ? this.api.blocks.getCurrentBlockIndex() : entryIndex;
     const newBlock = block || this.api.blocks.getBlockByIndex(index);
+    const { holder: newHolder } = newBlock;
+
+    const setMarginLeft = () => {
+      if (this.data.nested) {
+        const toggleSelector = this.wrapper.closest('.ce-block');
+        const styles = getComputedStyle(toggleSelector);
+        const { marginLeft } = styles;
+        this.itemsMarginLeft = this.data.items === 0
+          ? (parseFloat(marginLeft) + this.nestedMarginLeft) : this.itemsMarginLeft;
+
+        newHolder.style.marginLeft = `${this.itemsMarginLeft}px`;
+      }
+    };
+
+    setTimeout(setMarginLeft, 2);
 
     const id = uuidv4();
     if (!this.itemsId.includes(newBlock.id)) {
@@ -233,6 +251,7 @@ export default class ToggleBlock {
     holder.onkeydown = {};
     holder.onkeyup = {};
     holder.classList.remove('toggle-block__item');
+    holder.style.removeProperty('margin-left');
   }
 
   /**
@@ -241,6 +260,7 @@ export default class ToggleBlock {
    */
   createToggle() {
     this.wrapper = document.createElement('div');
+    console.log('Creating toggle...', this.wrapper);
     this.wrapper.classList.add('toggle-block__selector');
     this.wrapper.id = this.data.fk;
 
@@ -254,6 +274,23 @@ export default class ToggleBlock {
     input.classList.add('toggle-block__input');
     input.setAttribute('contentEditable', !this.readOnly);
     input.innerHTML = this.data.text || '';
+
+    if (this.data.nested) {
+      setTimeout(() => {
+        console.log('It is nested!');
+        const parentElement = this.wrapper.closest('.ce-block');
+        const { previousSibling: previousItem } = parentElement;
+        console.log('parentElement: ', parentElement);
+        console.log('previousSibling: ', previousItem);
+        const foreignKey = previousItem.getAttribute('foreignKey');
+        console.log('foreignKey: ', foreignKey);
+        parentElement.setAttribute('foreignKey', foreignKey);
+
+        const styles = getComputedStyle(previousItem);
+        const { marginLeft } = styles;
+        parentElement.style.marginLeft = marginLeft;
+      }, 2000);
+    }
 
     // Events
     if (!this.readOnly) {
@@ -430,6 +467,28 @@ export default class ToggleBlock {
    */
   render() {
     this.createToggle();
+
+    const index = this.api.blocks.getCurrentBlockIndex();
+    const block = this.api.blocks.getBlockByIndex(index) || {};
+    const { holder } = block;
+
+    if (holder && this.isPartOfAToggle(holder)) {
+      const foreignKey = holder.getAttribute('foreignKey');
+      const styles = getComputedStyle(holder);
+      const { marginLeft } = styles;
+      setTimeout(() => {
+        const nestedBlock = this.api.blocks.getBlockByIndex(index);
+        const { holder: nestedHolder } = nestedBlock;
+        const id = uuidv4();
+        nestedHolder.classList.add('toggle-block__item');
+        nestedHolder.setAttribute('foreignKey', foreignKey);
+        nestedHolder.setAttribute('id', id);
+
+        this.itemsMarginLeft = parseFloat(marginLeft);
+        nestedHolder.style.marginLeft = `${this.itemsMarginLeft}px`;
+        this.data.nested = true;
+      }, 1);
+    }
 
     // Renders the nested blocks after the toggle root is rendered
     setTimeout(() => this.renderItems());
@@ -905,8 +964,11 @@ export default class ToggleBlock {
       }
 
       // Set status in attribute to a proper hide and show
-      const toggleBlock = document.querySelector(`#${this.wrapper.id}`).parentNode.parentNode;
-      toggleBlock.setAttribute('status', this.data.status);
+      const wrapperElement = document.querySelector(`#${this.wrapper.id}`);
+      if (wrapperElement) {
+        const toggleBlock = document.querySelector(`#${this.wrapper.id}`).parentNode?.parentNode;
+        toggleBlock.setAttribute('status', this.data.status);
+      }
 
       const settingsButton = document.querySelector('.ce-toolbar__settings-btn');
       settingsButton.setAttribute('draggable', 'true');
