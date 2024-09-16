@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.17 (16.09.2024)
+- General decoupling in functions. See [PR #243](https://github.com/kommitters/editorjs-toggle-block/pull/243)
+
 ## 0.3.16 (24.04.2024)
 
 - Solving the support to add no-paragraph blocks. See [PR #235](https://github.com/kommitters/editorjs-toggle-block/pull/235)
